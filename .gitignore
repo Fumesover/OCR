@@ -1,0 +1,6 @@
+.idea*
+*.o
+*.d
+*.swp
+*~
+[Cc][Mm]ake*
