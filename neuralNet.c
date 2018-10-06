@@ -3,14 +3,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <math.h>
 
 int NNmain(void){
     
     // INIT
 
-    int hidden[] = {2};
+    int hidden[] = {2, 2};
 
-    neuNet n = NNinit(3, 1, hidden, 1);
+    neuNet n = NNinit(2, 2, hidden, 1);
 
     printf("nbInputs : %d\n", n.nbInputs);
     printf("nbOutput : %d\n", n.nbOutput);
@@ -110,12 +111,41 @@ float randF() {
 
 void forwardPropagation(neuNet n, float* inp) {
     
+    printf("fpropagation input to lvl 1\n");
+
     oneLayerPropagation(inp, 0, n.nbInputs, 
                         n.weights, 0, 
                         n.biais, 0,
                         n.neuHidden, 0, n.nbHidden[0]);
 
-     
+    int offsetBiais   = 0;
+    int offsetWeights = n.nbInputs * n.nbHidden[0];
+    int offsetHidden  = 0;
+    
+    printf("n.nbLayers : %d\n", n.nbLayers);
+
+    for (int layer = 0; layer < n.nbLayers -1; layer++) {
+        printf("fpropagation lvl %d to lvl %d\n", layer, layer + 1);
+
+        oneLayerPropagation(n.neuHidden, offsetHidden, n.nbHidden[layer] + offsetHidden,
+                            n.weights, offsetWeights,
+                            n.biais,   offsetBiais + n.nbHidden[layer], 
+                            n.neuHidden, offsetHidden + n.nbHidden[layer], n.nbHidden[layer + 1] + (offsetHidden + n.nbHidden[layer]));
+        //offset
+
+        offsetBiais   += n.nbHidden[layer];
+        offsetWeights += n.nbHidden[layer] * n.nbHidden[layer + 1];
+        offsetHidden  += n.nbHidden[layer];
+    }
+    
+    printf("fpropagation lvl %d to output\n", n.nbLayers - 1);
+
+    oneLayerPropagation(n.neuHidden, offsetHidden, n.nbHidden[n.nbLayers - 1] + offsetHidden,
+                        n.weights, offsetWeights,
+                        n.biais,   offsetBiais + n.nbOutput, 
+                        n.neuOutput, 0, n.nbOutput);
+
+    
 }
 
 void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
@@ -131,18 +161,20 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
         for (int p = 0; p < nbPrev; p++) {
             
             sum += previous[p + pStart] * weights[p * nbDest + d + wStart];
-            printf("wpos : %d | wval : %f | ppos : %d | pval : %f | sum : %f\n",
+            printf("  wpos : %d | wval : %f | ppos : %d | pval : %f | sum : %f\n",
                   p * nbDest + d + wStart, weights[p * nbPrev + d + wStart], 
                   p + pStart, previous[p + pStart], sum);
         }
         
-        printf("%d : sum = %f, biais = %f\n", dStart +d, sum, biais[bStart + d]);
+        printf(" %d : sum = %f, biais = %f, neuron value = %f\n", 
+                dStart +d, sum, biais[bStart + d], activation(sum + biais[bStart + d]));
         
         destination[dStart + d] = activation(sum + biais[bStart + d]);  
     }
 }
 
 float activation(float inp) { 
-    // TODO
-    return inp;
+    // Sigmoid :
+    //1.0f / (1.0f + expf(-a));
+    return 1.0f / (1.0f + expf(-inp));;
 }
