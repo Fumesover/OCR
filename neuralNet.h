@@ -56,7 +56,7 @@ float activation(float f);
 
 
 // Free NN
-
+void freeNeuNet(neuNet n);
 // load NN 
 
 // save NN 

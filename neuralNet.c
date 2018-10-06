@@ -33,6 +33,8 @@ int NNmain(void){
     // Propagation
     float vals[] = {0.5, 0.7};
     forwardPropagation(n, vals);
+    
+    freeNeuNet(n);
 
     return 0;
 }
@@ -162,7 +164,7 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
             
             sum += previous[p + pStart] * weights[p * nbDest + d + wStart];
             printf("  wpos : %d | wval : %f | ppos : %d | pval : %f | sum : %f\n",
-                  p * nbDest + d + wStart, weights[p * nbPrev + d + wStart], 
+                  p * nbDest + d + wStart, weights[p * nbDest + d + wStart], 
                   p + pStart, previous[p + pStart], sum);
         }
         
@@ -175,6 +177,14 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
 
 float activation(float inp) { 
     // Sigmoid :
-    //1.0f / (1.0f + expf(-a));
     return 1.0f / (1.0f + expf(-inp));;
+}
+
+void freeNeuNet(neuNet n) {
+    free(n.neuInputs);
+    free(n.neuHidden);
+    free(n.neuOutput);
+    
+    free(n.weights);
+    free(n.biais);
 }
