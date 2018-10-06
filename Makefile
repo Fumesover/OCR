@@ -11,7 +11,7 @@ LDFLAGS =
 # Libs and path for linker
 LDLIBS = -lm $(pkg-config --libs sdl2) `pkg-config --libs gtk+-3.0` # -lm includes math library
 
-SRC = main.c
+SRC = main.c neuralNet.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
