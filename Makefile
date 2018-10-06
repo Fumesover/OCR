@@ -19,6 +19,11 @@ all: main
 
 main: ${OBJ}
 
+valgrind: CFLAGS += -g
+valgrind: main
+valgrind:
+	valgrind ./main
+
 .PHONY: clean
 clean:
 	${RM} ${OBJ}      # remove object files
