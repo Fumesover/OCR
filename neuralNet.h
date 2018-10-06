@@ -17,7 +17,7 @@ int NNmain(void);
 
 // init a NN with 
 neuNet NNinit(const int nbInputs, const int nbLayers,
-                const int *nbHidden, const int nbOutput);
+                int *nbHidden, const int nbOutput);
 
 // random init
 

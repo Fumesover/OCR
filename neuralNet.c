@@ -4,7 +4,23 @@
 
 int NNmain(void){
     
-    printf("test");
+    //printf("test");
+
+    int hidden[] = {2,2};
+
+    neuNet n = NNinit(2, 2, hidden, 2);
+
+    printf("nbInputs : %d\n", n.nbInputs);
+    printf("nbOutput : %d\n", n.nbOutput);
+    
+    printf("nbLayers : %d\n", n.nbLayers);
+
+    for(int i = 0; i < 2; i++){
+        printf("layer %d : nbHidden : %d\n", i, n.nbHidden[i]);
+    }
+    
+    printf("nbWeights : %d\n", n.nbWeights);
+    printf("nbBiais : %d\n", n.nbBiais);
 
     return 0;
 }
@@ -16,16 +32,39 @@ int NNmain(void){
  *              (faire un mix de tout ca !)
 */
 
-// On prendra QUE 1 hidden layer pour le coup parce que voila
-neuNet NNinit(const int nbInputs, const int nbLayers, const *int nbHidden, const int nbOutput){
+neuNet NNinit(const int nbInputs, const int nbLayers, 
+                int* nbHidden, const int nbOutput){
+    
+    if (nbLayers < 1) {
+        printf("Error : NeuralNetwork need at least one hidden layer");
+        // return NULL; // < TODO : gerer fail
+    }
+    
     neuNet nn;
     
+    // Statiques
     nn.nbInputs = nbInputs;
     nn.nbHidden = nbHidden;
     nn.nbOutput = nbOutput;
+    nn.nbLayers = nbLayers;
 
-    nn.nbWeights = nbHidden * (nbInputs + nbOutput);
-    nn.nbBiais   = nbHidden + nbOutput;
+    // Calcul nb poids
+    int p = 0;
+    nn.nbWeights = nbInputs * nbHidden[p];
+    
+    for(; p < nbLayers - 1; p++) {
+        nn.nbWeights += nbHidden[p] * nbHidden[p + 1];
+    }
+    
+    nn.nbWeights += nbHidden[p] * nbOutput;
 
-   return nn; 
+    // Calcul nb biais
+    nn.nbBiais = 0;
+    for(int p = 0; p < nbLayers; p++) {
+        nn.nbBiais += nbHidden[p];
+    }
+    nn.nbBiais += nbOutput;
+    
+
+    return nn; 
 }
