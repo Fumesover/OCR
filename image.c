@@ -42,32 +42,51 @@ void DisplayImage(char path_image[])
 } */
 
 // Charge l'image nommée 'image'
-void LoadImage(char path_image[], Uint32 **pixels)
+void LoadImage(char * path_image)
 {
-	int i = 0, j = 0;
+	int i = 0;
 	int h = 0, w = 0;
-	SDL_Surface *image = NULL;
+    Uint32 **pixels = NULL;
+	SDL_Surface *image;
 
+	// Charge l'image
 	image = IMG_Load(path_image);
+
+    if(!image) {
+        printf("IMG_Load: %s\n", IMG_GetError());
+    }
 	
 	// Initialisation de la taille du tableau
 	h = image->h;
 	w = image->w;
-	pixels = malloc(sizeof(Uint32) * h);
+	pixels = malloc(sizeof(Uint32*) * h);
 	
 	for (i = 0; i < h; i++)
 	{
 		pixels[i] = malloc(sizeof(Uint32) * w);
 	}
 
-	// Remplissage du tableau
-	for (i = 0; i < h; i++)
-	{
-		for (j = 0; j < w; j++)
-		{
-			pixels[i][j] = GetPixel(image, i, j);
-		}
-	}	
+    // Remplissage du tableau
+    FillPixels(pixels, image, h, w);
+
+
+    for (int i = 0; i < h; i++)
+        free(pixels[i]);
+
+    free(pixels);
+}
+
+void FillPixels(Uint32 **pixels, SDL_Surface *image, int h, int w)
+{
+    int x = 0, y = 0;
+
+    for (x = 0; x < h; x++)
+    {
+        for (y = 0; y < w; y++)
+        {
+            pixels[x][y] = GetPixel(image, x, y);
+        }
+    }
 }
 
 // Renvoie la couleur du pixel à la position x, y

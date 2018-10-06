@@ -2,7 +2,8 @@
 #define IMAGE_H
 
 void DisplayImage (char path_image[]);
-void LoadImage(char path_image[], Uint32 **pixels);
+void LoadImage(char * path_image);
+void FillPixels(Uint32 **pixels, SDL_Surface *image, int h, int w);
 Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 
