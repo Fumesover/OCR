@@ -5,13 +5,13 @@ CC = gcc
 # Options for pre-processor
 CPPFLAGS = -MMD
 # Main compilation options
-CFLAGS = -Wall -Wextra -std=c99 -O3 $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0`
+CFLAGS = -Wall -Wextra -std=c99 -O3 `pkg-config --cflags sdl2` `pkg-config --cflags --libs gtk+-3.0`
 # Linker options
-LDFLAGS =
+LDFLAGS = 
 # Libs and path for linker
-LDLIBS = -lm $(pkg-config --libs sdl2) `pkg-config --libs gtk+-3.0` # -lm includes math library
+LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm
 
-SRC = main.c
+SRC = main.c image.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
@@ -24,6 +24,7 @@ clean:
 	${RM} ${OBJ}      # remove object files
 	${RM} ${DEP}      # remove dependency files
 	${RM} main	  # remove main program
+#	${RM} .*.sw*	  # remove temporary files
 
 -include ${DEP}
 

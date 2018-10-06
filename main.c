@@ -1,23 +1,21 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <gtk/gtk.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include "image.h"
 
 int main(int argc, char **argv)
 {
-    /* Variables */
-    GtkWidget * MainWindow = NULL;
+	char image[8] = "test.png";
+	//DisplayImage(image);
 
-    /* Initialisation de GTK+ */
-    gtk_init(&argc, &argv);
+	Uint32 **pixels = NULL;
+	LoadImage(image, pixels);
 
-    /* Création de la fenêtre */
-    MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-    g_signal_connect(G_OBJECT(MainWindow), "delete-event", G_CALLBACK(gtk_main_quit), NULL);
+	for (int i = 0; i < sizeof(pixels); i++)
+		free(pixels[i]);
 
-    /* Affichage et boucle évènementielle */
-    gtk_widget_show(MainWindow);
-    gtk_main();
-
-    /* On quitte.. */
-    return EXIT_SUCCESS;
+	free(pixels);
 }
 
