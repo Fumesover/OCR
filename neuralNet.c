@@ -8,10 +8,16 @@
 int NNmain(void){
     
     // INIT
+    int   nbInp = 2;
+    float inpVals[] = {0.5, 0.7};
+    int   nbHidden = 1;
+    int   hidden[] = {2};
+    int   nbOut = 2;
+    float target[] = {0.5, 0.7};
 
-    int hidden[] = {2, 2};
+    float updateRate = 0.04;
 
-    neuNet n = NNinit(2, 2, hidden, 1);
+    neuNet n = NNinit(nbInp, nbHidden, hidden, nbOut);
 
     printf("nbInputs : %d\n", n.nbInputs);
     printf("nbOutput : %d\n", n.nbOutput);
@@ -31,9 +37,13 @@ int NNmain(void){
     
 
     // Propagation
-    float vals[] = {0.5, 0.7};
-    forwardPropagation(n, vals);
+    //float vals[] = {0.5, 0.7};
+    forwardPropagation(n, inpVals);
     
+    // BackPropagation
+    backPropagation(n, inpVals, target, updateRate);
+
+
     freeNeuNet(n);
 
     return 0;
@@ -142,7 +152,8 @@ void forwardPropagation(neuNet n, float* inp) {
     
     printf("fpropagation lvl %d to output\n", n.nbLayers - 1);
 
-    oneLayerPropagation(n.neuHidden, offsetHidden, n.nbHidden[n.nbLayers - 1] + offsetHidden,
+    oneLayerPropagation(n.neuHidden, offsetHidden, 
+                                      n.nbHidden[n.nbLayers - 1] + offsetHidden,
                         n.weights, offsetWeights,
                         n.biais,   offsetBiais + n.nbOutput, 
                         n.neuOutput, 0, n.nbOutput);
@@ -169,7 +180,8 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
         }
         
         printf(" %d : sum = %f, biais = %f, neuron value = %f\n", 
-                dStart +d, sum, biais[bStart + d], activation(sum + biais[bStart + d]));
+                dStart +d, sum, biais[bStart + d], 
+                              activation(sum + biais[bStart + d]));
         
         destination[dStart + d] = activation(sum + biais[bStart + d]);  
     }
@@ -180,6 +192,15 @@ float activation(float inp) {
     return 1.0f / (1.0f + expf(-inp));;
 }
 
+float activationPrime(float inp) {
+    float act = activation(inp);
+    return act * (1 - act);
+}
+
+float primeOfActivation(float act) {
+    return act * (1 - act);
+}
+
 void freeNeuNet(neuNet n) {
     free(n.neuInputs);
     free(n.neuHidden);
@@ -188,3 +209,32 @@ void freeNeuNet(neuNet n) {
     free(n.weights);
     free(n.biais);
 }
+
+void backPropagation(neuNet n, float* inp, float* targ, float rate) {
+    float *costOutput = malloc(n.nbOutput * sizeof(float));
+
+    for (int o = 0; o < n.nbOutput; o++) {
+        costOutput[o] = 2 * (n.neuOutput[o] - targ[o]);
+
+        printf("output %d's cost is : %f\n", o, costOutput[o]);
+    }
+    
+    int w = n.nbWeights - n.nbOutput * n.nbHidden[n.nbLayers - 1];
+    for (; w < n.nbWeights; w++) {
+        
+        float Cost = costOutput[w % n.nbOutput];
+        printf("w n%d : Cost output nb %d = %f", w, w % n.nbOutput, Cost);
+
+        float primeAct = primeOfActivation(n.neuOutput[w % n.nbOutput]);
+        printf(", primeAct = %f", primeAct);
+        
+        float input    = n.neuHidden[w / n.nbHidden[n.nbLayers - 1]];
+        printf(", inp n%d, value=%f", w / n.nbHidden[n.nbLayers - 1], input);
+
+        printf("\n");
+    }
+
+
+    free(costOutput);
+}
+

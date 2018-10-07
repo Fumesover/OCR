@@ -47,12 +47,18 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
 
 // Sigmoid 
 float activation(float f);
+float activationPrime(float f);
+float primeOfActivation(float f);
+
 /* Sigmoide = 1 / (1 + e ^ -x)
  * 
  * (Regarder SoftMax function (cf livret rose))
  * (Regarder aussi ReLU : max(0,x) 
  *    ^ plus proche du naturel MAIS besoin de pronfondeur)
 */
+
+// Back Propagation
+void backPropagation(neuNet n, float* inp, float* targ, float rate);
 
 
 // Free NN
