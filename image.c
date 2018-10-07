@@ -41,34 +41,46 @@ void DisplayImage(char path_image[])
   /*  SDL_FreeSurface(image);	
 } */
 
-// Charge l'image nommée 'image'
+// Load the image called 'path_image' int a Pixel matrix
 void LoadImage(char * path_image)
 {
 	int i = 0;
 	int h = 0, w = 0;
-    Uint32 **pixels = NULL;
+    Pixel **pixels = NULL;
 	SDL_Surface *image;
 
-	// Charge l'image
+	// Load the image
 	image = IMG_Load(path_image);
 
     if(!image) {
         printf("IMG_Load: %s\n", IMG_GetError());
     }
 	
-	// Initialisation de la taille du tableau
+	// Init matrix
 	h = image->h;
 	w = image->w;
-	pixels = malloc(sizeof(Uint32*) * h);
+	pixels = malloc(sizeof(Pixel*) * h);
 	
 	for (i = 0; i < h; i++)
 	{
-		pixels[i] = malloc(sizeof(Uint32) * w);
+		pixels[i] = malloc(sizeof(Pixel) * w);
 	}
 
-    // Remplissage du tableau
+    // Fill the martix
     FillPixels(pixels, image, h, w);
 
+
+	// TEST
+	// Print the matrix
+    for (int x = 0; x < h; x++)
+    {
+        for (int y = 0; y < w; y++)
+        {
+            printf("(r: %u, g: %u, b: %u) ", pixels[x][y].r, pixels[x][y].g, pixels[x][y].b);
+        }
+
+        printf("\n");
+    }
 
     for (int i = 0; i < h; i++)
         free(pixels[i]);
@@ -76,7 +88,7 @@ void LoadImage(char * path_image)
     free(pixels);
 }
 
-void FillPixels(Uint32 **pixels, SDL_Surface *image, int h, int w)
+void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
 {
     int x = 0, y = 0;
 
@@ -84,12 +96,13 @@ void FillPixels(Uint32 **pixels, SDL_Surface *image, int h, int w)
     {
         for (y = 0; y < w; y++)
         {
-            pixels[x][y] = GetPixel(image, x, y);
+            SDL_GetRGB(image, image->format, &pixels[x][y].r, &pixels[x][y].g, &pixels[x][y].b);
         }
     }
 }
 
-// Renvoie la couleur du pixel à la position x, y
+
+// Returns the Uint32 value of the pixel at position x, y
 Uint32 GetPixel(SDL_Surface *surface, int x, int y)
 {
     int bpp = surface->format->BytesPerPixel;
@@ -117,7 +130,7 @@ Uint32 GetPixel(SDL_Surface *surface, int x, int y)
     }
 }
 
-// Change la valeur du pixel x, y
+// Change value of pixel at position x, y
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 {
     int bpp = surface->format->BytesPerPixel;
