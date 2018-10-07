@@ -96,7 +96,7 @@ void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
     {
         for (y = 0; y < w; y++)
         {
-            SDL_GetRGB(image, image->format, &pixels[x][y].r, &pixels[x][y].g, &pixels[x][y].b);
+            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[x][y].r, &pixels[x][y].g, &pixels[x][y].b);
         }
     }
 }
