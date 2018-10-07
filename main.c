@@ -8,11 +8,11 @@
 
 int main(int argc, char **argv)
 {
+    // TODO : Select file from interface file chooser
 	char image[] = "/home/rhaeven/Documents/OCR/test.jpg";
-	//DisplayImage(image);
 
+	// Return the corresponding Pixel matrix of the image
 	LoadImage(image);
-
 
 	return 0;
 }

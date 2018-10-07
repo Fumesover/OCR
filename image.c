@@ -69,23 +69,28 @@ void LoadImage(char * path_image)
     // Fill the martix
     FillPixels(pixels, image, h, w);
 
-
-	// TEST
-	// Print the matrix
-    for (int x = 0; x < h; x++)
-    {
-        for (int y = 0; y < w; y++)
-        {
-            printf("(r: %u, g: %u, b: %u) ", pixels[x][y].r, pixels[x][y].g, pixels[x][y].b);
-        }
-
-        printf("\n");
-    }
+	//TEST
+	PrintPixels(pixels, h, w);
 
     for (int i = 0; i < h; i++)
         free(pixels[i]);
 
     free(pixels);
+}
+
+// TEST THE MATRIX
+// Prints the RGB values og the matrix of size h * w
+void PrintPixels(Pixel **matrix, int h, int w)
+{
+    for (int x = 0; x < h; x++)
+    {
+        for (int y = 0; y < w; y++)
+        {
+            printf("(r: %u, g: %u, b: %u) ", matrix[x][y].r, matrix[x][y].g, matrix[x][y].b);
+        }
+
+        printf("\n");
+    }
 }
 
 void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
@@ -100,7 +105,6 @@ void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
         }
     }
 }
-
 
 // Returns the Uint32 value of the pixel at position x, y
 Uint32 GetPixel(SDL_Surface *surface, int x, int y)

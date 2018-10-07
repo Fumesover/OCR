@@ -11,6 +11,7 @@ struct Pixel {
 void DisplayImage (char path_image[]);
 void LoadImage(char * path_image);
 void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w);
+void PrintPixels(Pixel **matrix, int h, int w);
 Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 
