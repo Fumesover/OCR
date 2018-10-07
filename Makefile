@@ -20,6 +20,7 @@ all: main
 main: ${OBJ}
 
 valgrind: CFLAGS += -g
+valgrind: clean
 valgrind: main
 valgrind:
 	valgrind ./main

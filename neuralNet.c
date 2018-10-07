@@ -9,13 +9,13 @@ int NNmain(void){
     
     // INIT
     int   nbInp = 2;
-    float inpVals[] = {0.5, 0.7};
+    float inpVals[] = {1, 1};
     int   nbHidden = 1;
     int   hidden[] = {2};
-    int   nbOut = 2;
-    float target[] = {0.5, 0.7};
+    int   nbOut = 1;
+    float target[] = {0};
 
-    float updateRate = 0.04;
+    float updateRate = 0.1;
 
     neuNet n = NNinit(nbInp, nbHidden, hidden, nbOut);
 
@@ -104,16 +104,16 @@ neuNet NNinit(const int nbInputs, const int nbLayers,
 void neuNetRandom(neuNet nn) {
     srand(time(NULL));
     
-    printf("Weights :\n");
+    //printf("Weights :\n");
     for (int p = 0; p < nn.nbWeights; p++) {
         nn.weights[p] = randF();
-        printf("%d -> %f\n",p, nn.weights[p]);
+      //  printf("%d -> %f\n",p, nn.weights[p]);
     }
     
-    printf("Biais :\n");
+    //printf("Biais :\n");
     for (int p = 0; p < nn.nbBiais; p++) {
         nn.biais[p] = randF();
-        printf("%d -> %f\n", p, nn.biais[p]);
+      //  printf("%d -> %f\n", p, nn.biais[p]);
     }
 }
 
@@ -123,7 +123,7 @@ float randF() {
 
 void forwardPropagation(neuNet n, float* inp) {
     
-    printf("fpropagation input to lvl 1\n");
+    //printf("fpropagation input to lvl 1\n");
 
     oneLayerPropagation(inp, 0, n.nbInputs, 
                         n.weights, 0, 
@@ -134,10 +134,10 @@ void forwardPropagation(neuNet n, float* inp) {
     int offsetWeights = n.nbInputs * n.nbHidden[0];
     int offsetHidden  = 0;
     
-    printf("n.nbLayers : %d\n", n.nbLayers);
+    //printf("n.nbLayers : %d\n", n.nbLayers);
 
     for (int layer = 0; layer < n.nbLayers -1; layer++) {
-        printf("fpropagation lvl %d to lvl %d\n", layer, layer + 1);
+    //    printf("fpropagation lvl %d to lvl %d\n", layer, layer + 1);
 
         oneLayerPropagation(n.neuHidden, offsetHidden, n.nbHidden[layer] + offsetHidden,
                             n.weights, offsetWeights,
@@ -150,7 +150,7 @@ void forwardPropagation(neuNet n, float* inp) {
         offsetHidden  += n.nbHidden[layer];
     }
     
-    printf("fpropagation lvl %d to output\n", n.nbLayers - 1);
+    //printf("fpropagation lvl %d to output\n", n.nbLayers - 1);
 
     oneLayerPropagation(n.neuHidden, offsetHidden, 
                                       n.nbHidden[n.nbLayers - 1] + offsetHidden,
@@ -174,14 +174,14 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
         for (int p = 0; p < nbPrev; p++) {
             
             sum += previous[p + pStart] * weights[p * nbDest + d + wStart];
-            printf("  wpos : %d | wval : %f | ppos : %d | pval : %f | sum : %f\n",
-                  p * nbDest + d + wStart, weights[p * nbDest + d + wStart], 
-                  p + pStart, previous[p + pStart], sum);
+        //    printf("  wpos : %d | wval : %f | ppos : %d | pval : %f | sum : %f\n",
+        //          p * nbDest + d + wStart, weights[p * nbDest + d + wStart], 
+        //          p + pStart, previous[p + pStart], sum);
         }
         
-        printf(" %d : sum = %f, biais = %f, neuron value = %f\n", 
-                dStart +d, sum, biais[bStart + d], 
-                              activation(sum + biais[bStart + d]));
+    //    printf(" %d : sum = %f, biais = %f, neuron value = %f\n", 
+    //            dStart +d, sum, biais[bStart + d], 
+    //                          activation(sum + biais[bStart + d]));
         
         destination[dStart + d] = activation(sum + biais[bStart + d]);  
     }
@@ -228,8 +228,15 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
         float primeAct = primeOfActivation(n.neuOutput[w % n.nbOutput]);
         printf(", primeAct = %f", primeAct);
         
-        float input    = n.neuHidden[w / n.nbHidden[n.nbLayers - 1]];
-        printf(", inp n%d, value=%f", w / n.nbHidden[n.nbLayers - 1], input);
+        float input = n.neuHidden[(w / n.nbHidden[n.nbLayers - 1]) - n.nbInputs];
+        
+        // printf(", nbHiddenlayer[%d] = %d", n.nbLayers -1, (w / n.nbHidden[n.nbLayers - 1]) - n.nbInputs);
+        
+        printf(", hidden n°%d", (w / n.nbOutput) - n.nbInputs);
+        printf(", value=%f", input);
+        
+        float update = rate * Cost * primeAct * input;
+        printf(", update = %f", update);
 
         printf("\n");
     }
