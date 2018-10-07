@@ -10,8 +10,8 @@ int NNmain(void){
     // INIT
     int   nbInp = 2;
     float inpVals[] = {1, 1};
-    int   nbHidden = 1;
-    int   hidden[] = {2};
+    int   nbHidden = 2;
+    int   hidden[] = {2,2};
     int   nbOut = 1;
     float target[] = {0};
 
@@ -19,30 +19,31 @@ int NNmain(void){
 
     neuNet n = NNinit(nbInp, nbHidden, hidden, nbOut);
 
+    /*
     printf("nbInputs : %d\n", n.nbInputs);
     printf("nbOutput : %d\n", n.nbOutput);
     printf("ttHidden : %d\n", n.ttHidden);
     printf("nbLayers : %d\n", n.nbLayers);
 
-    for(int i = 0; i < 2; i++){
+    for(int i = 0; i < nbHidden; i++){
         printf("layer %d : nbHidden : %d\n", i, n.nbHidden[i]);
     }
     
     printf("nbWeights : %d\n", n.nbWeights);
     printf("nbBiais : %d\n", n.nbBiais);
-    
+    */
 
     // RANDOMISE
     neuNetRandom(n);
     
-
+    for (int toto = 0; toto < 1; toto++) {
     // Propagation
     //float vals[] = {0.5, 0.7};
     forwardPropagation(n, inpVals);
     
     // BackPropagation
     backPropagation(n, inpVals, target, updateRate);
-
+    }
 
     freeNeuNet(n);
 
@@ -211,37 +212,119 @@ void freeNeuNet(neuNet n) {
 }
 
 void backPropagation(neuNet n, float* inp, float* targ, float rate) {
+    
+    // Compute Costs
+    
+    // Outputs errors
     float *costOutput = malloc(n.nbOutput * sizeof(float));
-
     for (int o = 0; o < n.nbOutput; o++) {
-        costOutput[o] = 2 * (n.neuOutput[o] - targ[o]);
+        costOutput[o] = - 2 * (n.neuOutput[o] - targ[o]);
 
-        printf("output %d's cost is : %f\n", o, costOutput[o]);
+        printf("Output %d's cost is : %f\n", o, costOutput[o]);
     }
     
-    int w = n.nbWeights - n.nbOutput * n.nbHidden[n.nbLayers - 1];
-    for (; w < n.nbWeights; w++) {
+    float *costHidden = malloc(n.ttHidden * sizeof(float));
+    
+    // Hidden -> Ouput
+    int nbH  = n.nbHidden[n.nbLayers - 1];
+    int wPos = n.nbWeights - n.nbHidden[n.nbLayers - 1] * n.nbOutput; 
+    for (int posH = n.ttHidden - nbH; posH < n.ttHidden; posH++) {
+        printf("Hidden n°%d", posH);
         
-        float Cost = costOutput[w % n.nbOutput];
-        printf("w n%d : Cost output nb %d = %f", w, w % n.nbOutput, Cost);
+        float sum = 0.0f;
 
-        float primeAct = primeOfActivation(n.neuOutput[w % n.nbOutput]);
-        printf(", primeAct = %f", primeAct);
-        
-        float input = n.neuHidden[(w / n.nbHidden[n.nbLayers - 1]) - n.nbInputs];
-        
-        // printf(", nbHiddenlayer[%d] = %d", n.nbLayers -1, (w / n.nbHidden[n.nbLayers - 1]) - n.nbInputs);
-        
-        printf(", hidden n°%d", (w / n.nbOutput) - n.nbInputs);
-        printf(", value=%f", input);
-        
-        float update = rate * Cost * primeAct * input;
-        printf(", update = %f", update);
+        for (int o = 0; o < n.nbOutput; o++) {
+            sum += costOutput[o] * n.weights[wPos++] * primeOfActivation(n.neuOutput[o]);
+        }
 
-        printf("\n");
+        printf("'s cost is : %f\n", sum);
+        costHidden[posH] = sum;
+    }
+    
+    // Hidden -> Hidden
+    wPos -= n.nbHidden[n.nbLayers - 1] * n.nbOutput;
+    int posH = n.ttHidden - nbH;
+
+    for (int layer = n.nbLayers - 2; layer >= 0; layer--) {
+        posH -= n.nbHidden[layer];
+        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+        
+        printf("Starting Layer %d, hidden start at %d and end at %d", 
+                        layer, posH, posH + n.nbHidden[layer]);
+        printf(", weights starting at %d and end at %d\n",
+                        wPos, wPos + n.nbHidden[layer] * n.nbHidden[layer + 1]);
+        
+        for (int pH = posH; pH < posH + n.nbHidden[layer]; pH++) {
+            printf("Hidden n°%d", pH);
+
+            float sum = 0.0f;
+
+            for (int neuNext = posH + n.nbHidden[layer]; 
+                neuNext < posH + n.nbHidden[layer] + n.nbHidden[layer + 1]; neuNext++) {
+                sum += costHidden[neuNext] * n.weights[wPos++] * primeOfActivation(n.neuHidden[neuNext]);
+            }
+
+            printf("'s cost is : %f\n", sum);
+            costHidden[pH] = sum;
+        }
+
+        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+    }
+    
+    // Update weights
+    
+    // Last Hidden -> Output
+    wPos = n.nbWeights - n.nbHidden[n.nbLayers - 1] * n.nbOutput;
+    for (int pos = n.ttHidden - n.nbHidden[n.nbLayers - 1]; pos < n.ttHidden; pos++) {
+        for (int posD = 0; posD < n.nbOutput; posD++) {
+            float toUp = costOutput[posD] * primeOfActivation(n.neuOutput[posD]) * n.neuHidden[pos];
+            printf("weight n°%d updated of %f", wPos, toUp * rate);
+            printf(", was : %f", n.weights[wPos]);
+            n.weights[wPos++] += toUp * rate;
+            printf(", is now : %f\n", n.weights[wPos - 1]);   
+        }
     }
 
+    // Hidden to Hidden
+    posH = n.ttHidden - nbH;
+    wPos -= n.nbHidden[n.nbLayers - 1] * n.nbOutput;
 
+    for (int layer = n.nbLayers - 2; layer >= 0; layer--) {
+        posH -= n.nbHidden[layer];
+        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+
+        for (int pSource = posH; pSource < posH + n.nbHidden[layer]; pSource++) {
+            for (int pDest = posH + n.nbHidden[layer]; 
+                  pDest < posH + n.nbHidden[layer] + n.nbHidden[layer + 1]; pDest++) {
+                
+                float toUp = costHidden[pDest] 
+                              * primeOfActivation(n.neuHidden[pDest])
+                              * n.neuHidden[pSource];
+                printf("weight n°%d updated of %f", wPos, toUp * rate);
+                printf(", was : %f", n.weights[wPos]);
+                n.weights[wPos++] += toUp * rate;
+                printf(", is now : %f\n", n.weights[wPos - 1]);
+
+            }
+        }
+
+        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+    }
+    
+    // Input to Hidden
+    wPos = 0;
+    for (int pos = 0; pos < n.nbInputs; pos++) {
+        for (int posD = 0; posD < n.nbHidden[0]; posD++) {
+
+            float toUp = costHidden[posD] * primeOfActivation(n.neuHidden[posD]) * inp[pos];
+            printf("weight n°%d updated of %f", wPos, toUp * rate);
+            printf(", was : %f", n.weights[wPos]);
+            n.weights[wPos++] += toUp * rate;
+            printf(", is now : %f\n", n.weights[wPos - 1]);   
+        }
+    }
+
+    free(costHidden);
     free(costOutput);
 }
 
