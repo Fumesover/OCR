@@ -381,3 +381,20 @@ float NNTrain(neuNet n, float* inp, float* targ, float update) {
     return NNerror(n, targ);
 }
 
+char* NNtoChar(neuNet n) {
+    /*
+     * 1 -> nbInput|nbLayers|[nbHidden]|nbOutput
+     * 2 -> weight|weight|weight|...
+     * 3 -> biais|biais|...
+    **/
+    
+    n = n; // << no warnings
+
+    return NULL;
+}
+/*
+neuNet NNCharTo(char* inp) {
+    inp = inp; // << no warngs
+    return void;
+}
+*/
