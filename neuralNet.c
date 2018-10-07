@@ -56,20 +56,24 @@ int NNmain(void){
     int testLen = 4;
 
     do {
-        testPos = (testPos + 1) % testLen;
+        err = 0.0f;
+        for (testPos = 0; testPos < testLen; testPos++) {
 
-        inpVals[0] = tests[testPos][0];
-        inpVals[1] = tests[testPos][1];
-        target[0]  = tests[testPos][2];
+            inpVals[0] = tests[testPos][0];
+            inpVals[1] = tests[testPos][1];
+            target[0]  = tests[testPos][2];
 
-        forwardPropagation(n, inpVals);
-        backPropagation(n, inpVals, target, updateRate);
+            forwardPropagation(n, inpVals);
+            backPropagation(n, inpVals, target, updateRate);
 
-        err = NNerror(n, target);
-        printf("n°%d => error : %f vals : %d xor %d => %d \n", 
-                itteration++, err, (int) tests[testPos][0], 
-                (int)tests[testPos][1], (int) tests[testPos][2]);
-    
+            err += NNerror(n, target);
+            printf("  n°%d => error : %f vals : %d xor %d => %d \n", 
+                    itteration++, NNerror(n, target), (int) tests[testPos][0], 
+                    (int)tests[testPos][1], (int) tests[testPos][2]);
+        }
+
+        printf("n°%d : batch error : %f\n", itteration / testLen, err);
+
     } while (err > 0.001f);
 
     freeNeuNet(n);
