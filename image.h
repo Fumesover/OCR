@@ -15,5 +15,7 @@ void PrintPixels(Pixel **matrix, int h, int w);
 void GreyScale(Pixel **pixels, int h, int w);
 Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
+void Otsu(Pixel **pixels);
+SDL_Surface MatrixToSurface(Pixel **pixels, int h, int w);
 
 #endif

@@ -81,23 +81,6 @@ void LoadImage(char * path_image)
     free(pixels);
 }
 
-
-// Returns the greyscale value of the matrix of size h * w
-void GreyScale(Pixel **pixels, int h, int w)
-{
-    Uint8 grey;
-    for (int i = 0; i < h; i++)
-    {
-        for (int j = 0; j < w; j++)
-        {
-            grey = (Uint8)(0.2126 * pixels[i][j].r + 0.7152 * pixels[i][j].g + 0.0722 * pixels[i][j].b);
-            pixels[i][j].r = grey;
-            pixels[i][j].g = grey;
-            pixels[i][j].b = grey;
-        }
-    }
-}
-
 // TEST THE MATRIX
 // Prints the RGB values og the matrix of size h * w
 void PrintPixels(Pixel **matrix, int h, int w)
@@ -188,3 +171,48 @@ void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
     }
 }
 
+// Returns the greyscale value of the matrix of size h * w
+void GreyScale(Pixel **pixels, int h, int w)
+{
+    Uint8 grey;
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            grey = (Uint8)(0.2126 * pixels[i][j].r + 0.7152 * pixels[i][j].g + 0.0722 * pixels[i][j].b);
+            pixels[i][j].r = grey;
+            pixels[i][j].g = grey;
+            pixels[i][j].b = grey;
+        }
+    }
+}
+
+// Returns the thresholded result of Pixel matrix
+void Otsu(Pixel **pixels)
+{
+
+}
+
+SDL_Surface MatrixToSurface(Pixel **pixels, int h, int w)
+{
+    SDL_Surface *surface;
+    Uint32 **argb = NULL;
+    Uint32 alpha = 0xFF000000;
+    Uint32 pixel;
+
+
+
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            pixel = alpha << 24 | pixels[i][j].r << 24 | pixels[i][j].r << 24 | pixels[i][j].r << 24
+        }
+    }
+
+    // Create empty surface of size h * w
+    // Boucle
+    // Convert pixels i j 3 uint8 to uint32 unique pixel
+    // Putpixel in surface
+
+}
