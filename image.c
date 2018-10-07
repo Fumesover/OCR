@@ -70,12 +70,32 @@ void LoadImage(char * path_image)
     FillPixels(pixels, image, h, w);
 
 	//TEST
+	//PrintPixels(pixels, h, w);
+
+	GreyScale(pixels, h, w);
 	PrintPixels(pixels, h, w);
 
     for (int i = 0; i < h; i++)
         free(pixels[i]);
 
     free(pixels);
+}
+
+
+// Returns the greyscale value of the matrix of size h * w
+void GreyScale(Pixel **pixels, int h, int w)
+{
+    Uint8 grey;
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            grey = (Uint8)(0.2126 * pixels[i][j].r + 0.7152 * pixels[i][j].g + 0.0722 * pixels[i][j].b);
+            pixels[i][j].r = grey;
+            pixels[i][j].g = grey;
+            pixels[i][j].b = grey;
+        }
+    }
 }
 
 // TEST THE MATRIX
