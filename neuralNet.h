@@ -50,7 +50,7 @@ float activation(float f);
 float activationPrime(float f);
 float primeOfActivation(float f);
 
-/* Sigmoide = 1 / (1 + e ^ -x)
+/* Sigmoid = 1 / (1 + e ^ -x)
  * 
  * (Regarder SoftMax function (cf livret rose))
  * (Regarder aussi ReLU : max(0,x) 

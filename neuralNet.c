@@ -10,12 +10,12 @@ int NNmain(void){
     // INIT
     int   nbInp = 2;
     float inpVals[] = {1, 1};
-    int   nbHidden = 2;
-    int   hidden[] = {2,2};
+    int   nbHidden = 1;
+    int   hidden[] = {3};
     int   nbOut = 1;
     float target[] = {0};
 
-    float updateRate = 0.1;
+    float updateRate = 0.4;
 
     neuNet n = NNinit(nbInp, nbHidden, hidden, nbOut);
 
@@ -36,15 +36,41 @@ int NNmain(void){
     // RANDOMISE
     neuNetRandom(n);
     
-    for (int toto = 0; toto < 1; toto++) {
+    /*for (int t = 0; t < 1; t++) {
         // Propagation
         forwardPropagation(n, inpVals);
     
         // BackPropagation
         backPropagation(n, inpVals, target, updateRate);
-    }
+    }*/
+    
+    float err;
+    int itteration = 0;
+    float tests[4][3] = {
+        {1.0f,1.0f,0.0f},
+        {0.0f,0.0f,0.0f},
+        {1.0f,0.0f,1.0f},
+        {0.0f,1.0f,1.0f},
+    };
+    int testPos = 0;
+    int testLen = 4;
 
-    printf("error : %f\n", NNerror(n, target));
+    do {
+        testPos = (testPos + 1) % testLen;
+
+        inpVals[0] = tests[testPos][0];
+        inpVals[1] = tests[testPos][1];
+        target[0]  = tests[testPos][2];
+
+        forwardPropagation(n, inpVals);
+        backPropagation(n, inpVals, target, updateRate);
+
+        err = NNerror(n, target);
+        printf("n°%d => error : %f vals : %d xor %d => %d \n", 
+                itteration++, err, (int) tests[testPos][0], 
+                (int)tests[testPos][1], (int) tests[testPos][2]);
+    
+    } while (err > 0.001f);
 
     freeNeuNet(n);
 
@@ -221,7 +247,7 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
     for (int o = 0; o < n.nbOutput; o++) {
         costOutput[o] = - 2 * (n.neuOutput[o] - targ[o]);
 
-        printf("Output %d's cost is : %f\n", o, costOutput[o]);
+      //  printf("Output %d's cost is : %f\n", o, costOutput[o]);
     }
     
     float *costHidden = malloc(n.ttHidden * sizeof(float));
@@ -230,7 +256,7 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
     int nbH  = n.nbHidden[n.nbLayers - 1];
     int wPos = n.nbWeights - n.nbHidden[n.nbLayers - 1] * n.nbOutput; 
     for (int posH = n.ttHidden - nbH; posH < n.ttHidden; posH++) {
-        printf("Hidden n°%d", posH);
+     //   printf("Hidden n°%d", posH);
         
         float sum = 0.0f;
 
@@ -238,7 +264,7 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
             sum += costOutput[o] * n.weights[wPos++] * primeOfActivation(n.neuOutput[o]);
         }
 
-        printf("'s cost is : %f\n", sum);
+     //   printf("'s cost is : %f\n", sum);
         costHidden[posH] = sum;
     }
     
@@ -249,14 +275,14 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
     for (int layer = n.nbLayers - 2; layer >= 0; layer--) {
         posH -= n.nbHidden[layer];
         wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
-        
+    /*    
         printf("Starting Layer %d, hidden start at %d and end at %d", 
                         layer, posH, posH + n.nbHidden[layer]);
         printf(", weights starting at %d and end at %d\n",
                         wPos, wPos + n.nbHidden[layer] * n.nbHidden[layer + 1]);
-        
+      */  
         for (int pH = posH; pH < posH + n.nbHidden[layer]; pH++) {
-            printf("Hidden n°%d", pH);
+        //    printf("Hidden n°%d", pH);
 
             float sum = 0.0f;
 
@@ -265,7 +291,7 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
                 sum += costHidden[neuNext] * n.weights[wPos++] * primeOfActivation(n.neuHidden[neuNext]);
             }
 
-            printf("'s cost is : %f\n", sum);
+          //  printf("'s cost is : %f\n", sum);
             costHidden[pH] = sum;
         }
 
@@ -279,10 +305,10 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
     for (int pos = n.ttHidden - n.nbHidden[n.nbLayers - 1]; pos < n.ttHidden; pos++) {
         for (int posD = 0; posD < n.nbOutput; posD++) {
             float toUp = costOutput[posD] * primeOfActivation(n.neuOutput[posD]) * n.neuHidden[pos];
-            printf("weight n°%d updated of %f", wPos, toUp * rate);
-            printf(", was : %f", n.weights[wPos]);
+       //     printf("weight n°%d updated of %f", wPos, toUp * rate);
+       //     printf(", was : %f", n.weights[wPos]);
             n.weights[wPos++] += toUp * rate;
-            printf(", is now : %f\n", n.weights[wPos - 1]);   
+       //     printf(", is now : %f\n", n.weights[wPos - 1]);   
         }
     }
 
@@ -301,10 +327,10 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
                 float toUp = costHidden[pDest] 
                               * primeOfActivation(n.neuHidden[pDest])
                               * n.neuHidden[pSource];
-                printf("weight n°%d updated of %f", wPos, toUp * rate);
-                printf(", was : %f", n.weights[wPos]);
+        //        printf("weight n°%d updated of %f", wPos, toUp * rate);
+        //        printf(", was : %f", n.weights[wPos]);
                 n.weights[wPos++] += toUp * rate;
-                printf(", is now : %f\n", n.weights[wPos - 1]);
+        //        printf(", is now : %f\n", n.weights[wPos - 1]);
 
             }
         }
@@ -318,12 +344,16 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
         for (int posD = 0; posD < n.nbHidden[0]; posD++) {
 
             float toUp = costHidden[posD] * primeOfActivation(n.neuHidden[posD]) * inp[pos];
-            printf("weight n°%d updated of %f", wPos, toUp * rate);
-            printf(", was : %f", n.weights[wPos]);
+       //     printf("weight n°%d updated of %f", wPos, toUp * rate);
+       //     printf(", was : %f", n.weights[wPos]);
             n.weights[wPos++] += toUp * rate;
-            printf(", is now : %f\n", n.weights[wPos - 1]);   
+       //     printf(", is now : %f\n", n.weights[wPos - 1]);   
         }
     }
+    
+    // Update biais 
+    
+    // TODO
 
     free(costHidden);
     free(costOutput);
@@ -346,3 +376,4 @@ float NNTrain(neuNet n, float* inp, float* targ, float update) {
     backPropagation(n, inp, targ, update);
     return NNerror(n, targ);
 }
+

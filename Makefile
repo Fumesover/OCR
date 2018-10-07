@@ -25,6 +25,9 @@ valgrind: main
 valgrind:
 	valgrind ./main
 
+run: all
+	./main
+
 .PHONY: clean
 clean:
 	${RM} ${OBJ}      # remove object files
