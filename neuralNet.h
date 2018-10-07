@@ -60,6 +60,12 @@ float primeOfActivation(float f);
 // Back Propagation
 void backPropagation(neuNet n, float* inp, float* targ, float rate);
 
+// Train with one set
+float NNTrain(neuNet n, float* inp, float* targ, float update);
+
+// Compute error
+float NNerror(neuNet n, float* target);
+float error(float a, float b);
 
 // Free NN
 void freeNeuNet(neuNet n);

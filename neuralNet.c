@@ -37,13 +37,14 @@ int NNmain(void){
     neuNetRandom(n);
     
     for (int toto = 0; toto < 1; toto++) {
-    // Propagation
-    //float vals[] = {0.5, 0.7};
-    forwardPropagation(n, inpVals);
+        // Propagation
+        forwardPropagation(n, inpVals);
     
-    // BackPropagation
-    backPropagation(n, inpVals, target, updateRate);
+        // BackPropagation
+        backPropagation(n, inpVals, target, updateRate);
     }
+
+    printf("error : %f\n", NNerror(n, target));
 
     freeNeuNet(n);
 
@@ -328,3 +329,20 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
     free(costOutput);
 }
 
+float error(float a, float b) {
+    return 0.5 * (a - b) * (a - b);
+}
+
+float NNerror(neuNet n, float* target) {
+    float sum = 0.0f;
+    for (int p = 0; p < n.nbOutput; p++) {
+        sum += error(n.neuOutput[p], target[p]);
+    }
+    return sum;
+}
+
+float NNTrain(neuNet n, float* inp, float* targ, float update) {
+    forwardPropagation(n, inp);
+    backPropagation(n, inp, targ, update);
+    return NNerror(n, targ);
+}
