@@ -15,7 +15,7 @@ int NNmain(void){
     int   nbOut = 1;
     float target[] = {0};
 
-    float updateRate = 0.4;
+    float updateRate = 0.1;
 
     neuNet n = NNinit(nbInp, nbHidden, hidden, nbOut);
 
@@ -74,7 +74,7 @@ int NNmain(void){
 
         printf("n°%d : batch error : %f\n", itteration / testLen, err);
 
-    } while (err > 0.001f);
+    } while (err > 0.01f);
 
     freeNeuNet(n);
 
@@ -260,7 +260,6 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
     int nbH  = n.nbHidden[n.nbLayers - 1];
     int wPos = n.nbWeights - n.nbHidden[n.nbLayers - 1] * n.nbOutput; 
     for (int posH = n.ttHidden - nbH; posH < n.ttHidden; posH++) {
-     //   printf("Hidden n°%d", posH);
         
         float sum = 0.0f;
 
@@ -268,7 +267,6 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
             sum += costOutput[o] * n.weights[wPos++] * primeOfActivation(n.neuOutput[o]);
         }
 
-     //   printf("'s cost is : %f\n", sum);
         costHidden[posH] = sum;
     }
     
@@ -311,6 +309,7 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
             float toUp = costOutput[posD] * primeOfActivation(n.neuOutput[posD]) * n.neuHidden[pos];
        //     printf("weight n°%d updated of %f", wPos, toUp * rate);
        //     printf(", was : %f", n.weights[wPos]);
+
             n.weights[wPos++] += toUp * rate;
        //     printf(", is now : %f\n", n.weights[wPos - 1]);   
         }
@@ -351,13 +350,26 @@ void backPropagation(neuNet n, float* inp, float* targ, float rate) {
        //     printf("weight n°%d updated of %f", wPos, toUp * rate);
        //     printf(", was : %f", n.weights[wPos]);
             n.weights[wPos++] += toUp * rate;
-       //     printf(", is now : %f\n", n.weights[wPos - 1]);   
+      //      printf(", is now : %f\n", n.weights[wPos - 1]);   
         }
     }
     
     // Update biais 
     
-    // TODO
+    // Output Layer
+    for (int pos = 0; pos < n.nbOutput; pos++) {
+        float toUp = costOutput[pos] * primeOfActivation(n.neuOutput[pos]);
+    //    printf("output %d : biais += %f\n", pos, toUp);
+        n.biais[n.ttHidden + pos] += toUp * rate;
+    }
+
+    // Hidden Layers
+    for (posH = 0; posH < n.ttHidden; posH++) {
+
+        float toUp = costHidden[posH] * primeOfActivation(n.neuHidden[posH]); 
+    //    printf("hidden %d : biais += %f\n", posH, toUp);
+        n.biais[posH] += toUp * rate;
+    }
 
     free(costHidden);
     free(costOutput);
@@ -392,6 +404,7 @@ char* NNtoChar(neuNet n) {
 
     return NULL;
 }
+
 /*
 neuNet NNCharTo(char* inp) {
     inp = inp; // << no warngs
