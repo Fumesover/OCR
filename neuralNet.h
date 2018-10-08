@@ -17,7 +17,6 @@ typedef struct {
     float *biais;
     
     // Neurons
-    float *neuInputs;
     float *neuHidden;
     float *neuOutput;
 } 
@@ -41,14 +40,13 @@ void forwardPropagation(neuNet n, float* inp);
 
 // One Layer Propagation
 void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
-                         float* weights,  const int wStart, //const int wEnd,
+                         float* weights,  const int wStart,
                          float* biais,    const int bStart,
                          float* destination, const int dStart, const int dEnd);
 
 // Sigmoid 
 float activation(float f);
-float activationPrime(float f);
-float primeOfActivation(float f);
+float primeOfAct(float f);
 
 /* Sigmoid = 1 / (1 + e ^ -x)
  * 
