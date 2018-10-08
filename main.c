@@ -17,7 +17,7 @@ int main()
         fprintf(stderr, "Couldn't load %s: %s\n", path_image, SDL_GetError());
         return 1;
     }
-
+    
     //DisplayImage(image);
 
 	// Return the corresponding Pixel matrix of the image

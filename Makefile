@@ -5,7 +5,7 @@ CC = gcc
 # Options for pre-processor
 CPPFLAGS = -MMD
 # Main compilation options
-CFLAGS = -Wall -Wextra -std=c99 -O3 -march=native $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0`
+CFLAGS = -g -Wall -Wextra -std=c99 -O3 -march=native $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0`
 # Linker options
 LDFLAGS = 
 # Libs and path for linker

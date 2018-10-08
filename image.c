@@ -16,7 +16,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(1000);
+    SDL_Delay(3000);
 
 
     /* Free the allocated surface */
@@ -163,10 +163,49 @@ void GreyScale(Pixel **pixels, int h, int w)
 }
 
 // Returns the thresholded result of Pixel matrix
-/*void Otsu(Pixel **pixels)
+void Otsu(Pixel **pixels, int h, int w)
 {
+        /**** HISTOGRAM ****/
+    double probability[256], omega[256], mean[256], sigma[256]
+    int histogram[256];
+    int actual_color, total = 0;
+    int max_sigma = 0.0;
+    int threshold = 0;
 
-}*/
+    // Init the arrays
+    for (int i = 0; i < 256; i++)
+    {
+        histogram[i] = 0;
+        probability[i] = 0;
+    }
+
+    // Get the pixel colors histogram
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            actual_color = pixels[i][j].r;
+            histogram[actual_color]++;
+            total++;
+        }
+    }
+
+    //Fill probability table
+    for (int i = 0; i < 255; i++)
+        probability[i] = (double)histogram[i] / total;
+
+    omega[0] = probability[0];
+    mean[0] = 0.0;
+
+    for (int i = 1; i < 256; i++)
+    {
+        omega[i] = omega[i - 1] + probability[i];
+        mean[i] = mean[i - 1] + i * probability[i];
+    }
+
+    
+
+}
 
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
 {
