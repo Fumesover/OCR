@@ -16,6 +16,7 @@ void GreyScale(Pixel **pixels, int h, int w);
 Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 void Otsu(Pixel **pixels, int h, int w);
+void Binarization(Pixel **pixels, int h, int w, int threshold);
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w);
 
 #endif

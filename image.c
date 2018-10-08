@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <math.h>
 #include "image.h"
 
 
@@ -16,7 +17,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(3000);
+    SDL_Delay(1000);
 
 
     /* Free the allocated surface */
@@ -43,12 +44,13 @@ void LoadImage(SDL_Surface *image)
     // Fill the martix
     FillPixels(pixels, image, h, w);
 
-	//TEST
-	//PrintPixels(pixels, h, w);
-
+	//Greyscale
 	GreyScale(pixels, h, w);
 	DisplayImage(MatrixToSurface(pixels, h, w));
-	//PrintPixels(pixels, h, w);
+
+	// Otsu method on matrix
+	Otsu(pixels, h, w);
+    DisplayImage(MatrixToSurface(pixels, h, w));
 
     for (int i = 0; i < h; i++)
         free(pixels[i]);
@@ -73,7 +75,7 @@ void PrintPixels(Pixel **matrix, int h, int w)
 
 void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
 {
-    int x = 0, y = 0;
+    long x = 0, y = 0;
 
     for (x = 0; x < h; x++)
     {
@@ -166,10 +168,10 @@ void GreyScale(Pixel **pixels, int h, int w)
 void Otsu(Pixel **pixels, int h, int w)
 {
         /**** HISTOGRAM ****/
-    double probability[256], omega[256], mean[256], sigma[256]
+    double probability[256], omega[256], mean[256], sigma[256];
     int histogram[256];
     int actual_color, total = 0;
-    int max_sigma = 0.0;
+    double max_sigma = 0.0;
     int threshold = 0;
 
     // Init the arrays
@@ -203,8 +205,40 @@ void Otsu(Pixel **pixels, int h, int w)
         mean[i] = mean[i - 1] + i * probability[i];
     }
 
-    
+    for (int i = 0; i < 256;i++)
+    {
+        if (omega[i] != 0.0 && omega[i] != 1.0)
+            sigma[i] = pow(mean[255]*omega[i] - mean[i], 2) /
+                       (omega[i]*(1.0 - omega[i]));
+        else
+            sigma[i] = 0.0;
+        if (sigma[i] > max_sigma) {
+            max_sigma = sigma[i];
+            threshold = i;
+        }
+    }
 
+    printf("Threshold : %d\n Total of pixel : %d", threshold, total);
+    Binarization(pixels,h, w, threshold);
+}
+
+// Binarize the matrix considering the threshold
+void Binarization(Pixel **pixels, int h, int w, int threshold)
+{
+    int r, g, b;
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            r = pixels[i][j].r;
+            g = pixels[i][j].g;
+            b = pixels[i][j].b;
+            if (r > threshold)
+                pixels[i][j] = (Pixel){.r = 255, .g = 255, . b = 255};
+            else
+                pixels[i][j] = (Pixel){.r = 0, .g = 0, . b = 0};
+        }
+    }
 }
 
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
