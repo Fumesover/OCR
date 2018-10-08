@@ -9,7 +9,7 @@ void DisplayImage(SDL_Surface *image)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
-    SDL_Surface * screen = SDL_CreateWindow("SDL2 Displaying Image",
+    SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
 
     SDL_Rect dest = { 640/2 - image->w/2,480/2 - image->h/2, 0, 0};
@@ -163,15 +163,15 @@ void GreyScale(Pixel **pixels, int h, int w)
 }
 
 // Returns the thresholded result of Pixel matrix
-void Otsu(Pixel **pixels)
+/*void Otsu(Pixel **pixels)
 {
 
-}
+}*/
 
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
 {
     SDL_Surface *surface;
-    Uint32 pixel = NULL;
+    Uint32 pixel = 0;
     Uint32 alpha = 255;
     Uint32 rmask, gmask, bmask, amask;
 

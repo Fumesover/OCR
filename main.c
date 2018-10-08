@@ -6,10 +6,10 @@
 #include "image.h"
 #include "interface.h"
 
-int main(int argc, char **argv)
+int main()
 {
     // TODO : Select file from interface file chooser
-	char *path_image = "/home/rhaeven/Documents/OCR/test.jpg";
+    char *path_image = "/home/rhaeven/Documents/OCR/test.jpg";
     SDL_Surface *image = IMG_Load(path_image);
 
     if (image == NULL)
@@ -23,6 +23,6 @@ int main(int argc, char **argv)
 	// Return the corresponding Pixel matrix of the image
 	LoadImage(image);
 
-	return 0;
+    return 0;
 }
 
