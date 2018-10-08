@@ -9,7 +9,16 @@
 int main(int argc, char **argv)
 {
     // TODO : Select file from interface file chooser
-	char image[] = "/home/rhaeven/Documents/OCR/test.jpg";
+	char *path_image = "/home/rhaeven/Documents/OCR/test.jpg";
+    SDL_Surface *image = IMG_Load(path_image);
+
+    if (image == NULL)
+    {
+        fprintf(stderr, "Couldn't load %s: %s\n", path_image, SDL_GetError());
+        return 1;
+    }
+
+    //DisplayImage(image);
 
 	// Return the corresponding Pixel matrix of the image
 	LoadImage(image);

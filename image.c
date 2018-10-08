@@ -4,58 +4,32 @@
 #include <SDL2/SDL_image.h>
 #include "image.h"
 
-/*
-void DisplayImage(char path_image[]) 
-{
-    SDL_Surface *image;
 
+void DisplayImage(SDL_Surface *image)
+{
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Surface * screen = SDL_CreateWindow("SDL2 Displaying Image",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
-*/
-   /* Load the BMP file into a surface */
-  /*  image = IMG_Load(path_image);
-    if (image == NULL) {
-        fprintf(stderr, "Couldn't load %s: %s\n", path_image, SDL_GetError());
-        return;
-    }
-*/
-    /*
-     * Palettized screen modes will have a default palette (a standard
-     * 8*8*4 colour cube), but if the image is palettized as well we can
-     * use that palette for a nicer colour matching
-     */
-  /*  if (image->format->palette && screen->format->palette) {
-    SDL_SetColors(screen, image->format->palette->colors, 0,
-                  image->format->palette->ncolors);
-    }
-*/
-    /* Blit onto the screen surface */
-  /*  if(SDL_BlitSurface(image, NULL, screen, NULL) < 0)
-        fprintf(stderr, "BlitSurface error: %s\n", SDL_GetError());
 
-    SDL_UpdateRect(screen, 0, 0, image->w, image->h);
-*/
-    /* Free the allocated BMP surface */
-  /*  SDL_FreeSurface(image);	
-} */
+    SDL_Rect dest = { 640/2 - image->w/2,480/2 - image->h/2, 0, 0};
+    SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
+
+    SDL_UpdateWindowSurface(screen);
+    SDL_Delay(1000);
+
+
+    /* Free the allocated surface */
+    SDL_FreeSurface(image);
+}
 
 // Load the image called 'path_image' int a Pixel matrix
-void LoadImage(char * path_image)
+void LoadImage(SDL_Surface *image)
 {
 	int i = 0;
 	int h = 0, w = 0;
     Pixel **pixels = NULL;
-	SDL_Surface *image;
 
-	// Load the image
-	image = IMG_Load(path_image);
-
-    if(!image) {
-        printf("IMG_Load: %s\n", IMG_GetError());
-    }
-	
 	// Init matrix
 	h = image->h;
 	w = image->w;
@@ -73,7 +47,8 @@ void LoadImage(char * path_image)
 	//PrintPixels(pixels, h, w);
 
 	GreyScale(pixels, h, w);
-	PrintPixels(pixels, h, w);
+	DisplayImage(MatrixToSurface(pixels, h, w));
+	//PrintPixels(pixels, h, w);
 
     for (int i = 0; i < h; i++)
         free(pixels[i]);
@@ -193,26 +168,42 @@ void Otsu(Pixel **pixels)
 
 }
 
-SDL_Surface MatrixToSurface(Pixel **pixels, int h, int w)
+SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
 {
     SDL_Surface *surface;
-    Uint32 **argb = NULL;
-    Uint32 alpha = 0xFF000000;
-    Uint32 pixel;
+    Uint32 pixel = NULL;
+    Uint32 alpha = 255;
+    Uint32 rmask, gmask, bmask, amask;
 
+    /* SDL interprets each pixel as a 32-bit number, so our masks must depend
+       on the endianness (byte order) of the machine */
+    #if SDL_BYTEORDER == SDL_BIG_ENDIAN
+        rmask = 0xff000000;
+        gmask = 0x00ff0000;
+        bmask = 0x0000ff00;
+        amask = 0x000000ff;
+    #else
+        rmask = 0x000000ff;
+        gmask = 0x0000ff00;
+        bmask = 0x00ff0000;
+        amask = 0xff000000;
+    #endif
 
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, rmask, gmask, bmask, amask);
+    if(surface == NULL) {
+        fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
+        exit(1);
+    }
 
+    // Cast ARGB color Uint8 values into 1 Uint32 value
     for (int i = 0; i < h; i++)
     {
         for (int j = 0; j < w; j++)
         {
-            pixel = alpha << 24 | pixels[i][j].r << 24 | pixels[i][j].r << 24 | pixels[i][j].r << 24
+            pixel = alpha << 24 | pixels[i][j].r << 16 | pixels[i][j].g << 8 | pixels[i][j].b;
+            PutPixel(surface, i, j, pixel);
         }
     }
 
-    // Create empty surface of size h * w
-    // Boucle
-    // Convert pixels i j 3 uint8 to uint32 unique pixel
-    // Putpixel in surface
-
+    return surface;
 }
