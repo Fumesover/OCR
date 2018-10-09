@@ -26,14 +26,14 @@ neuNet;
 int NNmain(void);
 
 // Create a NN 
-neuNet NNinit(const int nbInputs, const int nbLayers,
+neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int *nbHidden, const int nbOutput);
 
 // random init
-void neuNetRandom(neuNet nn);
+void neuNetRandom(neuNet* nn);
 
 // Forward Propagation
-void forwardPropagation(neuNet n, float* inp);
+void forwardPropagation(neuNet* n, float* inp);
 
 // One Layer Propagation
 void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
@@ -49,16 +49,16 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
 */
 
 // Back Propagation
-void backPropagation(neuNet n, float* inp, float* targ, float rate);
+void backPropagation(neuNet* n, float* inp, float* targ, float rate);
 
 // Train with one set
-float NNTrain(neuNet n, float* inp, float* targ, float update);
+float NNTrain(neuNet* n, float* inp, float* targ, float update);
 
 // Compute error
-float NNerror(neuNet n, float* target);
+float NNerror(neuNet* n, float* target);
 
 // Free NN
-void freeNeuNet(neuNet n);
+void freeNeuNet(neuNet* n);
 
 // load NN 
 

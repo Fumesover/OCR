@@ -16,8 +16,8 @@ int NNmain(void) {
 
     float updateRate = 0.1;
 
-    neuNet n = NNinit(nbInp, nbHidden, hidden, nbOut);
-
+    neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
+    
     // RANDOMISE
     neuNetRandom(n);
     
@@ -50,8 +50,8 @@ int NNmain(void) {
 
         printf("n°%d : batch error : %f\n", itteration / testLen, err);
 
-    } while (err > 0.01f);
-
+    } while (err > 0.1f);
+    
     freeNeuNet(n);
 
     return 0;
@@ -64,7 +64,7 @@ int NNmain(void) {
  *              (faire un mix de tout ca !)
 */
 
-neuNet NNinit(const int nbInputs, const int nbLayers, 
+neuNet* NNinit(const int nbInputs, const int nbLayers, 
                 int* nbHidden, const int nbOutput){
     
     if (nbLayers < 1) {
@@ -72,35 +72,35 @@ neuNet NNinit(const int nbInputs, const int nbLayers,
         // return NULL; // < TODO : gerer fail
     }
     
-    neuNet nn;
+    neuNet* nn = malloc(sizeof(neuNet));
     
     // Statics 
-    nn.nbInputs = nbInputs;
-    nn.nbHidden = nbHidden;
-    nn.nbOutput = nbOutput;
-    nn.nbLayers = nbLayers;
+    nn->nbInputs = nbInputs;
+    nn->nbHidden = nbHidden;
+    nn->nbOutput = nbOutput;
+    nn->nbLayers = nbLayers;
     
     // Compute count hidden neurons
-    nn.ttHidden = 0;
+    nn->ttHidden = 0;
     for (int p = 0; p < nbLayers; p++) 
-        nn.ttHidden += nbHidden[p];
+        nn->ttHidden += nbHidden[p];
 
     // Compute count weights
     int p = 0;
-    nn.nbWeights = nbInputs * nbHidden[p];
+    nn->nbWeights = nbInputs * nbHidden[p];
     for(; p < nbLayers - 1; p++) 
-        nn.nbWeights += nbHidden[p] * nbHidden[p + 1];
+        nn->nbWeights += nbHidden[p] * nbHidden[p + 1];
     
-    nn.nbWeights += nbHidden[p] * nbOutput;
+    nn->nbWeights += nbHidden[p] * nbOutput;
 
     // Compute count biais
-    nn.nbBiais = nbOutput + nn.ttHidden;
+    nn->nbBiais = nbOutput + nn->ttHidden;
     
     // Init arrays
-    nn.weights   = malloc(nn.nbWeights * sizeof(*nn.weights));
-    nn.biais     = malloc(nn.nbBiais * sizeof(*nn.biais));
-    nn.neuHidden = malloc(nn.ttHidden * sizeof(*nn.neuHidden));
-    nn.neuOutput = malloc(nn.nbOutput * sizeof(*nn.neuOutput));
+    nn->weights   = malloc(nn->nbWeights * sizeof(*nn->weights));
+    nn->biais     = malloc(nn->nbBiais   * sizeof(*nn->biais));
+    nn->neuHidden = malloc(nn->ttHidden  * sizeof(*nn->neuHidden));
+    nn->neuOutput = malloc(nn->nbOutput  * sizeof(*nn->neuOutput));
 
     return nn; 
 }
@@ -109,14 +109,14 @@ float randF() {
     return rand() / (float) RAND_MAX;
 }
 
-void neuNetRandom(neuNet nn) {
+void neuNetRandom(neuNet* nn) {
     srand(time(NULL));
     
-    for (int p = 0; p < nn.nbWeights; p++) 
-        nn.weights[p] = randF();
+    for (int p = 0; p < nn->nbWeights; p++) 
+        nn->weights[p] = randF();
     
-    for (int p = 0; p < nn.nbBiais; p++) 
-        nn.biais[p] = randF();
+    for (int p = 0; p < nn->nbBiais; p++) 
+        nn->biais[p] = randF();
 }
 
 float activation(float inp) { 
@@ -128,42 +128,42 @@ float primeOfAct(float act) {
     return act * (1 - act);
 }
 
-void forwardPropagation(neuNet n, float* inp) {
+void forwardPropagation(neuNet* n, float* inp) {
    
     // Input -> Hidden
-    oneLayerPropagation(inp, 0, n.nbInputs, 
-                        n.weights, 0, 
-                        n.biais, 0,
-                        n.neuHidden, 0, n.nbHidden[0]);
+    oneLayerPropagation(inp, 0, n->nbInputs, 
+                        n->weights, 0, 
+                        n->biais, 0,
+                        n->neuHidden, 0, n->nbHidden[0]);
 
     // Hidden -> Hidden
     int offsetBiais   = 0;
-    int offsetWeights = n.nbInputs * n.nbHidden[0];
+    int offsetWeights = n->nbInputs * n->nbHidden[0];
     int offsetHidden  = 0;
     
-    for (int layer = 0; layer < n.nbLayers - 1; layer++) {
+    for (int layer = 0; layer < n->nbLayers - 1; layer++) {
         
         int pStart = offsetHidden;
-        int pEnd   = n.nbHidden[layer] + offsetHidden;
-        int dStart = offsetHidden + n.nbHidden[layer];
-        int dEnd   = n.nbHidden[layer + 1] + (offsetHidden + n.nbHidden[layer]);
+        int pEnd   = n->nbHidden[layer] + offsetHidden;
+        int dStart = offsetHidden + n->nbHidden[layer];
+        int dEnd   = n->nbHidden[layer + 1] + (offsetHidden + n->nbHidden[layer]);
 
-        oneLayerPropagation(n.neuHidden, pStart, pEnd,
-                            n.weights, offsetWeights,
-                            n.biais,   offsetBiais + n.nbHidden[layer], 
-                            n.neuHidden, dStart, dEnd);
+        oneLayerPropagation(n->neuHidden, pStart, pEnd,
+                            n->weights, offsetWeights,
+                            n->biais,   offsetBiais + n->nbHidden[layer], 
+                            n->neuHidden, dStart, dEnd);
 
-        offsetBiais   += n.nbHidden[layer];
-        offsetWeights += n.nbHidden[layer] * n.nbHidden[layer + 1];
-        offsetHidden  += n.nbHidden[layer];
+        offsetBiais   += n->nbHidden[layer];
+        offsetWeights += n->nbHidden[layer] * n->nbHidden[layer + 1];
+        offsetHidden  += n->nbHidden[layer];
     }
     
     // Hidden -> Output
-    oneLayerPropagation(n.neuHidden, offsetHidden, 
-                                      n.nbHidden[n.nbLayers - 1] + offsetHidden,
-                        n.weights, offsetWeights,
-                        n.biais,   offsetBiais + n.nbOutput, 
-                        n.neuOutput, 0, n.nbOutput);
+    oneLayerPropagation(n->neuHidden, offsetHidden, 
+                                      n->nbHidden[n->nbLayers - 1] + offsetHidden,
+                        n->weights, offsetWeights,
+                        n->biais,   offsetBiais + n->nbOutput, 
+                        n->neuOutput, 0, n->nbOutput);
 }
 
 void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
@@ -185,113 +185,115 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
 
 
 
-void freeNeuNet(neuNet n) {
-    free(n.neuHidden);
-    free(n.neuOutput);
+void freeNeuNet(neuNet *n) {
+    free(n->neuHidden);
+    free(n->neuOutput);
     
-    free(n.weights);
-    free(n.biais);
+    free(n->weights);
+    free(n->biais);
+
+    free(n);
 }
 
-void backPropagation(neuNet n, float* inp, float* targ, float rate) {
+void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
     // Compute Costs
     
     // Outputs errors
-    float *costOutp = malloc(n.nbOutput * sizeof(float));
-    for (int o = 0; o < n.nbOutput; o++)
-        costOutp[o] = - 2 * (n.neuOutput[o] - targ[o]);
+    float *costOutp = malloc(n->nbOutput * sizeof(float));
+    for (int o = 0; o < n->nbOutput; o++)
+        costOutp[o] = - 2 * (n->neuOutput[o] - targ[o]);
     
-    float *costH = malloc(n.ttHidden * sizeof(float));
+    float *costH = malloc(n->ttHidden * sizeof(float));
     
     // Hidden <-> Ouput
-    int nbH  = n.nbHidden[n.nbLayers - 1];
-    int wPos = n.nbWeights - n.nbHidden[n.nbLayers - 1] * n.nbOutput; 
-    for (int posH = n.ttHidden - nbH; posH < n.ttHidden; posH++) {
+    int nbH  = n->nbHidden[n->nbLayers - 1];
+    int wPos = n->nbWeights - n->nbHidden[n->nbLayers - 1] * n->nbOutput; 
+    for (int posH = n->ttHidden - nbH; posH < n->ttHidden; posH++) {
         float sum = 0.0f;
 
-        for (int o = 0; o < n.nbOutput; o++)
-            sum += costOutp[o] * n.weights[wPos++] * primeOfAct(n.neuOutput[o]);
+        for (int o = 0; o < n->nbOutput; o++)
+            sum += costOutp[o] * n->weights[wPos++] * primeOfAct(n->neuOutput[o]);
 
         costH[posH] = sum;
     }
     
     // Hidden <-> Hidden
-    wPos -= n.nbHidden[n.nbLayers - 1] * n.nbOutput;
-    int posH = n.ttHidden - nbH;
+    wPos -= n->nbHidden[n->nbLayers - 1] * n->nbOutput;
+    int posH = n->ttHidden - nbH;
 
-    for (int layer = n.nbLayers - 2; layer >= 0; layer--) {
-        posH -= n.nbHidden[layer];
-        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+    for (int layer = n->nbLayers - 2; layer >= 0; layer--) {
+        posH -= n->nbHidden[layer];
+        wPos -= n->nbHidden[layer] * n->nbHidden[layer + 1];
         
-        for (int pH = posH; pH < posH + n.nbHidden[layer]; pH++) {
+        for (int pH = posH; pH < posH + n->nbHidden[layer]; pH++) {
             float sum = 0.0f;
             
-            int neuNext = posH + n.nbHidden[layer];
-            int neuEnd  = posH + n.nbHidden[layer] + n.nbHidden[layer + 1];
+            int neuNext = posH + n->nbHidden[layer];
+            int neuEnd  = posH + n->nbHidden[layer] + n->nbHidden[layer + 1];
             for (; neuNext < neuEnd; neuNext++) {
-                sum += costH[neuNext] * n.weights[wPos++] * primeOfAct(n.neuHidden[neuNext]);
+                sum += costH[neuNext] * n->weights[wPos++] * primeOfAct(n->neuHidden[neuNext]);
             }
 
             costH[pH] = sum;
         }
 
-        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+        wPos -= n->nbHidden[layer] * n->nbHidden[layer + 1];
     }
     
     // Update weights
     
     // Last Hidden -> Output
-    wPos = n.nbWeights - n.nbHidden[n.nbLayers - 1] * n.nbOutput;
-    for (int pos = n.ttHidden - n.nbHidden[n.nbLayers - 1]; pos < n.ttHidden; pos++) {
-        for (int posD = 0; posD < n.nbOutput; posD++) {
-            float toUp = costOutp[posD] * primeOfAct(n.neuOutput[posD])
-                                          * n.neuHidden[pos];
-            n.weights[wPos++] += toUp * rate;
+    wPos = n->nbWeights - n->nbHidden[n->nbLayers - 1] * n->nbOutput;
+    for (int pos = n->ttHidden - n->nbHidden[n->nbLayers - 1]; pos < n->ttHidden; pos++) {
+        for (int posD = 0; posD < n->nbOutput; posD++) {
+            float toUp = costOutp[posD] * primeOfAct(n->neuOutput[posD])
+                                          * n->neuHidden[pos];
+            n->weights[wPos++] += toUp * rate;
         }
     }
 
     // Hidden to Hidden
-    posH = n.ttHidden - nbH;
-    wPos -= n.nbHidden[n.nbLayers - 1] * n.nbOutput;
+    posH = n->ttHidden - nbH;
+    wPos -= n->nbHidden[n->nbLayers - 1] * n->nbOutput;
 
-    for (int layer = n.nbLayers - 2; layer >= 0; layer--) {
-        posH -= n.nbHidden[layer];
-        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+    for (int layer = n->nbLayers - 2; layer >= 0; layer--) {
+        posH -= n->nbHidden[layer];
+        wPos -= n->nbHidden[layer] * n->nbHidden[layer + 1];
 
-        for (int pSource = posH; pSource < posH + n.nbHidden[layer]; pSource++) {
-            int pDest = posH + n.nbHidden[layer];
-            int pBlock = posH + n.nbHidden[layer] + n.nbHidden[layer + 1];
+        for (int pSource = posH; pSource < posH + n->nbHidden[layer]; pSource++) {
+            int pDest = posH + n->nbHidden[layer];
+            int pBlock = posH + n->nbHidden[layer] + n->nbHidden[layer + 1];
 
             for (; pDest < pBlock; pDest++) {
-                float toUp = costH[pDest] * primeOfAct(n.neuHidden[pDest]) * n.neuHidden[pSource];
-                n.weights[wPos++] += toUp * rate;
+                float toUp = costH[pDest] * primeOfAct(n->neuHidden[pDest]) * n->neuHidden[pSource];
+                n->weights[wPos++] += toUp * rate;
             }
         }
 
-        wPos -= n.nbHidden[layer] * n.nbHidden[layer + 1];
+        wPos -= n->nbHidden[layer] * n->nbHidden[layer + 1];
     }
     
     // Input to Hidden
     wPos = 0;
-    for (int pos = 0; pos < n.nbInputs; pos++) {
-        for (int posD = 0; posD < n.nbHidden[0]; posD++) {
-            float toUp = costH[posD] * primeOfAct(n.neuHidden[posD]) * inp[pos];
-            n.weights[wPos++] += toUp * rate;
+    for (int pos = 0; pos < n->nbInputs; pos++) {
+        for (int posD = 0; posD < n->nbHidden[0]; posD++) {
+            float toUp = costH[posD] * primeOfAct(n->neuHidden[posD]) * inp[pos];
+            n->weights[wPos++] += toUp * rate;
         }
     }
     
     // Update biais 
     
     // Output Layer
-    for (int pos = 0; pos < n.nbOutput; pos++) {
-        float toUp = costOutp[pos] * primeOfAct(n.neuOutput[pos]);
-        n.biais[n.ttHidden + pos] += toUp * rate;
+    for (int pos = 0; pos < n->nbOutput; pos++) {
+        float toUp = costOutp[pos] * primeOfAct(n->neuOutput[pos]);
+        n->biais[n->ttHidden + pos] += toUp * rate;
     }
 
     // Hidden Layers
-    for (posH = 0; posH < n.ttHidden; posH++) {
-        float toUp = costH[posH] * primeOfAct(n.neuHidden[posH]); 
-        n.biais[posH] += toUp * rate;
+    for (posH = 0; posH < n->ttHidden; posH++) {
+        float toUp = costH[posH] * primeOfAct(n->neuHidden[posH]); 
+        n->biais[posH] += toUp * rate;
     }
 
     free(costH);
@@ -302,14 +304,14 @@ float error(float a, float b) {
     return 0.5 * (a - b) * (a - b);
 }
 
-float NNerror(neuNet n, float* target) {
+float NNerror(neuNet *n, float* target) {
     float sum = 0.0f;
-    for (int p = 0; p < n.nbOutput; p++)
-        sum += error(n.neuOutput[p], target[p]);
+    for (int p = 0; p < n->nbOutput; p++)
+        sum += error(n->neuOutput[p], target[p]);
     return sum;
 }
 
-float NNTrain(neuNet n, float* inp, float* targ, float update) {
+float NNTrain(neuNet* n, float* inp, float* targ, float update) {
     forwardPropagation(n, inp);
     backPropagation(n, inp, targ, update);
     return NNerror(n, targ);
