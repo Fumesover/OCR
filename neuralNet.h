@@ -25,15 +25,12 @@ neuNet;
 // for test purposes
 int NNmain(void);
 
-// init a NN with 
+// Create a NN 
 neuNet NNinit(const int nbInputs, const int nbLayers,
                 int *nbHidden, const int nbOutput);
 
 // random init
 void neuNetRandom(neuNet nn);
-
-// Random Float funtion :
-float randF();
 
 // Forward Propagation
 void forwardPropagation(neuNet n, float* inp);
@@ -43,10 +40,6 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
                          float* weights,  const int wStart,
                          float* biais,    const int bStart,
                          float* destination, const int dStart, const int dEnd);
-
-// Sigmoid 
-float activation(float f);
-float primeOfAct(float f);
 
 /* Sigmoid = 1 / (1 + e ^ -x)
  * 
@@ -63,10 +56,10 @@ float NNTrain(neuNet n, float* inp, float* targ, float update);
 
 // Compute error
 float NNerror(neuNet n, float* target);
-float error(float a, float b);
 
 // Free NN
 void freeNeuNet(neuNet n);
+
 // load NN 
 
 // save NN 

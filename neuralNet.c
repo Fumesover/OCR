@@ -74,18 +74,18 @@ neuNet NNinit(const int nbInputs, const int nbLayers,
     
     neuNet nn;
     
-    // Informations 
+    // Statics 
     nn.nbInputs = nbInputs;
     nn.nbHidden = nbHidden;
     nn.nbOutput = nbOutput;
     nn.nbLayers = nbLayers;
     
-    // Calcul nb neurones caches
+    // Compute count hidden neurons
     nn.ttHidden = 0;
     for (int p = 0; p < nbLayers; p++) 
         nn.ttHidden += nbHidden[p];
 
-    // Calcul nb poids
+    // Compute count weights
     int p = 0;
     nn.nbWeights = nbInputs * nbHidden[p];
     for(; p < nbLayers - 1; p++) 
@@ -93,18 +93,20 @@ neuNet NNinit(const int nbInputs, const int nbLayers,
     
     nn.nbWeights += nbHidden[p] * nbOutput;
 
-    // Calcul nb biais
+    // Compute count biais
     nn.nbBiais = nbOutput + nn.ttHidden;
     
-    // Initialisations des tableaux
-    nn.weights = malloc(nn.nbWeights * sizeof(*nn.weights));
-    nn.biais = malloc(nn.nbBiais * sizeof(*nn.biais));
-    
-    // Initialisation des neurones
+    // Init arrays
+    nn.weights   = malloc(nn.nbWeights * sizeof(*nn.weights));
+    nn.biais     = malloc(nn.nbBiais * sizeof(*nn.biais));
     nn.neuHidden = malloc(nn.ttHidden * sizeof(*nn.neuHidden));
     nn.neuOutput = malloc(nn.nbOutput * sizeof(*nn.neuOutput));
 
     return nn; 
+}
+
+float randF() {
+    return rand() / (float) RAND_MAX;
 }
 
 void neuNetRandom(neuNet nn) {
@@ -117,8 +119,13 @@ void neuNetRandom(neuNet nn) {
         nn.biais[p] = randF();
 }
 
-float randF() {
-    return rand() / (float) RAND_MAX;
+float activation(float inp) { 
+    // Sigmoid :
+    return 1.0f / (1.0f + expf(-inp));;
+}
+
+float primeOfAct(float act) {
+    return act * (1 - act);
 }
 
 void forwardPropagation(neuNet n, float* inp) {
@@ -176,14 +183,7 @@ void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
     }
 }
 
-float activation(float inp) { 
-    // Sigmoid :
-    return 1.0f / (1.0f + expf(-inp));;
-}
 
-float primeOfAct(float act) {
-    return act * (1 - act);
-}
 
 void freeNeuNet(neuNet n) {
     free(n.neuHidden);
