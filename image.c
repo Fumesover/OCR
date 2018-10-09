@@ -11,9 +11,9 @@ void DisplayImage(SDL_Surface *image)
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, 0);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 1200, 0);
 
-    SDL_Rect dest = { 640/2 - image->w/2,480/2 - image->h/2, 0, 0};
+    SDL_Rect dest = { 1600/2 - image->w/2,1200/2 - image->h/2, 0, 0};
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
@@ -29,16 +29,19 @@ void LoadImage(SDL_Surface *image)
 {
 	int i = 0;
 	int h = 0, w = 0;
-    Pixel **pixels = NULL;
+    Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
+    int **matrix = NULL; // Receives 0 and 1 considering the color (black/white) of the pixels of the image
 
 	// Init matrix
 	h = image->h;
 	w = image->w;
 	pixels = malloc(sizeof(Pixel*) * h);
+	matrix = malloc(sizeof(Pixel*) * h);
 	
 	for (i = 0; i < h; i++)
 	{
 		pixels[i] = malloc(sizeof(Pixel) * w);
+        matrix[i] = malloc(sizeof(Pixel) * w);
 	}
 
     // Fill the martix
@@ -49,13 +52,20 @@ void LoadImage(SDL_Surface *image)
 	DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
-	Otsu(pixels, h, w);
+	int threshold = Otsu(pixels, h, w);
+	Binarization(pixels, h, w, threshold);
     DisplayImage(MatrixToSurface(pixels, h, w));
 
+    BinarizeMatrix(pixels, matrix, h, w);
+
     for (int i = 0; i < h; i++)
+    {
         free(pixels[i]);
+        free(matrix[i]);
+    }
 
     free(pixels);
+    free(matrix);
 }
 
 // TEST THE MATRIX
@@ -75,13 +85,15 @@ void PrintPixels(Pixel **matrix, int h, int w)
 
 void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
 {
-    long x = 0, y = 0;
+    SDL_LockSurface(image);
 
-    for (x = 0; x < h; x++)
+    int x = 0, y = 0;
+
+    for (y = 0; y < h; y++)
     {
-        for (y = 0; y < w; y++)
+        for (x = 0; x < w; x++)
         {
-            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[x][y].r, &pixels[x][y].g, &pixels[x][y].b);
+            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[y][x].r, &pixels[y][x].g, &pixels[y][x].b);
         }
     }
 }
@@ -94,23 +106,27 @@ Uint32 GetPixel(SDL_Surface *surface, int x, int y)
     Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
     switch(bpp) {
-    case 1:
-        return *p;
+        case 1:
+            return *p;
+            break;
 
-    case 2:
-        return *(Uint16 *)p;
+        case 2:
+            return *(Uint16 *)p;
+            break;
 
-    case 3:
-        if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-            return p[0] << 16 | p[1] << 8 | p[2];
-        else
-            return p[0] | p[1] << 8 | p[2] << 16;
+        case 3:
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
+                return p[0] << 16 | p[1] << 8 | p[2];
+            else
+                return p[0] | p[1] << 8 | p[2] << 16;
+            break;
 
-    case 4:
-        return *(Uint32 *)p;
+        case 4:
+            return *(Uint32 *)p;
+            break;
 
-    default:
-        return 0;       /* shouldn't happen, but avoids warnings */
+        default:
+            return 0;       /* shouldn't happen, but avoids warnings */
     }
 }
 
@@ -165,7 +181,7 @@ void GreyScale(Pixel **pixels, int h, int w)
 }
 
 // Returns the thresholded result of Pixel matrix
-void Otsu(Pixel **pixels, int h, int w)
+int Otsu(Pixel **pixels, int h, int w)
 {
         /**** HISTOGRAM ****/
     double probability[256], omega[256], mean[256], sigma[256];
@@ -218,8 +234,7 @@ void Otsu(Pixel **pixels, int h, int w)
         }
     }
 
-    printf("Threshold : %d\n Total of pixel : %d", threshold, total);
-    Binarization(pixels,h, w, threshold);
+    return threshold;
 }
 
 // Binarize the matrix considering the threshold
@@ -237,6 +252,21 @@ void Binarization(Pixel **pixels, int h, int w, int threshold)
                 pixels[i][j] = (Pixel){.r = 255, .g = 255, . b = 255};
             else
                 pixels[i][j] = (Pixel){.r = 0, .g = 0, . b = 0};
+        }
+    }
+}
+
+void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w)
+{
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            if (pixels[i][j].r == 0)
+                binarized[i][j] = 0;
+
+            else
+                binarized[i][j] = 1;
         }
     }
 }
@@ -274,7 +304,7 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
         for (int j = 0; j < w; j++)
         {
             pixel = alpha << 24 | pixels[i][j].r << 16 | pixels[i][j].g << 8 | pixels[i][j].b;
-            PutPixel(surface, i, j, pixel);
+            PutPixel(surface, j, i, pixel);
         }
     }
 
