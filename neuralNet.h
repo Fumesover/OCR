@@ -22,9 +22,6 @@ typedef struct {
 } 
 neuNet;
 
-// for test purposes
-int NNmain(void);
-
 // Create a NN 
 neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int *nbHidden, const int nbOutput);

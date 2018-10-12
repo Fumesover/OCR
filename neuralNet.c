@@ -5,57 +5,7 @@
 #include <time.h>
 #include <math.h>
 
-int NNmain(void) {
-    // INIT
-    int   nbInp = 2;
-    float inpVals[] = {1, 1};
-    int   nbHidden = 1;
-    int   hidden[] = {3};
-    int   nbOut = 1;
-    float target[] = {0};
 
-    float updateRate = 0.1;
-
-    neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
-    
-    // RANDOMISE
-    neuNetRandom(n);
-    
-    float err;
-    int itteration = 0;
-    float tests[4][3] = {
-        {1.0f,1.0f,0.0f},
-        {0.0f,0.0f,0.0f},
-        {1.0f,0.0f,1.0f},
-        {0.0f,1.0f,1.0f},
-    };
-    int testPos = 0;
-    int testLen = 4;
-
-    do {
-        err = 0.0f;
-        for (testPos = 0; testPos < testLen; testPos++) {
-            inpVals[0] = tests[testPos][0];
-            inpVals[1] = tests[testPos][1];
-            target[0]  = tests[testPos][2];
-
-            forwardPropagation(n, inpVals);
-            backPropagation(n, inpVals, target, updateRate);
-
-            err += NNerror(n, target);
-            printf("  n°%d => error : %f vals : %d xor %d => %d \n", 
-                    itteration++, NNerror(n, target), (int) tests[testPos][0], 
-                    (int)tests[testPos][1], (int) tests[testPos][2]);
-        }
-
-        printf("n°%d : batch error : %f\n", itteration / testLen, err);
-
-    } while (err > 0.1f);
-    
-    freeNeuNet(n);
-
-    return 0;
-}
 
 /* Nb hidden = 
  *              < 2 * nbInputs
@@ -68,8 +18,8 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int* nbHidden, const int nbOutput){
     
     if (nbLayers < 1) {
-        printf("Error : NeuralNetwork need at least one hidden layer");
-        // return NULL; // < TODO : gerer fail
+        printf("Error : NeuralNetwork need at least one hidden layer\n");
+        return NULL;
     }
     
     neuNet* nn = malloc(sizeof(neuNet));
@@ -246,8 +196,7 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
     wPos = n->nbWeights - n->nbHidden[n->nbLayers - 1] * n->nbOutput;
     for (int pos = n->ttHidden - n->nbHidden[n->nbLayers - 1]; pos < n->ttHidden; pos++) {
         for (int posD = 0; posD < n->nbOutput; posD++) {
-            float toUp = costOutp[posD] * primeOfAct(n->neuOutput[posD])
-                                          * n->neuHidden[pos];
+            float toUp = costOutp[posD] * primeOfAct(n->neuOutput[posD]) * n->neuHidden[pos];
             n->weights[wPos++] += toUp * rate;
         }
     }
