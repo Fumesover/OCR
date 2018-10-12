@@ -19,7 +19,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(1000);
+    SDL_Delay(3000);
 
 
     /* Free the allocated surface */
@@ -32,9 +32,8 @@ void LoadImage(SDL_Surface *image)
 	int i = 0;
 	int h = 0, w = 0;
     Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
-    int **matrix = NULL; // Receives 0 and 1 considering the color (black/white) of the pixels of the image
-
-	// Init matrix
+    int **matrix = NULL; // Receives 0 and 1 considering the color of pixel
+    // Init matrix
 	h = image->h;
 	w = image->w;
 	pixels = malloc(sizeof(Pixel*) * h);
@@ -51,7 +50,7 @@ void LoadImage(SDL_Surface *image)
 
 	//Greyscale
 	GreyScale(pixels, h, w);
-	//DisplayImage(MatrixToSurface(pixels, h, w));
+	DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
 	int threshold = Otsu(pixels, h, w);
@@ -107,7 +106,8 @@ void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
     {
         for (x = 0; x < w; x++)
         {
-            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[y][x].r, &pixels[y][x].g, &pixels[y][x].b);
+            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[y][x].r, 
+            &pixels[y][x].g, &pixels[y][x].b);
         }
     }
 }
@@ -186,7 +186,8 @@ void GreyScale(Pixel **pixels, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            grey = (Uint8)(0.2126 * pixels[i][j].r + 0.7152 * pixels[i][j].g + 0.0722 * pixels[i][j].b);
+            grey = (Uint8)(0.2126 * pixels[i][j].r + 0.7152 * pixels[i][j].g 
+            + 0.0722 * pixels[i][j].b);
             pixels[i][j].r = grey;
             pixels[i][j].g = grey;
             pixels[i][j].b = grey;
@@ -254,14 +255,12 @@ int Otsu(Pixel **pixels, int h, int w)
 // Binarize the matrix considering the threshold
 void Binarization(Pixel **pixels, int h, int w, int threshold)
 {
-    int r, g, b;
+    int r;
     for (int i = 0; i < h; i++)
     {
         for (int j = 0; j < w; j++)
         {
             r = pixels[i][j].r;
-            g = pixels[i][j].g;
-            b = pixels[i][j].b;
             if (r > threshold)
                 pixels[i][j] = (Pixel){.r = 255, .g = 255, . b = 255};
             else
@@ -306,7 +305,8 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
         amask = 0xff000000;
     #endif
 
-    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, rmask, gmask, bmask, amask);
+    surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 
+                                   rmask, gmask, bmask, amask);
     if(surface == NULL) {
         fprintf(stderr, "CreateRGBSurface failed: %s\n", SDL_GetError());
         exit(1);
@@ -317,7 +317,8 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            pixel = alpha << 24 | pixels[i][j].r << 16 | pixels[i][j].g << 8 | pixels[i][j].b;
+            pixel = alpha << 24 | pixels[i][j].r << 16 | pixels[i][j].g << 8 
+                                | pixels[i][j].b;
             PutPixel(surface, j, i, pixel);
         }
     }
