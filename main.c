@@ -5,6 +5,7 @@
 #include <SDL2/SDL_image.h>
 #include "image.h"
 #include "interface.h"
+#include "matrix.h"
 
 int main()
 {
@@ -17,11 +18,13 @@ int main()
         fprintf(stderr, "Couldn't load %s: %s\n", path_image, SDL_GetError());
         return 1;
     }
-    
+
     //DisplayImage(image);
 
 	// Return the corresponding Pixel matrix of the image
 	LoadImage(image);
+
+
 
     return 0;
 }

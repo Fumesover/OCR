@@ -4,6 +4,7 @@
 #include <SDL2/SDL_image.h>
 #include <math.h>
 #include "image.h"
+#include "matrix.h"
 
 
 void DisplayImage(SDL_Surface *image)
@@ -57,6 +58,8 @@ void LoadImage(SDL_Surface *image)
     DisplayImage(MatrixToSurface(pixels, h, w));
 
     BinarizeMatrix(pixels, matrix, h, w);
+
+
 
     for (int i = 0; i < h; i++)
     {
@@ -309,4 +312,16 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     }
 
     return surface;
+}
+
+// Creates a histogram of the number of black pixel for each line of the matrix
+void MatrixHistogram(int **matrix, int **Histogram, int h, int w)
+{
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+
+        }
+    }
 }

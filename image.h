@@ -19,5 +19,6 @@ int Otsu(Pixel **pixels, int h, int w);
 void Binarization(Pixel **pixels, int h, int w, int threshold);
 void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w);
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w);
+void MatrixHistogram(int **matrix, int **Histogram, int h, int w);
 
 #endif
