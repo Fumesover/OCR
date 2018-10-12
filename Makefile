@@ -32,9 +32,9 @@ xor: xor.o neuralNet.o
 
 .PHONY: clean
 clean:
-	${RM} *.o      # remove object files
-	${RM} *.d      # remove dependency files
-	${RM} main	  # remove main program
+	${RM} *.o      	  # remove object files
+	${RM} *.d         # remove dependency files
+	${RM} main xor	  # remove main program
 	${RM} vgcore.*
 
 -include ${DEP}
