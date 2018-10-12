@@ -27,3 +27,19 @@ void InitMatrix(int **matrix, int h, int w)
         }
     }
 }
+
+void InitList(int *list, int h)
+{
+    for (int i = 0; i < h; i++)
+    {
+        list[i] = 0;
+    }
+}
+
+void PrintList(int *list, int h)
+{
+    for (int i = 0; i < h; i++)
+    {
+        printf("(%d)=%d, ", i, list[i]);
+    }
+}

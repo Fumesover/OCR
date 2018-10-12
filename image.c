@@ -32,17 +32,23 @@ void LoadImage(SDL_Surface *image)
 	int h = 0, w = 0;
     Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
     int **matrix = NULL; // Receives 0 and 1 considering the color (black/white) of the pixels of the image
+    int *histo = NULL;
+    int **result = NULL; // Contains matrix of character matrixes
 
 	// Init matrix
 	h = image->h;
 	w = image->w;
 	pixels = malloc(sizeof(Pixel*) * h);
-	matrix = malloc(sizeof(Pixel*) * h);
-	
+	matrix = malloc(sizeof(int*) * h);
+    result = malloc(sizeof(int*) * h);
+
+    histo = malloc(sizeof(int) * h);
+
 	for (i = 0; i < h; i++)
 	{
 		pixels[i] = malloc(sizeof(Pixel) * w);
-        matrix[i] = malloc(sizeof(Pixel) * w);
+        matrix[i] = malloc(sizeof(int) * w);
+        result[i] = malloc(sizeof(int*) * w);
 	}
 
     // Fill the martix
@@ -50,16 +56,19 @@ void LoadImage(SDL_Surface *image)
 
 	//Greyscale
 	GreyScale(pixels, h, w);
-	DisplayImage(MatrixToSurface(pixels, h, w));
+	//DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
 	int threshold = Otsu(pixels, h, w);
 	Binarization(pixels, h, w, threshold);
-    DisplayImage(MatrixToSurface(pixels, h, w));
+    //DisplayImage(MatrixToSurface(pixels, h, w));
 
     BinarizeMatrix(pixels, matrix, h, w);
 
+    InitList(histo, h);
 
+    MatrixHistogram(matrix, histo, h, w);
+    PrintList(histo, h);
 
     for (int i = 0; i < h; i++)
     {
@@ -69,21 +78,7 @@ void LoadImage(SDL_Surface *image)
 
     free(pixels);
     free(matrix);
-}
-
-// TEST THE MATRIX
-// Prints the RGB values og the matrix of size h * w
-void PrintPixels(Pixel **matrix, int h, int w)
-{
-    for (int x = 0; x < h; x++)
-    {
-        for (int y = 0; y < w; y++)
-        {
-            printf("(r: %u, g: %u, b: %u) ", matrix[x][y].r, matrix[x][y].g, matrix[x][y].b);
-        }
-
-        printf("\n");
-    }
+    free(histo);
 }
 
 void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
@@ -315,13 +310,14 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
 }
 
 // Creates a histogram of the number of black pixel for each line of the matrix
-void MatrixHistogram(int **matrix, int **Histogram, int h, int w)
+void MatrixHistogram(int **matrix, int *histogram, int h, int w)
 {
     for (int i = 0; i < h; i++)
     {
         for (int j = 0; j < w; j++)
         {
-
+            if (matrix[i][j] == 0)
+                histogram[i]++;
         }
     }
 }
