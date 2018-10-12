@@ -32,23 +32,17 @@ void LoadImage(SDL_Surface *image)
 	int h = 0, w = 0;
     Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
     int **matrix = NULL; // Receives 0 and 1 considering the color (black/white) of the pixels of the image
-    int *histo = NULL;
-    int **result = NULL; // Contains matrix of character matrixes
 
 	// Init matrix
 	h = image->h;
 	w = image->w;
 	pixels = malloc(sizeof(Pixel*) * h);
 	matrix = malloc(sizeof(int*) * h);
-    result = malloc(sizeof(int*) * h);
-
-    histo = malloc(sizeof(int) * h);
 
 	for (i = 0; i < h; i++)
 	{
 		pixels[i] = malloc(sizeof(Pixel) * w);
         matrix[i] = malloc(sizeof(int) * w);
-        result[i] = malloc(sizeof(int*) * w);
 	}
 
     // Fill the martix
@@ -65,10 +59,7 @@ void LoadImage(SDL_Surface *image)
 
     BinarizeMatrix(pixels, matrix, h, w);
 
-    InitList(histo, h);
-
-    MatrixHistogram(matrix, histo, h, w);
-    PrintList(histo, h);
+    Segmentation(matrix, h, w);
 
     for (int i = 0; i < h; i++)
     {
@@ -78,6 +69,26 @@ void LoadImage(SDL_Surface *image)
 
     free(pixels);
     free(matrix);
+
+}
+
+void Segmentation(int **matrix, int h, int w)
+{
+    int *histo = NULL;
+    List list;
+
+    histo = malloc(sizeof(int) * h);
+    list.data = 0;
+    list.next = NULL;
+
+    InitList(histo, h);
+
+    MatrixHHistogram(matrix, histo, h, w);
+    PrintList(histo, h);
+
+    CutInLine(matrix, histo, list, h,  w);
+    PrintMatrix(matrix, h,  w);
+
     free(histo);
 }
 
@@ -309,15 +320,33 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     return surface;
 }
 
-// Creates a histogram of the number of black pixel for each line of the matrix
-void MatrixHistogram(int **matrix, int *histogram, int h, int w)
+void CutInLine(int **matrix, int *histogram, List list,  int h, int w)
 {
-    for (int i = 0; i < h; i++)
+    int i = 0, x1, x2;
+    int *histoW = NULL;
+
+    while (i < h)
     {
-        for (int j = 0; j < w; j++)
+        if (histogram[i] == 0)
         {
-            if (matrix[i][j] == 0)
-                histogram[i]++;
+            x1 = i - 1;
+
+            while (histogram[i] == 0)
+                i++;
+
+            x2 = i + 1;
+
+            histoW = malloc(sizeof(int) * x2 - x1);
+            MatrixWHistogram(matrix, histoW, h, w);
+            free(histoW);
         }
+
+        else
+            i++;
     }
+}
+
+void CutInChar(int **matrix, int *histogram, List list,  int h, int w)
+{
+
 }

@@ -40,6 +40,32 @@ void PrintList(int *list, int h)
 {
     for (int i = 0; i < h; i++)
     {
-        printf("(%d)=%d, ", i, list[i]);
+        printf("(%d)=%d\n, ", i, list[i]);
+    }
+}
+
+// Creates a histogram of the number of black pixel for each line of the matrix
+void MatrixHHistogram(int **matrix, int *histogram, int h, int w)
+{
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            if (matrix[i][j] == 0)
+                histogram[i]++;
+        }
+    }
+}
+
+// Creates a histogram of the number of black pixel for each column of the matrix
+void MatrixWHistogram(int **matrix, int *histogram, int h, int w)
+{
+    for (int i = 0; i < w; i++)
+    {
+        for (int j = 0; j < h; j++)
+        {
+            if (matrix[i][j] == 0)
+                histogram[i]++;
+        }
     }
 }
