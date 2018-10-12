@@ -1,6 +1,8 @@
 #ifndef IMAGE_H
 #define IMAGE_H
 
+#include "queue.h"
+
 typedef struct Pixel Pixel;
 struct Pixel {
     Uint8 r;
@@ -19,7 +21,7 @@ void Binarization(Pixel **pixels, int h, int w, int threshold);
 void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w);
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w);
 void Segmentation(int **matrix, int h, int w);
-void CutInLine(int **matrix, int *histogram, List list, int h, int w);
-List CutInChar(int **matrix, int *histogram, List list, int h, int w);
+void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w);
+void CutInChar(int **matrix, int *histogram, Queue *queue, int h, int w);
 
 #endif

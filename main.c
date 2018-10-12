@@ -6,6 +6,7 @@
 #include "image.h"
 #include "interface.h"
 #include "matrix.h"
+#include "queue.h"
 
 int main()
 {

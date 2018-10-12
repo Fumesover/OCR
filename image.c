@@ -78,18 +78,20 @@ void LoadImage(SDL_Surface *image)
 void Segmentation(int **matrix, int h, int w)
 {
     int *histo = NULL;
-    List list;
-
     histo = malloc(sizeof(int) * h);
-    list.data = 0;
-    list.next = NULL;
+
+    Queue *queue = NULL;
+    Elt *first = NewElt();
+    queue = malloc(sizeof(*queue));
+
+    queue->first = first;
 
     InitList(histo, h);
 
     MatrixHHistogram(matrix, histo, h, w);
     //PrintList(histo, h);
 
-    CutInLine(matrix, histo, list, h,  w);
+    CutInLine(matrix, histo, queue, h,  w);
     //PrintMatrix(matrix, h,  w);
 
     free(histo);
@@ -323,15 +325,11 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     return surface;
 }
 
-void CutInLine(int **matrix, int *histogram, List list, int h, int w)
+void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 {
     int i = 0, x1, x2;
     int *histoW = NULL;
     int **eol = NULL;
-
-    List new;
-    new.data = 0;
-    new.next = NULL;
 
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
@@ -356,10 +354,7 @@ void CutInLine(int **matrix, int *histogram, List list, int h, int w)
 
 
             //Add eol in list
-            list.data = eol;
-            list.next = &new;
-
-            list = new;
+            Enqueue(queue, eol);
 
             //Free memory
             free(histoW);
@@ -373,7 +368,7 @@ void CutInLine(int **matrix, int *histogram, List list, int h, int w)
     free(eol);
 }
 
-List CutInChar(int **matrix, int *histogram, List list,  int h, int w)
+void CutInChar(int **matrix, int *histogram, Queue *queue,  int h, int w)
 {
 
 }

@@ -23,7 +23,7 @@ void Enqueue(Queue *queue, int **data)
         queue->first = new;
 }
 
-Elt *InitElt()
+Elt *NewElt()
 {
     Elt *new = malloc(sizeof(*new));
     new->data = 0;
