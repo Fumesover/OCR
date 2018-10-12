@@ -5,6 +5,6 @@
 
 int main(void)
 {
-    return NNmain();
+
 }
 
