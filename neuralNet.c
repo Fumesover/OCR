@@ -59,7 +59,7 @@ float randF() {
     return rand() / (float) RAND_MAX;
 }
 
-void neuNetRandom(neuNet* nn) {
+void NNrand(neuNet* nn) {
     srand(time(NULL));
     
     for (int p = 0; p < nn->nbWeights; p++) 
@@ -76,6 +76,23 @@ float activation(float inp) {
 
 float primeOfAct(float act) {
     return act * (1 - act);
+}
+
+void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
+                         float* weights,  const int wStart,
+                         float* biais,    const int bStart,
+                         float* destination, const int dStart, const int dEnd) {
+    int nbDest = dEnd - dStart;
+    int nbPrev = pEnd - pStart;
+
+    for (int d = 0; d < nbDest; d++) {
+        float sum = 0.0f;
+
+        for (int p = 0; p < nbPrev; p++) 
+            sum += previous[p + pStart] * weights[p * nbDest + d + wStart];
+        
+        destination[dStart + d] = activation(sum + biais[bStart + d]);  
+    }
 }
 
 void forwardPropagation(neuNet* n, float* inp) {
@@ -116,26 +133,7 @@ void forwardPropagation(neuNet* n, float* inp) {
                         n->neuOutput, 0, n->nbOutput);
 }
 
-void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
-                         float* weights,  const int wStart,
-                         float* biais,    const int bStart,
-                         float* destination, const int dStart, const int dEnd) {
-    int nbDest = dEnd - dStart;
-    int nbPrev = pEnd - pStart;
-
-    for (int d = 0; d < nbDest; d++) {
-        float sum = 0.0f;
-
-        for (int p = 0; p < nbPrev; p++) 
-            sum += previous[p + pStart] * weights[p * nbDest + d + wStart];
-        
-        destination[dStart + d] = activation(sum + biais[bStart + d]);  
-    }
-}
-
-
-
-void freeNeuNet(neuNet *n) {
+void NNfree(neuNet *n) {
     free(n->neuHidden);
     free(n->neuOutput);
     
@@ -264,5 +262,10 @@ float NNTrain(neuNet* n, float* inp, float* targ, float update) {
     forwardPropagation(n, inp);
     backPropagation(n, inp, targ, update);
     return NNerror(n, targ);
+}
+
+const float* NNinput(neuNet* n, float* inp) {
+    forwardPropagation(n, inp);
+    return n->neuOutput;
 }
 

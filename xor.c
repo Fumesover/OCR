@@ -20,7 +20,7 @@ int main(void) {
         return 1;
 
     // RANDOMISE
-    neuNetRandom(n);
+    NNrand(n);
     
     float err;
     int itteration = 0;
@@ -39,13 +39,12 @@ int main(void) {
             inpVals[0] = tests[testPos][0];
             inpVals[1] = tests[testPos][1];
             target[0]  = tests[testPos][2];
-
-            forwardPropagation(n, inpVals);
-            backPropagation(n, inpVals, target, updateRate);
-
-            err += NNerror(n, target);
+            
+            float errthis = NNTrain(n, inpVals, target, updateRate);
+            err += errthis;
+            
             printf("  n°%d => error : %f vals : %d xor %d => %d \n", 
-                    itteration++, NNerror(n, target), (int) tests[testPos][0], 
+                    itteration++, errthis, (int) tests[testPos][0], 
                     (int)tests[testPos][1], (int) tests[testPos][2]);
         }
 
@@ -53,7 +52,7 @@ int main(void) {
  
     } while (err > 0.1f);
     
-    freeNeuNet(n);
+    NNfree(n);
 
     return 0;
 }

@@ -26,36 +26,20 @@ neuNet;
 neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int *nbHidden, const int nbOutput);
 
-// random init
-void neuNetRandom(neuNet* nn);
+// Init nerwork with random weights and biais 
+void NNrand(neuNet* nn);
 
-// Forward Propagation
-void forwardPropagation(neuNet* n, float* inp);
-
-// One Layer Propagation
-void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
-                         float* weights,  const int wStart,
-                         float* biais,    const int bStart,
-                         float* destination, const int dStart, const int dEnd);
-
-/* Sigmoid = 1 / (1 + e ^ -x)
- * 
- * (Regarder SoftMax function (cf livret rose))
- * (Regarder aussi ReLU : max(0,x) 
- *    ^ plus proche du naturel MAIS besoin de pronfondeur)
-*/
-
-// Back Propagation
-void backPropagation(neuNet* n, float* inp, float* targ, float rate);
-
-// Train with one set
+// Train with one set, return output error
 float NNTrain(neuNet* n, float* inp, float* targ, float update);
+
+// Compute output of neural network with specific input 
+const float* NNinput(neuNet* n, float* inp);
 
 // Compute error
 float NNerror(neuNet* n, float* target);
 
 // Free NN
-void freeNeuNet(neuNet* n);
+void NNfree(neuNet* n);
 
 // load NN 
 
