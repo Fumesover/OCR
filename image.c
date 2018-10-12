@@ -5,6 +5,7 @@
 #include <math.h>
 #include "image.h"
 #include "matrix.h"
+#include "queue.h"
 
 
 void DisplayImage(SDL_Surface *image)
@@ -59,12 +60,14 @@ void LoadImage(SDL_Surface *image)
 
     BinarizeMatrix(pixels, matrix, h, w);
 
+    //PrintMatrix(matrix, h, w);
+
     Segmentation(matrix, h, w);
 
-    for (int i = 0; i < h; i++)
+    for (int j = 0; j < h; j++)
     {
-        free(pixels[i]);
-        free(matrix[i]);
+        free(pixels[j]);
+        free(matrix[j]);
     }
 
     free(pixels);
@@ -84,10 +87,10 @@ void Segmentation(int **matrix, int h, int w)
     InitList(histo, h);
 
     MatrixHHistogram(matrix, histo, h, w);
-    PrintList(histo, h);
+    //PrintList(histo, h);
 
     CutInLine(matrix, histo, list, h,  w);
-    PrintMatrix(matrix, h,  w);
+    //PrintMatrix(matrix, h,  w);
 
     free(histo);
 }
@@ -320,33 +323,57 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     return surface;
 }
 
-void CutInLine(int **matrix, int *histogram, List list,  int h, int w)
+void CutInLine(int **matrix, int *histogram, List list, int h, int w)
 {
     int i = 0, x1, x2;
     int *histoW = NULL;
+    int **eol = NULL;
+
+    List new;
+    new.data = 0;
+    new.next = NULL;
+
+    eol = malloc(sizeof(int*) * 1);
+    eol[0] = malloc(sizeof(int) * 1);
+    eol[0][0] = 127;
 
     while (i < h)
     {
-        if (histogram[i] == 0)
+        if (histogram[i] > 0)
         {
             x1 = i - 1;
 
-            while (histogram[i] == 0)
+            while (histogram[i] > 0)
                 i++;
 
             x2 = i + 1;
 
-            histoW = malloc(sizeof(int) * x2 - x1);
-            MatrixWHistogram(matrix, histoW, h, w);
+            //Create histogram
+            histoW = malloc(sizeof(int) * w);
+            MatrixWHistogram(matrix, histoW, x1, x2, w);
+
+            //Cut line in char
+
+
+            //Add eol in list
+            list.data = eol;
+            list.next = &new;
+
+            list = new;
+
+            //Free memory
             free(histoW);
         }
 
         else
             i++;
     }
+
+    free(eol[0]);
+    free(eol);
 }
 
-void CutInChar(int **matrix, int *histogram, List list,  int h, int w)
+List CutInChar(int **matrix, int *histogram, List list,  int h, int w)
 {
 
 }

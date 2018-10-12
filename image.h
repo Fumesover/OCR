@@ -8,12 +8,6 @@ struct Pixel {
     Uint8 b;
 };
 
-typedef struct List List;
-struct List {
-    int **data;
-    List *next;
-};
-
 void DisplayImage(SDL_Surface *image);
 void LoadImage(SDL_Surface *image);
 void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w);
@@ -25,7 +19,7 @@ void Binarization(Pixel **pixels, int h, int w, int threshold);
 void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w);
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w);
 void Segmentation(int **matrix, int h, int w);
-void CutInLine(int **matrix, int *histogram, List list,  int h, int w);
-void CutInChar(int **matrix, int *histogram, List list,  int h, int w);
+void CutInLine(int **matrix, int *histogram, List list, int h, int w);
+List CutInChar(int **matrix, int *histogram, List list, int h, int w);
 
 #endif
