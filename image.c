@@ -19,7 +19,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(1500);
+    SDL_Delay(300);
 
 
     /* Free the allocated surface */
@@ -80,10 +80,8 @@ void Segmentation(int **matrix, int h, int w)
     histo = malloc(sizeof(int) * h);
 
     Queue *queue = NULL;
-    Elt *first = NewElt();
     queue = malloc(sizeof(*queue));
-
-    queue->first = first;
+    queue->first = NULL;
 
     InitList(histo, h);
 
@@ -188,8 +186,8 @@ void GreyScale(Pixel **pixels, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            grey = (Uint8)(0.2126 * pixels[i][j].r + 0.7152 * pixels[i][j].g 
-            + 0.0722 * pixels[i][j].b);
+            grey = (Uint8)(0.212 * pixels[i][j].r + 0.715 * pixels[i][j].g
+                           + 0.072 * pixels[i][j].b);
             pixels[i][j].r = grey;
             pixels[i][j].g = grey;
             pixels[i][j].b = grey;
@@ -278,10 +276,10 @@ void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w)
         for (int j = 0; j < w; j++)
         {
             if (pixels[i][j].r == 0)
-                binarized[i][j] = 0;
+                binarized[i][j] = 1;
 
             else
-                binarized[i][j] = 1;
+                binarized[i][j] = 0;
         }
     }
 }
@@ -333,27 +331,26 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     int i = 0, x1, x2;
     int *histoW = NULL;
     int **eol = NULL;
+    Tuple *data = NewTuple();
+    data->height = 1;
+    data->width = 1;
 
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
     eol[0][0] = 10;
 
+    data->data = eol;
+
     while (i < h)
     {
-        if (histogram[i] > 0)
+        if (histogram[i] >= 10)
         {
-            if (i == 0)
-                x1 = i;
-            else
-                x1 = i - 1;
+            x1 = i;
 
-            while (histogram[i] > 0)
+            while (histogram[i] >=10)
                 i++;
 
-            if (x2 == h)
-                x2 = 1;
-            else
-                x2 = i + 1;
+            x2 = i;
 
             //Creates histogram for each detected line
             histoW = malloc(sizeof(int) * w);
@@ -363,7 +360,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
             CutInChar(matrix, histoW, queue, x1, x2, w);
 
             //Add eol in list
-            Enqueue(queue, eol);
+            Enqueue(queue, data);
 
             //Free memory
             free(histoW);
@@ -382,18 +379,24 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
     int i = 0, space = 0, x1, x2;
     int min_sp = 100, max_sp = 0;
     float average_sp = 0.0;
+
     int **sp = NULL;
+    Tuple *data = NewTuple();
+    data->height = 1;
+    data->width = 1;
 
     sp = malloc(sizeof(int*) * 1);
     sp[0] = malloc(sizeof(int) * 1);
     sp[0][0] = 32;
 
+    data->data = sp;
+
     // Finds the average space size of the line
     while (i < w)
     {
-        if (histogram[i] == 0)
+        if (histogram[i] > 0)
         {
-            while (histogram[i] == 0)
+            while (histogram[i] > 0)
             {
                 i++;
                 space++;
@@ -426,8 +429,9 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
             x2 = i;
 
             space = x2 - x1;
-            if (space > average_sp)
-                Enqueue(queue, sp);
+            if (space > average_sp) {
+                Enqueue(queue, data);
+            }
             EnqueueMatrix(matrix, queue, h1, h2, x1, x2);
         }
 
@@ -448,11 +452,17 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
     {
         for (int j = w1; j < w2; j++)
         {
-            new[i-h1][j-h2] = matrix[i][j];
+            new[i-h1][j-w1] = matrix[i][j];
         }
     }
 
-    Enqueue(queue, new);
+    PrintMatrix(new, h2-h1, w2-w1);
+    Tuple *data = NewTuple();
+
+    data->data = new;
+    data->height = h2-h1;
+    data->width = w2-w1;
+    Enqueue(queue, data);
 }
 
 
@@ -460,29 +470,42 @@ void ShowSegmentation(Queue *queue)
 {
     Elt *curr = NULL;
     int **c;
+    Pixel **m;
 
-    if (queue != NULL)
+    if (queue->first != NULL)
         curr = queue->first;
 
-    while (curr != NULL)
+    while (curr != NULL && curr->data != NULL)
     {
         if (curr->data != NULL) {
-            c = curr->data;
+            c = curr->data->data;
             if (c[0][0] == 10)
                 printf("\n");
             else if (c[0][0] == 32)
                 printf("( ),");
-            else
+            else {
                 printf("v");
+
+                int h = curr->data->height;
+                int w = curr->data->width;
+                m = malloc(sizeof(Pixel*) * h);
+
+                BinToPixels(c, m, h, w);
+                DisplayImage(MatrixToSurface(m, h, w));
+
+                //PrintMatrix(c, h, w);
+
+                free(m);
+            }
+
             curr = curr->next;
         }
     }
 }
 
-Pixel** BinToPixels(int **matrix, int h, int w)
+// Fills the Pixel matrix considering the values of the binarized matrix
+void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
 {
-    Pixel **pixels = NULL;
-    pixels = malloc(sizeof(Pixel*) * h);
 
     for (int i = 0; i < h; i++)
         pixels[i] = malloc(sizeof(Pixel) * w);
@@ -496,6 +519,4 @@ Pixel** BinToPixels(int **matrix, int h, int w)
             pixels[i][j].b = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
         }
     }
-
-    return pixels;
 }

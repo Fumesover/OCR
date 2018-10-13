@@ -1,9 +1,16 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+typedef struct Tuple Tuple;
+struct Tuple {
+    int **data;
+    int height;
+    int width;
+};
+
 typedef struct Elt Elt;
 struct Elt {
-    int **data;
+    Tuple *data;
     Elt *next;
 };
 
@@ -12,7 +19,9 @@ struct Queue {
     Elt *first;
 };
 
-void Enqueue(Queue *queue, int **data);
+
+void Enqueue(Queue *queue, Tuple *data);
 Elt *NewElt();
+Tuple *NewTuple();
 
 #endif

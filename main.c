@@ -25,8 +25,6 @@ int main()
 	// Return the corresponding Pixel matrix of the image
 	LoadImage(image);
 
-
-
     return 0;
 }
 

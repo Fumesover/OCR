@@ -2,13 +2,11 @@
 #include <stdio.h>
 #include "queue.h"
 
-void Enqueue(Queue *queue, int **data)
+void Enqueue(Queue *queue, Tuple *data)
 {
     //Create new pointer to new element
-    Elt *new = malloc(sizeof(*new));
+    Elt *new = NewElt();
     new->data = data;
-    new->next = NULL;
-
     //Add new element the end of the queue
     if(queue->first != NULL)
     {
@@ -26,8 +24,19 @@ void Enqueue(Queue *queue, int **data)
 Elt *NewElt()
 {
     Elt *new = malloc(sizeof(*new));
-    new->data = 0;
+    new->data = NULL;
     new->next = NULL;
 
     return new;
 }
+
+Tuple *NewTuple()
+{
+    Tuple *new = malloc(sizeof(*new));
+    new->data = NULL;
+    new->height = 0;
+    new->width = 0;
+
+    return new;
+}
+
