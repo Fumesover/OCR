@@ -11,7 +11,7 @@ LDFLAGS =
 # Libs and path for linker
 LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm
 
-SRC = main.c neuralNetwork/neuralNet.c image.c
+SRC = main.c image.c matrix.c queue.c neuralNetwork/neuralNet.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 

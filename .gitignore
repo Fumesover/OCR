@@ -15,4 +15,5 @@
 *.swp
 *~
 [Cc][Mm]ake*
+*.png
 vgcore.*

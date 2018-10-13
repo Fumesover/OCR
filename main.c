@@ -4,20 +4,31 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include "image.h"
+#include "interface.h"
+#include "matrix.h"
+#include "queue.h"
 
 #include "neuralNetwork/neuralNet.h"
 
 int main(void)
 {
-	char image[8] = "test.png";
-	//DisplayImage(image);
+    // TODO : Select file from interface file chooser
+    char *path_image = "/home/rhaeven/Documents/OCR/scan.jpg";
+    SDL_Surface *image = IMG_Load(path_image);
 
-	Uint32 **pixels = NULL;
-	LoadImage(image, pixels);
+    if (image == NULL)
+    {
+        fprintf(stderr, "Couldn't load %s: %s\n", path_image, SDL_GetError());
+        return 1;
+    }
 
-	for (int i = 0; i < sizeof(pixels); i++)
-		free(pixels[i]);
+    //DisplayImage(image);
 
-	free(pixels);
+	// Return the corresponding Pixel matrix of the image
+	LoadImage(image);
+
+
+
+    return 0;
 }
 
