@@ -28,17 +28,22 @@ valgrind:
 run: all
 	./main
 
-neuralNetwork/xor: neuralNetwork/xor.o neuralNetwork/neuralNet.o
+xor: 
+	(cd neuralNetwork; make xor; mv xor ..)
 
-NNgraphviz: neuralNetwork/NNgraphviz.o neuralNetwork/neuralNet.o
+showgraph: 
+	(cd neuralNetwork; make showgraph)
+
+NNgraphviz:
+	(cd neuralNetwork; make NNgraphviz; mv NNgraphviz ..)
 
 .PHONY: clean
 clean:
 	${RM} *.o */*.o	  # remove object files
 	${RM} *.d */*.d   # remove dependency files
 	${RM} main   	  # remove programs
-	${RM} neuralNetwork/xor
-	${RM} neuralNetwork/NNgraphviz
+	${RM} {,neuralNetwork/}xor 
+	${RM} {,neuralNetwork/}NNgraphviz
 	${RM} vgcore.*    
 
 -include ${DEP}
