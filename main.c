@@ -5,7 +5,9 @@
 #include <SDL2/SDL_image.h>
 #include "image.h"
 
-int main(int argc, char **argv)
+#include "neuralNetwork/neuralNet.h"
+
+int main(void)
 {
 	char image[8] = "test.png";
 	//DisplayImage(image);

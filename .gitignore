@@ -1,6 +1,18 @@
+# Ignore all
+*
+
+# Unignore all with extensions
+!*.*
+
+# Unignore all folders
+!*/
+
+### Now ingore what you want to
+
 .idea*
 *.o
 *.d
 *.swp
 *~
 [Cc][Mm]ake*
+vgcore.*
