@@ -58,6 +58,8 @@ void MatrixHHistogram(int **matrix, int *histogram, int h, int w)
 
 void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w)
 {
+    PrintMatrix(matrix, h2, w);
+
     for (int i = h1; i < h2; i++)
     {
         for (int j = 0; j < w; j++)

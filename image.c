@@ -19,7 +19,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(3000);
+    SDL_Delay(1500);
 
 
     /* Free the allocated surface */
@@ -50,7 +50,7 @@ void LoadImage(SDL_Surface *image)
 
 	//Greyscale
 	GreyScale(pixels, h, w);
-	DisplayImage(MatrixToSurface(pixels, h, w));
+	//DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
 	int threshold = Otsu(pixels, h, w);
@@ -92,6 +92,8 @@ void Segmentation(int **matrix, int h, int w)
 
     CutInLine(matrix, histo, queue, h,  w);
     //PrintMatrix(matrix, h,  w);
+
+    ShowSegmentation(queue);
 
     free(histo);
 }
@@ -334,25 +336,31 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
-    eol[0][0] = 127;
+    eol[0][0] = 10;
 
     while (i < h)
     {
         if (histogram[i] > 0)
         {
-            x1 = i - 1;
+            if (i == 0)
+                x1 = i;
+            else
+                x1 = i - 1;
 
             while (histogram[i] > 0)
                 i++;
 
-            x2 = i + 1;
+            if (x2 == h)
+                x2 = 1;
+            else
+                x2 = i + 1;
 
-            //Create histogram
+            //Creates histogram for each detected line
             histoW = malloc(sizeof(int) * w);
             MatrixWHistogram(matrix, histoW, x1, x2, w);
 
             //Cut line in char
-
+            CutInChar(matrix, histoW, queue, x1, x2, w);
 
             //Add eol in list
             Enqueue(queue, eol);
@@ -369,7 +377,125 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     free(eol);
 }
 
-void CutInChar(int **matrix, int *histogram, Queue *queue,  int h, int w)
+void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w)
 {
+    int i = 0, space = 0, x1, x2;
+    int min_sp = 100, max_sp = 0;
+    float average_sp = 0.0;
+    int **sp = NULL;
 
+    sp = malloc(sizeof(int*) * 1);
+    sp[0] = malloc(sizeof(int) * 1);
+    sp[0][0] = 32;
+
+    // Finds the average space size of the line
+    while (i < w)
+    {
+        if (histogram[i] == 0)
+        {
+            while (histogram[i] == 0)
+            {
+                i++;
+                space++;
+            }
+
+            if (space < min_sp)
+                min_sp = space;
+            if (space > max_sp)
+                max_sp = space;
+        }
+
+        else
+            i++;
+
+        space = 0;
+    }
+
+    i = 0;
+
+    average_sp = (float)(min_sp + max_sp) / 2;
+
+    while (i < w)
+    {
+        if (histogram[i] > 0)
+        {
+            x1 = i;
+            while (histogram[i] > 0)
+                i++;
+
+            x2 = i;
+
+            space = x2 - x1;
+            if (space > average_sp)
+                Enqueue(queue, sp);
+            EnqueueMatrix(matrix, queue, h1, h2, x1, x2);
+        }
+
+        else
+            i++;
+    }
+}
+
+
+void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
+{
+    int **new = NULL;
+    new = malloc(sizeof(int *) * (h2 - h1));
+    for (int i = 0; i < (h2-h1); i++)
+        new[i] = malloc(sizeof(int) * (w2-w1));
+
+    for (int i = h1; i < h2; i++)
+    {
+        for (int j = w1; j < w2; j++)
+        {
+            new[i-h1][j-h2] = matrix[i][j];
+        }
+    }
+
+    Enqueue(queue, new);
+}
+
+
+void ShowSegmentation(Queue *queue)
+{
+    Elt *curr = NULL;
+    int **c;
+
+    if (queue != NULL)
+        curr = queue->first;
+
+    while (curr != NULL)
+    {
+        if (curr->data != NULL) {
+            c = curr->data;
+            if (c[0][0] == 10)
+                printf("\n");
+            else if (c[0][0] == 32)
+                printf("( ),");
+            else
+                printf("v");
+            curr = curr->next;
+        }
+    }
+}
+
+Pixel** BinToPixels(int **matrix, int h, int w)
+{
+    Pixel **pixels = NULL;
+    pixels = malloc(sizeof(Pixel*) * h);
+
+    for (int i = 0; i < h; i++)
+        pixels[i] = malloc(sizeof(Pixel) * w);
+
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            pixels[i][j].r = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
+            pixels[i][j].g = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
+            pixels[i][j].b = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
+        }
+    }
+
+    return pixels;
 }

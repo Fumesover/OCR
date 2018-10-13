@@ -20,8 +20,11 @@ int Otsu(Pixel **pixels, int h, int w);
 void Binarization(Pixel **pixels, int h, int w, int threshold);
 void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w);
 SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w);
+Pixel** BinToPixels(int **matrix, int h, int w);
 void Segmentation(int **matrix, int h, int w);
 void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w);
-void CutInChar(int **matrix, int *histogram, Queue *queue, int h, int w);
+void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w);
+void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2);
+void ShowSegmentation(Queue *queue);
 
 #endif
