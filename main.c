@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <gtk/gtk.h>
 
-#include "neuralNet.h"
+#include "neuralNetwork/neuralNet.h"
 
 int main(void)
 {

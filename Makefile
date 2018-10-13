@@ -11,7 +11,7 @@ LDFLAGS =
 # Libs and path for linker
 LDLIBS = -lm $(pkg-config --libs sdl2) `pkg-config --libs gtk+-3.0` # -lm includes math library
 
-SRC = main.c neuralNet.c 
+SRC = main.c neuralNetwork/neuralNet.c 
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
@@ -28,16 +28,18 @@ valgrind:
 run: all
 	./main
 
-xor: xor.o neuralNet.o
+neuralNetwork/xor: neuralNetwork/xor.o neuralNetwork/neuralNet.o
 
-NNgraphviz: NNgraphviz.o neuralNet.o
+NNgraphviz: neuralNetwork/NNgraphviz.o neuralNetwork/neuralNet.o
 
 .PHONY: clean
 clean:
-	${RM} *.o      	  # remove object files
-	${RM} *.d         # remove dependency files
-	${RM} main xor	  # remove main program
-	${RM} vgcore.*
+	${RM} *.o */*.o	  # remove object files
+	${RM} *.d */*.d   # remove dependency files
+	${RM} main   	  # remove programs
+	${RM} neuralNetwork/xor
+	${RM} neuralNetwork/NNgraphviz
+	${RM} vgcore.*    
 
 -include ${DEP}
 
