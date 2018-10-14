@@ -21,7 +21,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(20000);
+    SDL_Delay(500);
 
     SDL_FreeSurface(image);
 }
@@ -339,9 +339,10 @@ void Segmentation(int **matrix, int h, int w)
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
-    free(pixels);
+
     for (int i = 0; i < h; i++)
         free(pixels[i]);
+    free(pixels);
 }
 
 void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
@@ -353,6 +354,8 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     data->height = 1;
     data->width = 1;
 
+    histoW = malloc(sizeof(int) * w);
+
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
     eol[0][0] = 10;
@@ -361,7 +364,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
     while (i < h)
     {
-        if (histogram[i] >= 10)
+        if (histogram[i] >= 1)
         {
             if (i == 0)
                 x1 = i;
@@ -369,11 +372,9 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
                 x1 = i - 1;
 
             for (int j = 0; j < w; j++)
-            {
                 matrix[x1][j] = 2;
-            }
 
-            while (histogram[i] >= 10)
+            while (histogram[i] >= 1)
                 i++;
 
             if (i == h - 1)
@@ -382,12 +383,9 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
                 x2 = i + 1;
 
             for (int j = 0; j < w; j++)
-            {
                 matrix[x2][j] = 2;
-            }
 
             //Creates histogram for each detected line
-            histoW = malloc(sizeof(int) * w);
             MatrixWHistogram(matrix, histoW, x1, x2, w);
 
             //Cut line in char
@@ -395,14 +393,13 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
             //Add eol in list
             Enqueue(queue, data);
-
-            //Free memory
-            free(histoW);
         }
 
         else
             i++;
     }
+
+    free(histoW);
 
     free(eol[0]);
     free(eol);
@@ -428,9 +425,9 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
     // Finds the average space size of the line
     while (i < w)
     {
-        if (histogram[i] > 0)
+        if (histogram[i] == 0)
         {
-            while (histogram[i] > 0)
+            while (histogram[i] == 0)
             {
                 i++;
                 space++;
@@ -462,9 +459,7 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
                 x1 = i - 1;
 
             for (int j = h1; j < h2; j++)
-            {
                 matrix[j][x1] = 3;
-            }
 
             while (histogram[i] > 0)
                 i++;
@@ -475,14 +470,12 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
                 x2 = i + 1;
 
             for (int j = h1; j < h2; j++)
-            {
                 matrix[j][x2] = 3;
-            }
 
             space = x2 - x1;
-            if (space > average_sp) {
+            if (space > average_sp)
                 Enqueue(queue, data);
-            }
+
             EnqueueMatrix(matrix, queue, h1, h2, x1, x2);
         }
 
