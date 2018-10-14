@@ -31,7 +31,7 @@ void Segmentation(int **matrix, int h, int w)
     CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
-    //ShowSegmentation(queue);
+    ShowSegmentation(queue);
     BinToPixels(matrix, pixels, h, w);
     DisplayImage(MatrixToSurface(pixels, h, w));
 
@@ -48,48 +48,49 @@ void Segmentation(int **matrix, int h, int w)
 // to CutInChar with the corresponding histogram
 void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 {
+    /*** INIT ***/
     int i = 0, x1, x2;
     int *histoW = NULL;
-    int **eol = NULL;
     Tuple *data = NewTuple();
     data->height = 1;
     data->width = 1;
 
     histoW = malloc(sizeof(int) * w);
 
+    int **eol = NULL;
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
     eol[0][0] = 10;
 
     data->data = eol;
 
+    /*** PROCESSING ALL LINES ***/
     while (i < h)
     {
         if (histogram[i] >= 1)
         {
+            // Top of line
             x1 = (i) ? i-1 : 0;
-
-            for (int j = 0; j < w; j++)
-                matrix[x1][j] = 2;
 
             while (histogram[i] >= 1) i++;
 
-            if (i == h - 1) x2 = i;
-            else x2 = i + 1;
+            // Bottom of line
+            if (i == h - 1) x2 = i; else x2 = i + 1;
 
-            for (int j = 0; j < w; j++)
+            // Draw line around the line
+            for (int j = 0; j < w; j++){
                 matrix[x2][j] = 2;
+                matrix[x1][j] = 2;
+            }
 
-            //Creates histogram for each detected line
+            // Clears and creates histogram for each detected line
             InitList(histoW, w);
             MatrixWHistogram(matrix, histoW, x1, x2, w);
 
-            PrintList(histoW, x2-x1);
-
-            //Cut line in char
+            // Cuts line in char
             CutInChar(matrix, histoW, queue, x1, x2, w);
 
-            //Add eol in list
+            // Enqueue eol after line is treated
             Enqueue(queue, data);
         }
 
@@ -97,6 +98,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
             i++;
     }
 
+    /*** FREE ALLOCATED MEMORY ***/
     free(histoW);
 
     free(eol[0]);
@@ -107,80 +109,79 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 // and puts them in the queue
 void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w)
 {
+    /*** INIT ***/
     int i = 0, space = 0, x1 = 0, x2 = 0;
     int min_sp = 100, max_sp = 0;
     float average_sp = 0.0;
+    int pos = 0, last_pos = w - 1;
 
-    int **sp = NULL;
     Tuple *data = NewTuple();
     data->height = 1;
     data->width = 1;
 
+    int **sp = NULL;
     sp = malloc(sizeof(int*) * 1);
     sp[0] = malloc(sizeof(int) * 1);
     sp[0][0] = 32;
 
     data->data = sp;
 
-    // Finds the average space size of the line
-    while (i < w)
+    /*** FINDS AVERAGE SPACE OF LINE ***/
+    while (histogram[pos] == 0) pos++;
+    while (histogram[last_pos] == 0) last_pos--;
+
+    while (pos < last_pos)
     {
-        if (histogram[i] == 0)
+        if (histogram[pos] == 0)
         {
-            while (histogram[i] == 0)
-            {
-                i++;
+            while (histogram[pos] == 0) {
+                pos++;
                 space++;
             }
 
-            if (space < min_sp)
-                min_sp = space;
-            if (space > max_sp)
-                max_sp = space;
+            if (space < min_sp) min_sp = space;
+            if (space > max_sp) max_sp = space;
         }
 
-        else
-            i++;
-
+        else pos++;
         space = 0;
     }
 
-    i = 0;
-
     average_sp = (float)(min_sp + max_sp) / 2;
 
+    /*** PROCESSING ALL COLUMNS ***/
     while (i < w)
     {
         if (histogram[i] > 0)
         {
-            if (i == 0)
-                x1 = i;
-            else
-                x1 = i - 1;
-
-            for (int j = h1; j < h2; j++)
-                matrix[j][x1] = 3;
-
-            while (histogram[i] > 0)
-                i++;
-
-            if (i == w - 1)
-                x2 = i;
-            else
-                x2 = i + 1;
-
-            for (int j = h1; j < h2; j++)
-                matrix[j][x2] = 3;
-
-            space = x2 - x1;
+            // If blank pixels considered as space
+            // adds space in queue before next character
             if (space > average_sp)
                 Enqueue(queue, data);
+            space = 0;
 
+            // Right side of character
+            x1 = (i) ? i - 1 : 0;
+
+            while (histogram[i] > 0) i++;
+
+            // Left side of character
+            if (i == w - 1) x2 = i; else x2 = i + 1;
+
+            // Draws line around character
+            for (int j = h1; j < h2; j++) {
+                matrix[j][x2] = 3;
+                matrix[j][x1] = 3;
+            }
+
+            // Enqueue character
             EnqueueMatrix(matrix, queue, h1, h2, x1, x2);
         }
 
-        else
+        else {
             i++;
+            space++;
+        }
     }
 }
 
@@ -232,8 +233,8 @@ void ShowSegmentation(Queue *queue)
                 int w = curr->data->width;
                 m = malloc(sizeof(Pixel*) * h);
 
-                BinToPixels(c, m, h, w);
-                DisplayImage(MatrixToSurface(m, h, w));
+                //BinToPixels(c, m, h, w);
+                //DisplayImage(MatrixToSurface(m, h, w));
 
                 //PrintMatrix(c, h, w);
 
