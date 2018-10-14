@@ -287,30 +287,30 @@ float NNTrain(neuNet* n, float* inp, float* targ, float update) {
 }
 
 void NNsave(neuNet* n, char* filename){
-	FILE *fPointer;
-	fPointer = fopen(filename,"w");
-	fprintf(fPointer,"%d\n",n->nbInputs);
-	fprintf(fPointer,"%d\n",n->nbOutput);
-	fprintf(fPointer,"%d\n",n->nbLayers);
-	for(int i = 0; i < n->nbLayers; i++)
-	{
-		fprintf(fPointer,"%d ",n->nbHidden[i]);
-	}
-	fprintf(fPointer,"\n");
-       	fprintf(fPointer,"%d\n",n->ttHidden);
-	fprintf(fPointer,"%d\n",n->nbWeights);
-	fprintf(fPointer,"%d\n",n->nbBiais);	
-	for(int i = 0; i < n->nbWeights; i++)
-        {
-                fprintf(fPointer,"%f ",n->weights[i]);
-        }
-	fprintf(fPointer,"\n");
-	for(int i = 0; i < n->nbBiais; i++)
-        {
-                fprintf(fPointer,"%f ",n->biais[i]);
-       	}
-	fprintf(fPointer,"\n");
-	fclose(fPointer);
+	FILE* fPointer = fopen(filename,"w");
+	
+    fprintf(fPointer,"%d\n",n->nbInputs);
+    fprintf(fPointer,"%d\n",n->nbOutput);
+    fprintf(fPointer,"%d\n",n->nbLayers);
+	
+    for(int i = 0; i < n->nbLayers; i++)
+        fprintf(fPointer,"%d ",n->nbHidden[i]);
+	
+    fprintf(fPointer,"\n");
+    fprintf(fPointer,"%d\n",n->ttHidden);
+    fprintf(fPointer,"%d\n",n->nbWeights);
+    fprintf(fPointer,"%d\n",n->nbBiais);	
+
+    for(int i = 0; i < n->nbWeights; i++)
+        fprintf(fPointer,"%f ",n->weights[i]);
+
+    fprintf(fPointer,"\n");
+	
+    for(int i = 0; i < n->nbBiais; i++)
+        fprintf(fPointer,"%f ",n->biais[i]);
+	
+    fprintf(fPointer,"\n");
+    fclose(fPointer);
 }
 
 neuNet* NNload(char* filename){
