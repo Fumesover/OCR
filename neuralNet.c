@@ -8,50 +8,19 @@
 int NNmain(void) {
     // INIT
     int   nbInp = 2;
-    float inpVals[] = {1, 1};
-    int   nbHidden = 1;
-    int   hidden[] = {3};
+    int   nbHidden = 2;
+    int   hidden[] = {3, 4};
     int   nbOut = 1;
-    float target[] = {0};
-
-    float updateRate = 0.1;
 
     neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
     
     // RANDOMISE
     neuNetRandom(n);
     
-    float err;
-    int itteration = 0;
-    float tests[4][3] = {
-        {1.0f,1.0f,0.0f},
-        {0.0f,0.0f,0.0f},
-        {1.0f,0.0f,1.0f},
-        {0.0f,1.0f,1.0f},
-    };
-    int testPos = 0;
-    int testLen = 4;
+    // ici n est le reseau
+    NNsave(n, "test.txt");
+    NNload("test.txt");
 
-    do {
-        err = 0.0f;
-        for (testPos = 0; testPos < testLen; testPos++) {
-            inpVals[0] = tests[testPos][0];
-            inpVals[1] = tests[testPos][1];
-            target[0]  = tests[testPos][2];
-
-            forwardPropagation(n, inpVals);
-            backPropagation(n, inpVals, target, updateRate);
-
-            err += NNerror(n, target);
-            printf("  n°%d => error : %f vals : %d xor %d => %d \n", 
-                    itteration++, NNerror(n, target), (int) tests[testPos][0], 
-                    (int)tests[testPos][1], (int) tests[testPos][2]);
-        }
-
-        printf("n°%d : batch error : %f\n", itteration / testLen, err);
-
-    } while (err > 0.1f);
-    
     freeNeuNet(n);
 
     return 0;
@@ -317,3 +286,134 @@ float NNTrain(neuNet* n, float* inp, float* targ, float update) {
     return NNerror(n, targ);
 }
 
+void NNsave(neuNet* n, char* filename){
+	FILE *fPointer;
+	fPointer = fopen(filename,"w");
+	fprintf(fPointer,"%d\n",n->nbInputs);
+	fprintf(fPointer,"%d\n",n->nbOutput);
+	fprintf(fPointer,"%d\n",n->nbLayers);
+	for(int i = 0; i < n->nbLayers; i++)
+	{
+		fprintf(fPointer,"%d ",n->nbHidden[i]);
+	}
+	fprintf(fPointer,"\n");
+       	fprintf(fPointer,"%d\n",n->ttHidden);
+	fprintf(fPointer,"%d\n",n->nbWeights);
+	fprintf(fPointer,"%d\n",n->nbBiais);	
+	for(int i = 0; i < n->nbWeights; i++)
+        {
+                fprintf(fPointer,"%f ",n->weights[i]);
+        }
+	fprintf(fPointer,"\n");
+	for(int i = 0; i < n->nbBiais; i++)
+        {
+                fprintf(fPointer,"%f ",n->biais[i]);
+       	}
+	fprintf(fPointer,"\n");
+	fclose(fPointer);
+}
+
+neuNet* NNload(char* filename){
+	neuNet* n;
+	int nbInputs;
+	int nbOutput;
+	int nbLayers;
+	int ttHidden;
+	int nbWeights;
+	int nbBiais;
+	FILE *fPointer;
+	fPointer = fopen(filename,"r");
+	char singleLine[300];
+	int i = 0;
+	while(!feof(fPointer))
+	{
+		fgets(singleLine, 300, fPointer);
+		i++;
+		if(i == 1){
+			nbInputs = atoi(singleLine);
+			//printf("nbInputs: %d\n", nbInputs);
+		}
+		if(i == 2){
+			nbOutput = atoi(singleLine);
+			//printf("nbOutput: %d\n", nbOutput);
+		}
+		if(i == 3){
+			nbLayers = atoi(singleLine);
+			//printf("nbLayers: %d\n", nbLayers);
+		}
+		if(i == 4){
+			int nbHidden[nbLayers];
+			int j = 0;
+			int k = 0;
+			while(singleLine[j] != '\n'){
+				int value = 0;
+				while(singleLine[j] != ' '){
+					value = value * 10 + (singleLine[j] - 48);
+					j++;
+				}
+				nbHidden[k] = value;
+				j++;
+				k++;
+			}
+			//printf("nbHidden[0]: %d\n", nbHidden[0]);
+			//printf("nbHidden[1]: %d\n", nbHidden[1]);
+			n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput);
+		}
+		if(i == 5){
+			ttHidden = atoi(singleLine);
+			//printf("ttHidden: %d\n", ttHidden);
+			n->ttHidden = ttHidden;
+		}
+		if(i == 6){
+			nbWeights = atoi(singleLine);
+			//printf("nbWeights: %d\n", nbWeights);
+			n->nbWeights = nbWeights;
+		}
+		if(i == 7){
+			nbBiais = atoi(singleLine);
+			//printf("nbBiais: %d\n", nbBiais);
+			n->nbBiais = nbBiais;
+		}
+		if(i == 8){
+			float weights[nbWeights];
+			int j = 0;
+			int l = 0;
+			while(singleLine[j] != '\n'){
+				int k = 0;
+				char value[10];
+				while(singleLine[j] != ' '){
+					value[k] = singleLine[j];
+					k++;
+					j++;
+				}
+				weights[l] = atof(value);
+				l++;
+				j++;
+			}
+			//printf("weights[0]: %f\n", weights[0]);
+                        //printf("weights[1]: %f\n", weights[1]);
+			n->weights = weights;
+		}
+		if(i == 9){
+			float biais[nbBiais];
+                        int j = 0;
+                        int l = 0;
+                        while(singleLine[j] != '\n'){
+                                int k = 0;
+                                char value[10];
+                                while(singleLine[j] != ' '){
+                                        value[k] = singleLine[j];
+                                        k++;
+                                        j++;
+                                }
+                                biais[l] = atof(value);
+                                l++;
+                                j++;
+                        }
+                        //printf("biais[0]: %f\n", biais[0]);
+                        //printf("biais[1]: %f\n", biais[1]);	
+			n->biais = biais;
+		}
+	}
+	return n;
+}

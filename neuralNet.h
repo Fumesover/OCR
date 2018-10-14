@@ -61,7 +61,8 @@ float NNerror(neuNet* n, float* target);
 void freeNeuNet(neuNet* n);
 
 // load NN 
+neuNet* NNload(char* filename);
 
 // save NN 
-
+void NNsave(neuNet* n, char* filename);
 
