@@ -230,7 +230,7 @@ void ShowSegmentation(Queue *queue)
                 printf("v");
 
                 int h = curr->data->height;
-                int w = curr->data->width;
+                // int w = curr->data->width;
                 m = malloc(sizeof(Pixel*) * h);
 
                 //BinToPixels(c, m, h, w);
