@@ -15,7 +15,7 @@
 int main(int argc, char** argv)
 {
     // TODO : Select file from interface file chooser
-    char *path_image = "/home/rhaeven/Documents/OCR/scan.jpg";
+    char *path_image = "/home/rhaeven/Documents/OCR/scan1.png";
    
     int opt;
     while ((opt = getopt(argc, argv, "i:")) != -1) {

@@ -7,109 +7,23 @@
 #include "matrix.h"
 #include "queue.h"
 
+#define MIN_PIXELS = 10
 
+// Displays the image "image" on screen
 void DisplayImage(SDL_Surface *image)
 {
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 1200, 0);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1000, 1000, 0);
 
-    SDL_Rect dest = { 1600/2 - image->w/2,1200/2 - image->h/2, 0, 0};
+    SDL_Rect dest = { 1000/2 - image->w/2,1000/2 - image->h/2, 0, 0};
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(300);
+    SDL_Delay(20000);
 
-
-    /* Free the allocated surface */
     SDL_FreeSurface(image);
-}
-
-// Load the image called 'path_image' int a Pixel matrix
-void LoadImage(SDL_Surface *image)
-{
-	int i = 0;
-	int h = 0, w = 0;
-    Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
-    int **matrix = NULL; // Receives 0 and 1 considering the color of pixel
-    // Init matrix
-	h = image->h;
-	w = image->w;
-	pixels = malloc(sizeof(Pixel*) * h);
-	matrix = malloc(sizeof(int*) * h);
-
-	for (i = 0; i < h; i++)
-	{
-		pixels[i] = malloc(sizeof(Pixel) * w);
-        matrix[i] = malloc(sizeof(int) * w);
-	}
-
-    // Fill the martix
-    FillPixels(pixels, image, h, w);
-
-	//Greyscale
-	GreyScale(pixels, h, w);
-	//DisplayImage(MatrixToSurface(pixels, h, w));
-
-	// Otsu method on matrix
-	int threshold = Otsu(pixels, h, w);
-	Binarization(pixels, h, w, threshold);
-    //DisplayImage(MatrixToSurface(pixels, h, w));
-
-    BinarizeMatrix(pixels, matrix, h, w);
-
-    //PrintMatrix(matrix, h, w);
-
-    Segmentation(matrix, h, w);
-
-    for (int j = 0; j < h; j++)
-    {
-        free(pixels[j]);
-        free(matrix[j]);
-    }
-
-    free(pixels);
-    free(matrix);
-
-}
-
-void Segmentation(int **matrix, int h, int w)
-{
-    int *histo = NULL;
-    histo = malloc(sizeof(int) * h);
-
-    Queue *queue = NULL;
-    queue = malloc(sizeof(*queue));
-    queue->first = NULL;
-
-    InitList(histo, h);
-
-    MatrixHHistogram(matrix, histo, h, w);
-    //PrintList(histo, h);
-
-    CutInLine(matrix, histo, queue, h,  w);
-    //PrintMatrix(matrix, h,  w);
-
-    ShowSegmentation(queue);
-
-    free(histo);
-}
-
-void FillPixels(Pixel **pixels, SDL_Surface *image, int h, int w)
-{
-    SDL_LockSurface(image);
-
-    int x = 0, y = 0;
-
-    for (y = 0; y < h; y++)
-    {
-        for (x = 0; x < w; x++)
-        {
-            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[y][x].r, 
-            &pixels[y][x].g, &pixels[y][x].b);
-        }
-    }
 }
 
 // Returns the Uint32 value of the pixel at position x, y
@@ -152,31 +66,100 @@ void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
     Uint8 *p = (Uint8 *)surface->pixels + y * surface->pitch + x * bpp;
 
     switch(bpp) {
-    case 1:
-        *p = pixel;
-        break;
+        case 1:
+            *p = pixel;
+            break;
 
-    case 2:
-        *(Uint16 *)p = pixel;
-        break;
+        case 2:
+            *(Uint16 *)p = pixel;
+            break;
 
-    case 3:
-        if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
-            p[0] = (pixel >> 16) & 0xff;
-            p[1] = (pixel >> 8) & 0xff;
-            p[2] = pixel & 0xff;
-        } else {
-            p[0] = pixel & 0xff;
-            p[1] = (pixel >> 8) & 0xff;
-            p[2] = (pixel >> 16) & 0xff;
-        }
-        break;
+        case 3:
+            if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+                p[0] = (pixel >> 16) & 0xff;
+                p[1] = (pixel >> 8) & 0xff;
+                p[2] = pixel & 0xff;
+            } else {
+                p[0] = pixel & 0xff;
+                p[1] = (pixel >> 8) & 0xff;
+                p[2] = (pixel >> 16) & 0xff;
+            }
+            break;
 
-    case 4:
-        *(Uint32 *)p = pixel;
-        break;
+        case 4:
+            *(Uint32 *)p = pixel;
+            break;
     }
 }
+
+// Load the image called 'path_image' int a Pixel matrix
+void LoadImage(SDL_Surface *image)
+{
+	int i = 0;
+	int h = 0, w = 0;
+    Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
+    int **matrix = NULL; // Receives 0 and 1 considering the color of pixel
+
+    /*** INIT ***/
+	h = image->h;
+	w = image->w;
+	pixels = malloc(sizeof(Pixel*) * h);
+	matrix = malloc(sizeof(int*) * h);
+
+	for (i = 0; i < h; i++)
+	{
+		pixels[i] = malloc(sizeof(Pixel) * w);
+        matrix[i] = malloc(sizeof(int) * w);
+	}
+
+    // Fill the martix
+    SurfaceToMatrix(pixels, image, h, w);
+
+	/*** BINARIZATION ***/
+	//Greyscale
+	GreyScale(pixels, h, w);
+    //DisplayImage(MatrixToSurface(pixels, h, w));
+
+	// Otsu method on matrix
+	int threshold = Otsu(pixels, h, w);
+	Binarization(pixels, h, w, threshold);
+
+    BinarizeMatrix(pixels, matrix, h, w);
+    //DisplayImage(MatrixToSurface(pixels, h, w));
+
+    /*** SEGMENTATION ***/
+    Segmentation(matrix, h, w);
+
+
+    /*** FREE ALLOCATED MEMORY ***/
+    for (int j = 0; j < h; j++)
+    {
+        free(pixels[j]);
+        free(matrix[j]);
+    }
+
+    free(pixels);
+    free(matrix);
+
+}
+
+// Fills matrix "pixels" with color values of
+void SurfaceToMatrix(Pixel **pixels, SDL_Surface *image, int h, int w)
+{
+    SDL_LockSurface(image);
+
+    int x = 0, y = 0;
+
+    for (y = 0; y < h; y++)
+    {
+        for (x = 0; x < w; x++)
+        {
+            SDL_GetRGB(GetPixel(image, x, y), image->format, &pixels[y][x].r,
+            &pixels[y][x].g, &pixels[y][x].b);
+        }
+    }
+}
+
 
 // Returns the greyscale value of the matrix of size h * w
 void GreyScale(Pixel **pixels, int h, int w)
@@ -326,6 +309,41 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     return surface;
 }
 
+// Main document segmentation functions
+// Makes histogram and calls line segmentation function
+void Segmentation(int **matrix, int h, int w)
+{
+    int *histo = NULL;
+    Pixel **pixels = malloc(sizeof(Pixel*) * h);
+
+    for (int i = 0; i < h; i++)
+        pixels[i] = malloc(sizeof(Pixel) * w);
+
+    /*** INIT ***/
+    histo = malloc(sizeof(int) * h);
+
+    Queue *queue = NULL;
+    queue = malloc(sizeof(*queue));
+    queue->first = NULL;
+
+    InitList(histo, h);
+    MatrixHHistogram(matrix, histo, h, w);
+
+    /*** LINE SEGMENTATION ***/
+    CutInLine(matrix, histo, queue, h,  w);
+
+    // TEST: displays result
+    //ShowSegmentation(queue);
+    BinToPixels(matrix, pixels, h, w);
+    DisplayImage(MatrixToSurface(pixels, h, w));
+
+    /*** FREE ALLOCATED MEMORY ***/
+    free(histo);
+    free(pixels);
+    for (int i = 0; i < h; i++)
+        free(pixels[i]);
+}
+
 void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 {
     int i = 0, x1, x2;
@@ -345,12 +363,28 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     {
         if (histogram[i] >= 10)
         {
-            x1 = i;
+            if (i == 0)
+                x1 = i;
+            else
+                x1 = i - 1;
 
-            while (histogram[i] >=10)
+            for (int j = 0; j < w; j++)
+            {
+                matrix[x1][j] = 2;
+            }
+
+            while (histogram[i] >= 10)
                 i++;
 
-            x2 = i;
+            if (i == h - 1)
+                x2 = i;
+            else
+                x2 = i + 1;
+
+            for (int j = 0; j < w; j++)
+            {
+                matrix[x2][j] = 2;
+            }
 
             //Creates histogram for each detected line
             histoW = malloc(sizeof(int) * w);
@@ -376,7 +410,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
 void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w)
 {
-    int i = 0, space = 0, x1, x2;
+    int i = 0, space = 0, x1 = 0, x2 = 0;
     int min_sp = 100, max_sp = 0;
     float average_sp = 0.0;
 
@@ -422,11 +456,28 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
     {
         if (histogram[i] > 0)
         {
-            x1 = i;
+            if (i == 0)
+                x1 = i;
+            else
+                x1 = i - 1;
+
+            for (int j = h1; j < h2; j++)
+            {
+                matrix[j][x1] = 3;
+            }
+
             while (histogram[i] > 0)
                 i++;
 
-            x2 = i;
+            if (i == w - 1)
+                x2 = i;
+            else
+                x2 = i + 1;
+
+            for (int j = h1; j < h2; j++)
+            {
+                matrix[j][x2] = 3;
+            }
 
             space = x2 - x1;
             if (space > average_sp) {
@@ -479,11 +530,12 @@ void ShowSegmentation(Queue *queue)
     {
         if (curr->data != NULL) {
             c = curr->data->data;
+
             if (c[0][0] == 10)
                 printf("\n");
             else if (c[0][0] == 32)
-                printf("( ),");
-            else {
+                printf(" ");
+            else if (curr->data->width > 1 && curr->data->height > 1){
                 printf("v");
 
                 int h = curr->data->height;
@@ -497,6 +549,8 @@ void ShowSegmentation(Queue *queue)
 
                 free(m);
             }
+            else
+                printf("\n");
 
             curr = curr->next;
         }
@@ -506,7 +560,6 @@ void ShowSegmentation(Queue *queue)
 // Fills the Pixel matrix considering the values of the binarized matrix
 void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
 {
-
     for (int i = 0; i < h; i++)
         pixels[i] = malloc(sizeof(Pixel) * w);
 
@@ -514,9 +567,31 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            pixels[i][j].r = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
-            pixels[i][j].g = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
-            pixels[i][j].b = (matrix[i][j]) ? (Uint8)255 : (Uint8)0;
+            switch(matrix[i][j])
+            {
+                case(1):
+                    pixels[i][j].r = (Uint8)0;
+                    pixels[i][j].g = (Uint8)0;
+                    pixels[i][j].b = (Uint8)0;
+                    break;
+                case (0):
+                    pixels[i][j].r = (Uint8)255;
+                    pixels[i][j].g = (Uint8)255;
+                    pixels[i][j].b = (Uint8)255;
+                    break;
+                case(2):
+                    pixels[i][j].r = (Uint8)0;
+                    pixels[i][j].g = (Uint8)255;
+                    pixels[i][j].b = (Uint8)0;
+                    break;
+                case(3):
+                    pixels[i][j].r = (Uint8)0;
+                    pixels[i][j].g = (Uint8)0;
+                    pixels[i][j].b = (Uint8)255;
+                    break;
+                default:
+                    break;
+            }
         }
     }
 }

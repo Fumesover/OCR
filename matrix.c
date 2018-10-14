@@ -67,3 +67,4 @@ void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w)
         }
     }
 }
+
