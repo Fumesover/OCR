@@ -9,7 +9,7 @@ void InitList(int *list, int h);
 void PrintMatrix(int **matrix, int h, int w);
 void PrintList(int *list, int h);
 
-/* FILL */
+/* FILL HISTOGRAM */
 void MatrixHHistogram(int **matrix, int *histogram, int h, int w);
 void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w);
 

@@ -2,25 +2,9 @@
 #include <stdio.h>
 #include "queue.h"
 
-void Enqueue(Queue *queue, Tuple *data)
-{
-    //Create new pointer to new element
-    Elt *new = NewElt();
-    new->data = data;
-    //Add new element the end of the queue
-    if(queue->first != NULL)
-    {
-        Elt *this = queue->first;
-        while (this->next != NULL)
-            this = this->next;
-        this->next = new;
-    }
+/*** INIT ***/
 
-    //New element as first element if queue is empty
-    else
-        queue->first = new;
-}
-
+//Returns a new empty Element
 Elt *NewElt()
 {
     Elt *new = malloc(sizeof(*new));
@@ -30,6 +14,7 @@ Elt *NewElt()
     return new;
 }
 
+// Returns a new empty Tuple
 Tuple *NewTuple()
 {
     Tuple *new = malloc(sizeof(*new));
@@ -40,3 +25,24 @@ Tuple *NewTuple()
     return new;
 }
 
+// Enqueue an Element containing the tuple "data"
+// in the Queue "queue"
+void Enqueue(Queue *queue, Tuple *data)
+{
+    // New element
+    Elt *new = NewElt();
+    new->data = data;
+
+    // If queue not empty, we travel to the end of the queue
+    if(queue->first != NULL)
+    {
+        Elt *this = queue->first;
+        while (this->next != NULL)
+            this = this->next;
+        this->next = new;
+    }
+
+    // New element is the first if queue is empty
+    else
+        queue->first = new;
+}

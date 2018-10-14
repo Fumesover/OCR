@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "matrix.h"
 
+/*** Matrixes ***/
 
 // Prints the values of the matrix into the terminal
 void PrintMatrix(int **matrix, int h, int w)
@@ -16,7 +17,7 @@ void PrintMatrix(int **matrix, int h, int w)
     }
 }
 
-// Initialize all values of the matrix to 0
+// Initializes all values of the matrix to 0
 void InitMatrix(int **matrix, int h, int w)
 {
     for (int i = 0; i < h; i++)
@@ -28,6 +29,9 @@ void InitMatrix(int **matrix, int h, int w)
     }
 }
 
+/*** Lists ***/
+
+// Initializes all values of the list to 0
 void InitList(int *list, int h)
 {
     for (int i = 0; i < h; i++)
@@ -36,14 +40,20 @@ void InitList(int *list, int h)
     }
 }
 
+// Prints the list of the matrix into the terminal
 void PrintList(int *list, int h)
 {
     for (int i = 0; i < h; i++)
     {
-        printf("(%d)=%d\n, ", i, list[i]);
+        printf("(%d)=%d, ", i, list[i]);
+        fflush(stdout);
     }
+    printf("\n");
 }
 
+/*** Histograms of black pixels ***/
+
+// Returns the histogram of all lines of the matrix
 void MatrixHHistogram(int **matrix, int *histogram, int h, int w)
 {
     for (int i = 0; i < h; i++)
@@ -56,14 +66,16 @@ void MatrixHHistogram(int **matrix, int *histogram, int h, int w)
     }
 }
 
+// Returns the histogram of all columns of the matrix
+// in the line range [h1, h2]
 void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w)
 {
-    for (int i = h1; i < h2; i++)
+    for (int x = 0; x < w; x++)
     {
-        for (int j = 0; j < w; j++)
+        for (int y = h1; y < h2; y++)
         {
-            if (matrix[i][j] == 1)
-                histogram[j]++;
+            if (matrix[y][x] == 1)
+                histogram[x]++;
         }
     }
 }
