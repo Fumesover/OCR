@@ -1,9 +1,12 @@
 #include "neuralNet.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
+
+#define _GNU_SOURCE
+#include <stdio.h>
+size_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
 
 int NNmain(void) {
     // INIT
@@ -19,10 +22,13 @@ int NNmain(void) {
     
     // ici n est le reseau
     NNsave(n, "test.txt");
-    NNload("test.txt");
-
+    
     freeNeuNet(n);
 
+    n = NNload("test.txt");
+
+    freeNeuNet(n);
+    
     return 0;
 }
 
@@ -55,13 +61,11 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
         nn->ttHidden += nbHidden[p];
 
     // Compute count weights
-    int p = 0;
-    nn->nbWeights = nbInputs * nbHidden[p];
-    for(; p < nbLayers - 1; p++) 
+    nn->nbWeights = nbInputs * nbHidden[0];
+    for(int p = 0; p < nbLayers - 1; p++)
         nn->nbWeights += nbHidden[p] * nbHidden[p + 1];
+    nn->nbWeights += nbHidden[nbLayers - 1] * nbOutput;
     
-    nn->nbWeights += nbHidden[p] * nbOutput;
-
     // Compute count biais
     nn->nbBiais = nbOutput + nn->ttHidden;
     
@@ -287,133 +291,83 @@ float NNTrain(neuNet* n, float* inp, float* targ, float update) {
 }
 
 void NNsave(neuNet* n, char* filename){
-	FILE* fPointer = fopen(filename,"w");
-	
+    FILE* fPointer = fopen(filename,"w");
+    
     fprintf(fPointer,"%d\n",n->nbInputs);
     fprintf(fPointer,"%d\n",n->nbOutput);
     fprintf(fPointer,"%d\n",n->nbLayers);
-	
+    
     for(int i = 0; i < n->nbLayers; i++)
         fprintf(fPointer,"%d ",n->nbHidden[i]);
-	
     fprintf(fPointer,"\n");
-    fprintf(fPointer,"%d\n",n->ttHidden);
-    fprintf(fPointer,"%d\n",n->nbWeights);
-    fprintf(fPointer,"%d\n",n->nbBiais);	
 
     for(int i = 0; i < n->nbWeights; i++)
         fprintf(fPointer,"%f ",n->weights[i]);
-
     fprintf(fPointer,"\n");
-	
+    
     for(int i = 0; i < n->nbBiais; i++)
         fprintf(fPointer,"%f ",n->biais[i]);
-	
+    
     fprintf(fPointer,"\n");
     fclose(fPointer);
 }
 
 neuNet* NNload(char* filename){
-	neuNet* n;
-	int nbInputs;
-	int nbOutput;
-	int nbLayers;
-	int ttHidden;
-	int nbWeights;
-	int nbBiais;
-	FILE *fPointer;
-	fPointer = fopen(filename,"r");
-	char singleLine[300];
-	int i = 0;
-	while(!feof(fPointer))
-	{
-		fgets(singleLine, 300, fPointer);
-		i++;
-		if(i == 1){
-			nbInputs = atoi(singleLine);
-			//printf("nbInputs: %d\n", nbInputs);
-		}
-		if(i == 2){
-			nbOutput = atoi(singleLine);
-			//printf("nbOutput: %d\n", nbOutput);
-		}
-		if(i == 3){
-			nbLayers = atoi(singleLine);
-			//printf("nbLayers: %d\n", nbLayers);
-		}
-		if(i == 4){
-			int nbHidden[nbLayers];
-			int j = 0;
-			int k = 0;
-			while(singleLine[j] != '\n'){
-				int value = 0;
-				while(singleLine[j] != ' '){
-					value = value * 10 + (singleLine[j] - 48);
-					j++;
-				}
-				nbHidden[k] = value;
-				j++;
-				k++;
-			}
-			//printf("nbHidden[0]: %d\n", nbHidden[0]);
-			//printf("nbHidden[1]: %d\n", nbHidden[1]);
-			n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput);
-		}
-		if(i == 5){
-			ttHidden = atoi(singleLine);
-			//printf("ttHidden: %d\n", ttHidden);
-			n->ttHidden = ttHidden;
-		}
-		if(i == 6){
-			nbWeights = atoi(singleLine);
-			//printf("nbWeights: %d\n", nbWeights);
-			n->nbWeights = nbWeights;
-		}
-		if(i == 7){
-			nbBiais = atoi(singleLine);
-			//printf("nbBiais: %d\n", nbBiais);
-			n->nbBiais = nbBiais;
-		}
-		if(i == 8){
-			float weights[nbWeights];
-			int j = 0;
-			int l = 0;
-			while(singleLine[j] != '\n'){
-				int k = 0;
-				char value[10];
-				while(singleLine[j] != ' '){
-					value[k] = singleLine[j];
-					k++;
-					j++;
-				}
-				weights[l] = atof(value);
-				l++;
-				j++;
-			}
-			//printf("weights[0]: %f\n", weights[0]);
-                        //printf("weights[1]: %f\n", weights[1]);
-			n->weights = weights;
-		}
-		if(i == 9){
-			float biais[nbBiais];
-                        int j = 0;
-                        int l = 0;
-                        while(singleLine[j] != '\n'){
-                                int k = 0;
-                                char value[10];
-                                while(singleLine[j] != ' '){
-                                        value[k] = singleLine[j];
-                                        k++;
-                                        j++;
-                                }
-                                biais[l] = atof(value);
-                                l++;
-                                j++;
-                        }
-                        //printf("biais[0]: %f\n", biais[0]);
-                        //printf("biais[1]: %f\n", biais[1]);	
-			n->biais = biais;
-		}
-	}
-	return n;
+    FILE* fp = fopen(filename,"r");
+    size_t len = 0;
+    char* line = NULL;
+    size_t read;
+   
+    int nbInputs = 0;
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1) {
+        nbInputs = atoi(line);
+        // printf("nbInputs: %d\n", atoi(line));
+    }
+    
+    int nbOutput = 0;
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1) {
+        nbOutput = atoi(line);
+        // printf("nbOutput: %d\n", nbOutput);
+    }
+    
+    int nbLayers = 0;
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1) {
+        nbLayers = atoi(line);
+        // printf("nbLayers: %d\n", nbLayers);
+    }
+    
+    int* nbHidden = malloc(nbLayers * sizeof(int));
+    for (int i = 0; i < nbLayers; i++) {
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) {
+            int value = atoi(line);
+            nbHidden[i] = value;
+            // printf("nbHidden[%d]: %d\n", i, value);
+        }
+    }
+   
+    read = getdelim(&line, &len, '\n', fp); // remove last space
+    
+    neuNet* n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput); 
+    
+    free(nbHidden);
+    
+    for (int i = 0; i < n->nbWeights; i++) {
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) {
+            n->weights[i] = atof(line);
+            // printf("weights[%d]: %f\n", i, n->weights[i]);
+        }
+    }
+    read = getdelim(&line, &len, '\n', fp); // remove last space
+
+    for (int i = 0; i < n->nbBiais; i++) {
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) {
+            n->biais[i] = atof(line);
+            // printf("biais[%d]: %f\n", i, n->biais[i]);
+        }
+    }
+
+    free(line);
+    fclose(fp);
+
+    return n;
 }
