@@ -319,52 +319,35 @@ neuNet* NNload(char* filename){
     size_t read;
    
     int nbInputs = 0;
-    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1) {
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
         nbInputs = atoi(line);
-        // printf("nbInputs: %d\n", atoi(line));
-    }
     
     int nbOutput = 0;
-    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1) {
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
         nbOutput = atoi(line);
-        // printf("nbOutput: %d\n", nbOutput);
-    }
     
     int nbLayers = 0;
-    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1) {
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
         nbLayers = atoi(line);
-        // printf("nbLayers: %d\n", nbLayers);
-    }
     
     int* nbHidden = malloc(nbLayers * sizeof(int));
-    for (int i = 0; i < nbLayers; i++) {
-        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) {
-            int value = atoi(line);
-            nbHidden[i] = value;
-            // printf("nbHidden[%d]: %d\n", i, value);
-        }
-    }
-   
+    for (int i = 0; i < nbLayers; i++)
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) 
+            nbHidden[i] = atoi(line);
     read = getdelim(&line, &len, '\n', fp); // remove last space
     
     neuNet* n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput); 
     
     free(nbHidden);
     
-    for (int i = 0; i < n->nbWeights; i++) {
-        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) {
+    for (int i = 0; i < n->nbWeights; i++)
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
             n->weights[i] = atof(line);
-            // printf("weights[%d]: %f\n", i, n->weights[i]);
-        }
-    }
     read = getdelim(&line, &len, '\n', fp); // remove last space
 
-    for (int i = 0; i < n->nbBiais; i++) {
-        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) {
+    for (int i = 0; i < n->nbBiais; i++)
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
             n->biais[i] = atof(line);
-            // printf("biais[%d]: %f\n", i, n->biais[i]);
-        }
-    }
 
     free(line);
     fclose(fp);
