@@ -22,9 +22,27 @@ void DisplayImage(SDL_Surface *image)
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(20000);
+    //SDL_Delay(20000);
+    WaitForKeypressed();
 
     SDL_FreeSurface(image);
+}
+
+void WaitForKeypressed()
+{
+    SDL_Event event;
+    // Infinite loop, waiting for event
+    for (;;) {
+        // Take an event
+        SDL_PollEvent( &event );
+        // Switch on event type
+        switch (event.type) {
+            // Someone pressed a key -> leave the function
+            case SDL_KEYDOWN: return;
+            default: break;
+        }
+        // Loop until we got the expected event
+    }
 }
 
 // Returns the Uint32 value of the pixel at position x, y
@@ -119,7 +137,7 @@ void LoadImage(SDL_Surface *image)
 	/*** BINARIZATION ***/
 	//Greyscale
 	GreyScale(pixels, h, w);
-    //DisplayImage(MatrixToSurface(pixels, h, w));
+    DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
 	int threshold = Otsu(pixels, h, w);
@@ -129,7 +147,7 @@ void LoadImage(SDL_Surface *image)
     //DisplayImage(MatrixToSurface(pixels, h, w));
 
     /*** SEGMENTATION ***/
-    Segmentation(matrix, h, w);
+    //Segmentation(matrix, h, w);
 
 
     /*** FREE ALLOCATED MEMORY ***/

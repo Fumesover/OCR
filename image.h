@@ -10,6 +10,7 @@ struct Pixel {
 
 /* SDL */
 void DisplayImage(SDL_Surface *image);
+void WaitForKeypressed();
 Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 
