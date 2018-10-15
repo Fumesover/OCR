@@ -24,7 +24,7 @@ void Segmentation(int **matrix, int h, int w)
     queue = malloc(sizeof(*queue));
     queue->first = NULL;
 
-    InitList(histo, h);
+    InitArray(histo, h);
     MatrixHHistogram(matrix, histo, h, w);
 
     /*** LINE SEGMENTATION ***/
@@ -32,6 +32,7 @@ void Segmentation(int **matrix, int h, int w)
 
     // TEST: displays result
     ShowSegmentation(queue);
+
     BinToPixels(matrix, pixels, h, w);
     DisplayImage(MatrixToSurface(pixels, h, w));
 
@@ -84,7 +85,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
             }
 
             // Clears and creates histogram for each detected line
-            InitList(histoW, w);
+            InitArray(histoW, w);
             MatrixWHistogram(matrix, histoW, x1, x2, w);
 
             // Cuts line in char
@@ -198,7 +199,6 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
             new[i-h1][j-w1] = matrix[i][j];
     }
 
-    // PrintMatrix(new, h2-h1, w2-w1);
     Tuple *data = NewTuple();
 
     data->data = new;
@@ -207,12 +207,14 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
     Enqueue(queue, data);
 }
 
-
+// Shows result of segmentation
+// Prints elements of the queue in a file
 void ShowSegmentation(Queue *queue)
 {
     Elt *curr = NULL;
     int **c;
     Pixel **m;
+    FILE* file = fopen("treated","w");
 
     if (queue->first != NULL)
         curr = queue->first;
@@ -223,27 +225,25 @@ void ShowSegmentation(Queue *queue)
             c = curr->data->data;
 
             if (c[0][0] == 10)
-                printf("\n");
+                fprintf(file, "\n");
             else if (c[0][0] == 32)
-                printf(" ");
+                fprintf(file, " ");
             else if (curr->data->width > 1 && curr->data->height > 1){
-                printf("v");
+                fprintf(file, "c");
 
                 int h = curr->data->height;
                 // int w = curr->data->width;
                 m = malloc(sizeof(Pixel*) * h);
 
-                //BinToPixels(c, m, h, w);
-                //DisplayImage(MatrixToSurface(m, h, w));
-
-                //PrintMatrix(c, h, w);
-
                 free(m);
             }
             else
-                printf("\n");
+                fprintf(file, "\n");
 
             curr = curr->next;
         }
     }
+
+    // Closing file
+    fclose(file);
 }

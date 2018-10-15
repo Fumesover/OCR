@@ -3,11 +3,11 @@
 
 /* INITIALIZE */
 void InitMatrix(int **matrix, int h, int w);
-void InitList(int *list, int h);
+void InitArray(int *list, int h);
 
 /* PRINT */
 void PrintMatrix(int **matrix, int h, int w);
-void PrintList(int *list, int h);
+void PrintArray(int *list, int h);
 
 /* FILL HISTOGRAM */
 void MatrixHHistogram(int **matrix, int *histogram, int h, int w);

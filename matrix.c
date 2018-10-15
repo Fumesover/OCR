@@ -32,7 +32,7 @@ void InitMatrix(int **matrix, int h, int w)
 /*** Lists ***/
 
 // Initializes all values of the list to 0
-void InitList(int *list, int h)
+void InitArray(int *list, int h)
 {
     for (int i = 0; i < h; i++)
     {
@@ -41,7 +41,7 @@ void InitList(int *list, int h)
 }
 
 // Prints the list of the matrix into the terminal
-void PrintList(int *list, int h)
+void PrintArray(int *list, int h)
 {
     for (int i = 0; i < h; i++)
     {

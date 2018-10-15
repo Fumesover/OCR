@@ -16,9 +16,9 @@ void DisplayImage(SDL_Surface *image)
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1000, 1000, 0);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 1000, 0);
 
-    SDL_Rect dest = { 1000/2 - image->w/2,1000/2 - image->h/2, 0, 0};
+    SDL_Rect dest = { 1600/2 - image->w/2,1000/2 - image->h/2, 0, 0};
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
 
     SDL_UpdateWindowSurface(screen);
@@ -137,18 +137,17 @@ void LoadImage(SDL_Surface *image)
 	/*** BINARIZATION ***/
 	//Greyscale
 	GreyScale(pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
 	int threshold = Otsu(pixels, h, w);
 	Binarization(pixels, h, w, threshold);
 
     BinarizeMatrix(pixels, matrix, h, w);
-    //DisplayImage(MatrixToSurface(pixels, h, w));
+    DisplayImage(MatrixToSurface(pixels, h, w));
 
     /*** SEGMENTATION ***/
-    //Segmentation(matrix, h, w);
-
+    Segmentation(matrix, h, w);
+    //DisplayImage(MatrixToSurface(pixels, h, w));
 
     /*** FREE ALLOCATED MEMORY ***/
     for (int j = 0; j < h; j++)
@@ -296,17 +295,20 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
                     pixels[i][j].g = (Uint8)255;
                     pixels[i][j].b = (Uint8)255;
                     break;
-                case(2): // GREEN
-                    pixels[i][j].r = (Uint8)0;
-                    pixels[i][j].g = (Uint8)255;
-                    pixels[i][j].b = (Uint8)0;
+                case(2): // LINES
+                    pixels[i][j].r = (Uint8)254;
+                    pixels[i][j].g = (Uint8)17;
+                    pixels[i][j].b = (Uint8)88;
                     break;
-                case(3): // RED
-                    pixels[i][j].r = (Uint8)0;
+                case(3): // CHARACTERS
+                    pixels[i][j].r = (Uint8)68;
                     pixels[i][j].g = (Uint8)0;
                     pixels[i][j].b = (Uint8)255;
                     break;
                 default:
+                    pixels[i][j].r = (Uint8)255;
+                    pixels[i][j].g = (Uint8)255;
+                    pixels[i][j].b = (Uint8)255;
                     break;
             }
         }
@@ -352,6 +354,7 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
         amask = 0xff000000;
     #endif
 
+    // Creates new surface
     surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 
                                    rmask, gmask, bmask, amask);
     if(surface == NULL) {
