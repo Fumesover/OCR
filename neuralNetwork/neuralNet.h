@@ -42,7 +42,8 @@ float NNerror(neuNet* n, float* target);
 void NNfree(neuNet* n);
 
 // load NN 
+neuNet* NNload(char* filename);
 
 // save NN 
-
+void NNsave(neuNet* n, char* filename);
 
