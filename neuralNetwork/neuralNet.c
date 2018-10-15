@@ -1,11 +1,36 @@
 #include "neuralNet.h"
 
-#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 
+#define _GNU_SOURCE
+#include <stdio.h>
+size_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
 
+int NNmain(void) {
+    // INIT
+    int   nbInp = 2;
+    int   nbHidden = 2;
+    int   hidden[] = {3, 4};
+    int   nbOut = 1;
+
+    neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
+    
+    // RANDOMISE
+    NNrand(n);
+    
+    // ici n est le reseau
+    NNsave(n, "test.txt");
+    
+    NNfree(n);
+
+    n = NNload("test.txt");
+
+    NNfree(n);
+    
+    return 0;
+}
 
 /* Nb hidden = 
  *              < 2 * nbInputs
@@ -18,8 +43,8 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int* nbHidden, const int nbOutput){
     
     if (nbLayers < 1) {
-        printf("Error : NeuralNetwork need at least one hidden layer\n");
-        return NULL;
+        printf("Error : NeuralNetwork need at least one hidden layer");
+        // return NULL; // < TODO : gerer fail
     }
     
     neuNet* nn = malloc(sizeof(neuNet));
@@ -36,13 +61,11 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
         nn->ttHidden += nbHidden[p];
 
     // Compute count weights
-    int p = 0;
-    nn->nbWeights = nbInputs * nbHidden[p];
-    for(; p < nbLayers - 1; p++) 
+    nn->nbWeights = nbInputs * nbHidden[0];
+    for(int p = 0; p < nbLayers - 1; p++)
         nn->nbWeights += nbHidden[p] * nbHidden[p + 1];
+    nn->nbWeights += nbHidden[nbLayers - 1] * nbOutput;
     
-    nn->nbWeights += nbHidden[p] * nbOutput;
-
     // Compute count biais
     nn->nbBiais = nbOutput + nn->ttHidden;
     
@@ -194,7 +217,8 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
     wPos = n->nbWeights - n->nbHidden[n->nbLayers - 1] * n->nbOutput;
     for (int pos = n->ttHidden - n->nbHidden[n->nbLayers - 1]; pos < n->ttHidden; pos++) {
         for (int posD = 0; posD < n->nbOutput; posD++) {
-            float toUp = costOutp[posD] * primeOfAct(n->neuOutput[posD]) * n->neuHidden[pos];
+            float toUp = costOutp[posD] * primeOfAct(n->neuOutput[posD])
+                                          * n->neuHidden[pos];
             n->weights[wPos++] += toUp * rate;
         }
     }
@@ -264,8 +288,67 @@ float NNTrain(neuNet* n, float* inp, float* targ, float update) {
     return NNerror(n, targ);
 }
 
-const float* NNinput(neuNet* n, float* inp) {
-    forwardPropagation(n, inp);
-    return n->neuOutput;
+void NNsave(neuNet* n, char* filename){
+    FILE* fPointer = fopen(filename,"w");
+    
+    fprintf(fPointer,"%d\n",n->nbInputs);
+    fprintf(fPointer,"%d\n",n->nbOutput);
+    fprintf(fPointer,"%d\n",n->nbLayers);
+    
+    for(int i = 0; i < n->nbLayers; i++)
+        fprintf(fPointer,"%d ",n->nbHidden[i]);
+    fprintf(fPointer,"\n");
+
+    for(int i = 0; i < n->nbWeights; i++)
+        fprintf(fPointer,"%f ",n->weights[i]);
+    fprintf(fPointer,"\n");
+    
+    for(int i = 0; i < n->nbBiais; i++)
+        fprintf(fPointer,"%f ",n->biais[i]);
+    
+    fprintf(fPointer,"\n");
+    fclose(fPointer);
 }
 
+neuNet* NNload(char* filename){
+    FILE* fp = fopen(filename,"r");
+    size_t len = 0;
+    char* line = NULL;
+    size_t read;
+   
+    int nbInputs = 0;
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
+        nbInputs = atoi(line);
+    
+    int nbOutput = 0;
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
+        nbOutput = atoi(line);
+    
+    int nbLayers = 0;
+    if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
+        nbLayers = atoi(line);
+    
+    int* nbHidden = malloc(nbLayers * sizeof(int));
+    for (int i = 0; i < nbLayers; i++)
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1) 
+            nbHidden[i] = atoi(line);
+    read = getdelim(&line, &len, '\n', fp); // remove last space
+    
+    neuNet* n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput); 
+    
+    free(nbHidden);
+    
+    for (int i = 0; i < n->nbWeights; i++)
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
+            n->weights[i] = atof(line);
+    read = getdelim(&line, &len, '\n', fp); // remove last space
+
+    for (int i = 0; i < n->nbBiais; i++)
+        if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
+            n->biais[i] = atof(line);
+
+    free(line);
+    fclose(fp);
+
+    return n;
+}
