@@ -1,9 +1,9 @@
 #include "neuralNet.h"
-#include "xor.h"
-
+#include "NNgraphviz.h"
 #include <stdio.h>
+#include <string.h>
 
-int main(void) {
+int main(void) { // int argc, char** argv) {
     // INIT
     int   nbInp = 2;
     float inpVals[] = {1, 1};
@@ -12,7 +12,7 @@ int main(void) {
     int   nbOut = 1;
     float target[] = {0};
 
-    float updateRate = 1.0f;
+    float updateRate = 0.4f;
 
     neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
     
@@ -23,7 +23,6 @@ int main(void) {
     NNrand(n);
     
     float err;
-    int itteration = 0;
     float tests[4][3] = {
         {1.0f,1.0f,0.0f},
         {0.0f,0.0f,0.0f},
@@ -32,6 +31,14 @@ int main(void) {
     };
     int testPos = 0;
     int testLen = 4;
+    int itteration = 0;
+
+    char* outputs[4] = {
+        "xor-1-",
+        "xor-2-",
+        "xor-3-",
+        "xor-4-" 
+    };
 
     do {
         err = 0.0f;
@@ -43,19 +50,23 @@ int main(void) {
             float errthis = NNTrain(n, inpVals, target, updateRate);
             err += errthis;
             
-            printf("  n°%d => error : %f vals : %d xor %d => %d (%f) \n", 
-                    itteration++, errthis, (int) tests[testPos][0], 
-                    (int)tests[testPos][1], (int) tests[testPos][2], n->neuOutput[0]);
+            char path[20];
+            char num[15];
+            strcpy(path, outputs[testPos]);
+            sprintf(num, "%09d", itteration);
+            strcat(path, num);
+            FILE* file = fopen(path, "w");
+            printf("%s\n", path);
+            NNtoGraphviz(file, n, inpVals);
+            fclose(file);
         }
-
-        printf("n°%d : batch error : %f -- update rate : %f\n", 
-                itteration / testLen, err, updateRate);
-        updateRate *= 0.9999f;
+        
+        itteration++;
+        updateRate = 0.99f;
     } while (err > 0.01f);
     
     NNfree(n);
 
     return 0;
+
 }
-
-
