@@ -274,8 +274,11 @@ void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w)
 // Fills the Pixel matrix considering the values of the binarized matrix
 void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
 {
+    /*
     for (int i = 0; i < h; i++)
-        pixels[i] = malloc(sizeof(Pixel) * w);
+        pixels[i] = malloc(sizeof(Pixel) * w);*/
+
+    printf("xp : %lu, yp : %lu, xm : %lu, ym : %lu\n", sizeof(pixels) / sizeof(Pixel), sizeof(pixels[0]) / sizeof(Pixel), sizeof(matrix) / 8, sizeof(matrix[0]) / 8);
 
     for (int i = 0; i < h; i++)
     {

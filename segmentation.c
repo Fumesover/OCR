@@ -318,6 +318,7 @@ void ShowSegmentation(Queue *queue)
     int **c;
     Pixel **m;
     FILE* file = fopen("out.treated","w");
+    int t;
 
     if (queue->first != NULL)
         curr = queue->first;
@@ -335,8 +336,17 @@ void ShowSegmentation(Queue *queue)
                 fprintf(file, "c");
 
                 int h = curr->data->height;
-                // int w = curr->data->width;
-                m = malloc(sizeof(Pixel*) * h);
+                int w = curr->data->width;
+
+                if (h > w) t = h; else t = w;
+
+                    m = malloc(sizeof(Pixel *) * t);
+                    for (int i = 0; i < t; i++)
+                        m[i] = malloc(sizeof(int) * t);
+                printf("%d\n", t);
+
+                BinToPixels(SquareMatrix(c, t), m, t, t);
+                DisplayImage(MatrixToSurface(m, t, t));
 
                 free(m);
             }

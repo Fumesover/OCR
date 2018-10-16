@@ -14,5 +14,7 @@ void MatrixHHistogram(int **matrix, int *histogram, int h, int w);
 void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w);
 
 void Copy(int **mat1, int**mat2);
+int **SquareMatrix(int **matrix, int t);
+int **ResizeMatri(int **matrix);
 
 #endif
