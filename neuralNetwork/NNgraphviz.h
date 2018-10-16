@@ -1,3 +1,5 @@
 #pragma once
 
-int main(void);
+#include <stdio.h>
+
+void NNtoGraphviz(FILE* output, neuNet* n, float* input);

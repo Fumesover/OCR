@@ -32,10 +32,10 @@ xor: xor.o neuralNet.o
 
 NNgraphviz: NNgraphviz.o neuralNet.o
 
-showgraph: NNgraphviz
-	./NNgraphviz | dot -Tpng > test
-	feh test
-	rm test
+xorGraphviz: xorGraphviz.o neuralNet.o NNgraphviz.o
+
+xorgif: xorGraphviz
+	./gifCreator.sh	
 
 .PHONY: clean
 clean:

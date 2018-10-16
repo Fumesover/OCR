@@ -272,14 +272,15 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
 }
 
 float error(float a, float b) {
-    return 0.5 * (a - b) * (a - b);
+    return (a - b) * (a - b);
+    // return 0.5 * (a - b) * (a - b);
 }
 
 float NNerror(neuNet *n, float* target) {
     float sum = 0.0f;
     for (int p = 0; p < n->nbOutput; p++)
         sum += error(n->neuOutput[p], target[p]);
-    return sum;
+    return sum / (float) n->nbOutput;
 }
 
 float NNTrain(neuNet* n, float* inp, float* targ, float update) {
