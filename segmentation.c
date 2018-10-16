@@ -7,8 +7,8 @@
 #include "queue.h"
 #include "matrix.h"
 
-#define HOR_THRESH 50
-#define VER_THRESH 50
+#define HOR_THRESH 150
+#define VER_THRESH 150
 
 // Main document segmentation functions
 // Makes histogram and calls line segmentation function
@@ -31,17 +31,17 @@ void Segmentation(int **matrix, int h, int w)
     MatrixHHistogram(matrix, histo, h, w);
 
     /*** RLSA ***/
-    BinToPixels(RLSA(matrix, h, w), pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));
+    /*BinToPixels(RLSA(matrix, h, w), pixels, h, w);
+    DisplayImage(MatrixToSurface(pixels, h, w));*/
 
     /*** LINE SEGMENTATION ***/
-    /*CutInLine(matrix, histo, queue, h,  w);
+    CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
     ShowSegmentation(queue);
 
     BinToPixels(matrix, pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));*/
+    DisplayImage(MatrixToSurface(pixels, h, w));
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -76,8 +76,8 @@ int** RLSA(int **matrix, int h, int w) {
             {
                     if (nbzeros <= HOR_THRESH)
                     {
-                        for (int k = j - nbzeros; k < j-1; k++)
-                            resH[i][k] = 1;
+                        for (int k = j - nbzeros + 1; k < j-1; k++)
+                            resH[i][k] = 4;
                     }
                     nbzeros = 0;
             }
@@ -85,6 +85,8 @@ int** RLSA(int **matrix, int h, int w) {
                 nbzeros++;
         }
     }
+
+    nbzeros = 0;
 
     /*** COLUMN PROCESSING ***/
     for (int j = 0; j < w; j++)
@@ -95,8 +97,9 @@ int** RLSA(int **matrix, int h, int w) {
             {
                     if (nbzeros <= VER_THRESH)
                     {
-                        for (int k = i - nbzeros; k < i-1; k++)
-                            resW[k][j] = 1;
+                        for (int k = i - nbzeros + 1; k < i-1; k++)
+                            if (k >= 0)
+                                resW[k][j] = 4;
                     }
                     nbzeros = 0;
             }
@@ -107,7 +110,7 @@ int** RLSA(int **matrix, int h, int w) {
     /*** AND OPERATOR ON BOTH MATRIXES ***/
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
-            res[i][j] = (resW[i][j] && resH[i][j]) ? 1 : 0;
+            res[i][j] = (resW[i][j] && resH[i][j]) ? 4 : 0;
         }
     }
 
@@ -128,6 +131,9 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     /*** INIT ***/
     int i = 0, x1, x2;
     int *histoW = NULL;
+    int space = 0;
+    float average_sp = 0.0;
+
     Tuple *data = NewTuple();
     data->height = 1;
     data->width = 1;
@@ -140,6 +146,9 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     eol[0][0] = 10;
 
     data->data = eol;
+
+    // Find average space between lines
+    average_sp = AverageSpace(histogram);
 
     /*** PROCESSING ALL LINES ***/
     while (i < h)
@@ -160,19 +169,25 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
                 matrix[x1][j] = 2;
             }
 
-            // Clears and creates histogram for each detected line
-            InitArray(histoW, w);
-            MatrixWHistogram(matrix, histoW, x1, x2, w);
+            if (space >= average_sp)
+            {
+                // Clears and creates histogram for each detected line
+                InitArray(histoW, w);
+                MatrixWHistogram(matrix, histoW, x1, x2, w);
 
-            // Cuts line in char
-            CutInChar(matrix, histoW, queue, x1, x2, w);
+                // Cuts line in char
+                CutInChar(matrix, histoW, queue, x1, x2, w);
 
-            // Enqueue eol after line is treated
-            Enqueue(queue, data);
+                // Enqueue eol after line is treated
+                Enqueue(queue, data);
+            }
+            space = 0;
         }
 
-        else
+        else {
             i++;
+            space++;
+        }
     }
 
     /*** FREE ALLOCATED MEMORY ***/
@@ -182,13 +197,13 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     free(eol);
 }
 
+
 // Cutes line from h1 to h2 in "matrix" in characters
 // and puts them in the queue
 void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w)
 {
     /*** INIT ***/
     int i = 0, space = 0, x1 = 0, x2 = 0;
-    int min_sp = 100, max_sp = 0;
     float average_sp = 0.0;
     int pos = 0, last_pos = w - 1;
 
@@ -203,28 +218,8 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
 
     data->data = sp;
 
-    /*** FINDS AVERAGE SPACE OF LINE ***/
-    while (histogram[pos] == 0) pos++;
-    while (histogram[last_pos] == 0) last_pos--;
-
-    while (pos < last_pos)
-    {
-        if (histogram[pos] == 0)
-        {
-            while (histogram[pos] == 0) {
-                pos++;
-                space++;
-            }
-
-            if (space < min_sp) min_sp = space;
-            if (space > max_sp) max_sp = space;
-        }
-
-        else pos++;
-        space = 0;
-    }
-
-    average_sp = (float)(min_sp + max_sp) / 2;
+    // Find average space between characters
+    average_sp = AverageSpace(histogram);
 
     /*** PROCESSING ALL COLUMNS ***/
     while (i < w)
@@ -261,6 +256,38 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
         }
     }
 }
+
+// Returns the average white spaces in the histogram
+int AverageSpace(int* histogram)
+{
+    int pos = 0, last_pos = sizeof(histogram) / 8 - 1;
+    float average_sp = 0.0;
+    int space = 0, min_sp = 100, max_sp = 0;
+
+    /*** FINDS AVERAGE SPACE OF LINE ***/
+    while (histogram[pos] == 0) pos++;
+    while (histogram[last_pos] == 0) last_pos--;
+
+    while (pos < last_pos)
+    {
+        if (histogram[pos] == 0)
+        {
+            while (histogram[pos] == 0) {
+                pos++;
+                space++;
+            }
+
+            if (space < min_sp) min_sp = space;
+            if (space > max_sp) max_sp = space;
+        }
+
+        else pos++;
+        space = 0;
+    }
+
+    average_sp = (float)(min_sp + max_sp) / 2;
+}
+
 
 void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 {

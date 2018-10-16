@@ -16,13 +16,11 @@ void DisplayImage(SDL_Surface *image)
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1600, 1000, 0);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, image->w, image->h, 0);
 
-    SDL_Rect dest = { 1600/2 - image->w/2,1000/2 - image->h/2, 0, 0};
-    SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
+    SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen), 0);
 
     SDL_UpdateWindowSurface(screen);
-    //SDL_Delay(20000);
     WaitForKeypressed();
 
     SDL_FreeSurface(image);
@@ -286,6 +284,7 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
             switch(matrix[i][j])
             {
                 case(1): // BLACK
+                case(4):
                     pixels[i][j].r = (Uint8)0;
                     pixels[i][j].g = (Uint8)0;
                     pixels[i][j].b = (Uint8)0;
@@ -306,9 +305,9 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
                     pixels[i][j].b = (Uint8)255;
                     break;
                 default:
-                    pixels[i][j].r = (Uint8)255;
-                    pixels[i][j].g = (Uint8)255;
-                    pixels[i][j].b = (Uint8)255;
+                    pixels[i][j].r = (Uint8)25;
+                    pixels[i][j].g = (Uint8)25;
+                    pixels[i][j].b = (Uint8)25;
                     break;
             }
         }
