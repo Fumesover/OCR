@@ -15,7 +15,7 @@
 int main(int argc, char** argv)
 {
     // TODO : Select file from interface file chooser
-    char *path_image = "/home/rhaeven/Documents/OCR/lorem1.png";
+    char *path_image = "/home/rhaeven/Documents/OCR/scan1.png";
     char *enter = "", *tmp;
     enter = malloc(200*sizeof(char));
    

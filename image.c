@@ -296,9 +296,9 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
                     pixels[i][j].b = (Uint8)255;
                     break;
                 case(2): // LINES
-                    pixels[i][j].r = (Uint8)254;
-                    pixels[i][j].g = (Uint8)17;
-                    pixels[i][j].b = (Uint8)88;
+                    pixels[i][j].r = (Uint8)255;
+                    pixels[i][j].g = (Uint8)204;
+                    pixels[i][j].b = (Uint8)0;
                     break;
                 case(3): // CHARACTERS
                     pixels[i][j].r = (Uint8)68;

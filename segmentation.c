@@ -7,6 +7,9 @@
 #include "queue.h"
 #include "matrix.h"
 
+#define HOR_THRESH 50
+#define VER_THRESH 50
+
 // Main document segmentation functions
 // Makes histogram and calls line segmentation function
 void Segmentation(int **matrix, int h, int w)
@@ -27,14 +30,18 @@ void Segmentation(int **matrix, int h, int w)
     InitArray(histo, h);
     MatrixHHistogram(matrix, histo, h, w);
 
+    /*** RLSA ***/
+    BinToPixels(RLSA(matrix, h, w), pixels, h, w);
+    DisplayImage(MatrixToSurface(pixels, h, w));
+
     /*** LINE SEGMENTATION ***/
-    CutInLine(matrix, histo, queue, h,  w);
+    /*CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
     ShowSegmentation(queue);
 
     BinToPixels(matrix, pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));
+    DisplayImage(MatrixToSurface(pixels, h, w));*/
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -42,6 +49,75 @@ void Segmentation(int **matrix, int h, int w)
     for (int i = 0; i < h; i++)
         free(pixels[i]);
     free(pixels);
+}
+
+
+int** RLSA(int **matrix, int h, int w) {
+    int nbzeros = 0;
+    int** resH = malloc(sizeof(int*) * h);
+    int** resW = malloc(sizeof(int*) * h);
+    int** res = malloc(sizeof(int*) * h);
+
+    for (int i = 0; i < h; i++) {
+        resH[i] = malloc(sizeof(int) * w);
+        resW[i] = malloc(sizeof(int) * w);
+        res[i] = malloc(sizeof(int) * w);
+    }
+
+    Copy(matrix, resH);
+    Copy(matrix, resW);
+
+    /*** ROW PROCESSING ***/
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+        {
+            if (matrix[i][j] == 1)
+            {
+                    if (nbzeros <= HOR_THRESH)
+                    {
+                        for (int k = j - nbzeros; k < j-1; k++)
+                            resH[i][k] = 1;
+                    }
+                    nbzeros = 0;
+            }
+            else
+                nbzeros++;
+        }
+    }
+
+    /*** COLUMN PROCESSING ***/
+    for (int j = 0; j < w; j++)
+    {
+        for (int i = 0; i < h; i++)
+        {
+            if (matrix[i][j] == 1)
+            {
+                    if (nbzeros <= VER_THRESH)
+                    {
+                        for (int k = i - nbzeros; k < i-1; k++)
+                            resW[k][j] = 1;
+                    }
+                    nbzeros = 0;
+            }
+            nbzeros++;
+        }
+    }
+
+    /*** AND OPERATOR ON BOTH MATRIXES ***/
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            res[i][j] = (resW[i][j] && resH[i][j]) ? 1 : 0;
+        }
+    }
+
+    /*** FREE ALLOCATED MEMORY ***/
+    for (int i = 0; i < h; i++) {
+        free(resH[i]);
+        free(resW[i]);
+    }
+
+    return res;
 }
 
 
@@ -167,7 +243,7 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
             while (histogram[i] > 0) i++;
 
             // Left side of character
-            if (i == w - 1) x2 = i; else x2 = i + 1;
+            x2 = i;
 
             // Draws line around character
             for (int j = h1; j < h2; j++) {
@@ -214,7 +290,7 @@ void ShowSegmentation(Queue *queue)
     Elt *curr = NULL;
     int **c;
     Pixel **m;
-    FILE* file = fopen("treated","w");
+    FILE* file = fopen("out.treated","w");
 
     if (queue->first != NULL)
         curr = queue->first;

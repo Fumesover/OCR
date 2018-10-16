@@ -80,3 +80,15 @@ void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w)
     }
 }
 
+// Copy content of mat1 into mat2
+void Copy(int **mat1, int**mat2)
+{
+    int w = sizeof(mat1) / 8;
+    int h = sizeof(mat1[0]) / 8;
+
+    for (int i = 0; i < h; i++)
+    {
+        for (int j = 0; j < w; j++)
+            mat2[i][j] = mat1[i][j];
+    }
+}

@@ -45,7 +45,7 @@ clean:
 	${RM} {,neuralNetwork/}xor 
 	${RM} {,neuralNetwork/}NNgraphviz
 	${RM} vgcore.*    
-
+	${RM} out.
 -include ${DEP}
 
 # END
