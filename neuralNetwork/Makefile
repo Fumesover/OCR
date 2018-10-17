@@ -42,7 +42,8 @@ clean:
 	${RM} *.o 		  	 # remove object files
 	${RM} *.d   	     # remove dependency files
 	${RM} NNgraphviz xor # remove main program
-	${RM} vgcore.*
+	${RM} xorGraphviz xor.gif
+	${RM} vgcore.*		 # remove valgrind files
 
 -include ${DEP}
 

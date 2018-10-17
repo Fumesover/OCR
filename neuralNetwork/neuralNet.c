@@ -101,30 +101,27 @@ float primeOfAct(float act) {
     return act * (1 - act);
 }
 
-void oneLayerPropagation(float* previous, const int pStart, const int pEnd,
-                         float* weights,  const int wStart,
-                         float* biais,    const int bStart,
-                         float* destination, const int dStart, const int dEnd) {
-    int nbDest = dEnd - dStart;
-    int nbPrev = pEnd - pStart;
-
+void oneLayerPropagation(float* previous, const int nbPrev,
+                         float* weights,  
+                         float* biais,   
+                         float* destination, const int nbDest) {
     for (int d = 0; d < nbDest; d++) {
         float sum = 0.0f;
 
         for (int p = 0; p < nbPrev; p++) 
-            sum += previous[p + pStart] * weights[p * nbDest + d + wStart];
+            sum += previous[p] * weights[p * nbDest + d];
         
-        destination[dStart + d] = activation(sum + biais[bStart + d]);  
+        destination[d] = activation(sum + biais[d]);  
     }
 }
 
 void forwardPropagation(neuNet* n, float* inp) {
    
     // Input -> Hidden
-    oneLayerPropagation(inp, 0, n->nbInputs, 
-                        n->weights, 0, 
-                        n->biais, 0,
-                        n->neuHidden, 0, n->nbHidden[0]);
+    oneLayerPropagation(inp, n->nbInputs, 
+                        n->weights,
+                        n->biais,
+                        n->neuHidden, n->nbHidden[0]);
 
     // Hidden -> Hidden
     int offsetBiais   = 0;
@@ -138,10 +135,10 @@ void forwardPropagation(neuNet* n, float* inp) {
         int dStart = offsetHidden + n->nbHidden[layer];
         int dEnd   = n->nbHidden[layer + 1] + (offsetHidden + n->nbHidden[layer]);
 
-        oneLayerPropagation(n->neuHidden, pStart, pEnd,
-                            n->weights, offsetWeights,
-                            n->biais,   offsetBiais + n->nbHidden[layer], 
-                            n->neuHidden, dStart, dEnd);
+        oneLayerPropagation(n->neuHidden + pStart, pEnd,
+                            n->weights   + offsetWeights,
+                            n->biais     + offsetBiais + n->nbHidden[layer], 
+                            n->neuHidden + dStart, dEnd);
 
         offsetBiais   += n->nbHidden[layer];
         offsetWeights += n->nbHidden[layer] * n->nbHidden[layer + 1];
@@ -149,11 +146,10 @@ void forwardPropagation(neuNet* n, float* inp) {
     }
     
     // Hidden -> Output
-    oneLayerPropagation(n->neuHidden, offsetHidden, 
-                                      n->nbHidden[n->nbLayers - 1] + offsetHidden,
-                        n->weights, offsetWeights,
-                        n->biais,   offsetBiais + n->nbOutput, 
-                        n->neuOutput, 0, n->nbOutput);
+    oneLayerPropagation(n->neuHidden + offsetHidden, n->nbHidden[n->nbLayers - 1] + offsetHidden,
+                        n->weights + offsetWeights,
+                        n->biais   + offsetBiais + n->nbOutput, 
+                        n->neuOutput, n->nbOutput);
 }
 
 void NNfree(neuNet *n) {
