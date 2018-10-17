@@ -32,13 +32,6 @@ int NNmain(void) {
     return 0;
 }
 
-/* Nb hidden =
- *              < 2 * nbInputs
- *              nbInput < xxxx < nbOuput (si beaucoup de nodes)
- *              2 / 3 * nbInput + nbOutput (maybe)
- *              (faire un mix de tout ca !)
-*/
-
 neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int* nbHidden, const int nbOutput){
 
@@ -55,18 +48,18 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
     nn->nbOutput = nbOutput;
     nn->nbLayers = nbLayers;
 
-    // Compute count hidden neurons
+    // Count hidden neurons
     nn->ttHidden = 0;
     for (int p = 0; p < nbLayers; p++)
         nn->ttHidden += nbHidden[p];
 
-    // Compute count weights
+    // Count weights
     nn->nbWeights = nbInputs * nbHidden[0];
     for(int p = 0; p < nbLayers - 1; p++)
         nn->nbWeights += nbHidden[p] * nbHidden[p + 1];
     nn->nbWeights += nbHidden[nbLayers - 1] * nbOutput;
 
-    // Compute count biais
+    // Count biais
     nn->nbBiais = nbOutput + nn->ttHidden;
 
     // Init arrays
@@ -101,16 +94,15 @@ float primeOfAct(float act) {
     return act * (1 - act);
 }
 
-void oneLayerPropagation(float* previous, const int nbPrev,
-                         float* weights,
-                         float* biais,
-                         float* destination, const int nbDest) {
-    for (int d = 0; d < nbDest; d++) {
-        float sum = 0.0f;
+void oneLayerPropagation(float* previous, const int nbPrev, float* weights,
+                         float* biais, float* destination, const int nbDest) {
 
+    for (int d = 0; d < nbDest; d++) {
+
+        float sum = 0.0f;
         for (int p = 0; p < nbPrev; p++)
             sum += previous[p] * weights[p * nbDest + d];
-
+    
         destination[d] = activation(sum + biais[d]);
     }
 }
@@ -118,38 +110,26 @@ void oneLayerPropagation(float* previous, const int nbPrev,
 void forwardPropagation(neuNet* n, float* inp) {
 
     // Input -> Hidden
-    oneLayerPropagation(inp, n->nbInputs,
-                        n->weights,
-                        n->biais,
-                        n->neuHidden, n->nbHidden[0]);
+    oneLayerPropagation(inp, n->nbInputs, n->weights, n->biais, n->neuHidden, n->nbHidden[0]);
 
     // Hidden -> Hidden
-    int offsetBiais   = 0;
-    int offsetWeights = n->nbInputs * n->nbHidden[0];
-    int offsetHidden  = 0;
+    float* biais   = n->biais + n->nbHidden[0];
+    float* weights = n->weights + n->nbInputs * n->nbHidden[0];
+    float* neuHidden = n->neuHidden;
 
     for (int layer = 0; layer < n->nbLayers - 1; layer++) {
 
-        int pStart = offsetHidden;
-        int pEnd   = n->nbHidden[layer] + offsetHidden;
-        int dStart = offsetHidden + n->nbHidden[layer];
-        int dEnd   = n->nbHidden[layer + 1] + (offsetHidden + n->nbHidden[layer]);
+        oneLayerPropagation(neuHidden, n->nbHidden[layer], weights, biais,
+                     neuHidden + n->nbHidden[layer], n->nbHidden[layer + 1]);
 
-        oneLayerPropagation(n->neuHidden + pStart, pEnd,
-                            n->weights   + offsetWeights,
-                            n->biais     + offsetBiais + n->nbHidden[layer],
-                            n->neuHidden + dStart, dEnd);
-
-        offsetBiais   += n->nbHidden[layer];
-        offsetWeights += n->nbHidden[layer] * n->nbHidden[layer + 1];
-        offsetHidden  += n->nbHidden[layer];
+        biais += n->nbHidden[layer];
+        weights   += n->nbHidden[layer] * n->nbHidden[layer + 1];
+        neuHidden += n->nbHidden[layer];
     }
 
     // Hidden -> Output
-    oneLayerPropagation(n->neuHidden + offsetHidden, n->nbHidden[n->nbLayers - 1] + offsetHidden,
-                        n->weights + offsetWeights,
-                        n->biais   + offsetBiais + n->nbOutput,
-                        n->neuOutput, n->nbOutput);
+    oneLayerPropagation(neuHidden, n->nbHidden[n->nbLayers - 1],
+                        weights, biais, n->neuOutput, n->nbOutput);
 }
 
 void NNfree(neuNet *n) {
@@ -268,8 +248,8 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
 }
 
 float error(float a, float b) {
-    return (a - b) * (a - b);
-    // return 0.5 * (a - b) * (a - b);
+    // return (a - b) * (a - b);
+    return 0.5 * (a - b) * (a - b);
 }
 
 float NNerror(neuNet *n, float* target) {

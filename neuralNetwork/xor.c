@@ -50,7 +50,6 @@ int main(void) {
 
         printf("n°%d : batch error : %f -- update rate : %f\n",
                 itteration / testLen, err, updateRate);
-        updateRate *= 0.9999f;
     } while (err > 0.01f);
 
     NNfree(n);

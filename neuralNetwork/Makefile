@@ -37,6 +37,8 @@ xorGraphviz: xorGraphviz.o neuralNet.o NNgraphviz.o
 xorgif: xorGraphviz
 	./gifCreator.sh
 
+NNtest: NNtest.o neuralNet.o
+
 remspaces: clean
 	sed -i 's/[ \t]*$$//' *
 
