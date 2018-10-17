@@ -9,30 +9,30 @@ typedef struct {
     int nbOutput;  // <= nb noeuds de sortie
 
     // To Compute
-    int nbWeights; 
+    int nbWeights;
     int nbBiais;
 
     // Values in arrays
     float *weights;
     float *biais;
-    
+
     // Neurons
     float *neuHidden;
     float *neuOutput;
-} 
+}
 neuNet;
 
-// Create a NN 
+// Create a NN
 neuNet* NNinit(const int nbInputs, const int nbLayers,
                 int *nbHidden, const int nbOutput);
 
-// Init nerwork with random weights and biais 
+// Init nerwork with random weights and biais
 void NNrand(neuNet* nn);
 
 // Train with one set, return output error
 float NNTrain(neuNet* n, float* inp, float* targ, float update);
 
-// Compute output of neural network with specific input 
+// Compute output of neural network with specific input
 const float* NNinput(neuNet* n, float* inp);
 
 // Compute error
@@ -41,9 +41,9 @@ float NNerror(neuNet* n, float* target);
 // Free NN
 void NNfree(neuNet* n);
 
-// load NN 
+// load NN
 neuNet* NNload(char* filename);
 
-// save NN 
+// save NN
 void NNsave(neuNet* n, char* filename);
 

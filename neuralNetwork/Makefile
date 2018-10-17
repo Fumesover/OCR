@@ -11,11 +11,11 @@ LDFLAGS =
 # Libs and path for linker
 LDLIBS = -lm $(pkg-config --libs sdl2) `pkg-config --libs gtk+-3.0` # -lm includes math library
 
-SRC = xor.c neuralNet.c 
+SRC = xor.c neuralNet.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: xor 
+all: xor
 
 main: ${OBJ}
 
@@ -35,7 +35,10 @@ NNgraphviz: NNgraphviz.o neuralNet.o
 xorGraphviz: xorGraphviz.o neuralNet.o NNgraphviz.o
 
 xorgif: xorGraphviz
-	./gifCreator.sh	
+	./gifCreator.sh
+
+remspaces: clean
+	sed -i 's/[ \t]*$$//' *
 
 .PHONY: clean
 clean:

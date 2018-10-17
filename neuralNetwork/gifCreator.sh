@@ -8,14 +8,14 @@ $source/xorGraphviz
 
 for filename in xor-[1-4]-*[0-9]; do
     echo "Adding title to file $filename"
-    sed -i "/headport/a label=\"$filename\"" $filename 
+    sed -i "/headport/a label=\"$filename\"" $filename
 done
 
 wait
 
 for filename in xor-[1-4]-*[0-9]; do
     echo "Creating image $filename"
-    cat $filename | dot -Tpng > $filename.png 
+    cat $filename | dot -Tpng > $filename.png
 done
 
 wait
