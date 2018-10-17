@@ -1,6 +1,10 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <SDL2/SDL.h>
 #include "matrix.h"
+#include "image.h"
+
+#define SIZE 20
 
 /*** Matrixes ***/
 
@@ -17,27 +21,47 @@ void PrintMatrix(int **matrix, int h, int w)
     }
 }
 
-// Initializes all values of the matrix to 0
-void InitMatrix(int **matrix, int h, int w)
+// Initializes the matrix
+int** InitIntMatrix(int h, int w)
 {
+    int **matrix = NULL;
+    matrix = malloc(sizeof(int*) * h);
     for (int i = 0; i < h; i++)
-    {
-        for (int j = 0; j < w; j++)
-        {
+        matrix[i] = malloc(sizeof(int) * w);
+
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
             matrix[i][j] = 0;
         }
     }
+
+    return matrix;
+}
+
+Pixel** InitPixelMatrix(int h, int w)
+{
+    Pixel **matrix = malloc(sizeof(Pixel*) * h);
+    for (int i = 0; i < h; i++)
+        matrix[i] = malloc(sizeof(Pixel) * w);
+
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            matrix[i][j].r = 0;
+            matrix[i][j].g = 0;
+            matrix[i][j].b = 0;
+        }
+    }
+
+    return matrix;
 }
 
 /*** Lists ***/
 
 // Initializes all values of the list to 0
-void InitArray(int *list, int h)
+void InitArray(int *array, int h)
 {
     for (int i = 0; i < h; i++)
-    {
-        list[i] = 0;
-    }
+        array[i] = 0;
 }
 
 // Prints the list of the matrix into the terminal
@@ -92,38 +116,129 @@ void Copy(int **mat1, int**mat2)
     }
 }
 
-// Returns a squared matrix equivalent to the original
-int **SquareMatrix(int **matrix, int t)
+int **RemoveWhite(int **matrix, int *h, int *w)
 {
     /*** INIT ***/
-    int h = sizeof(matrix) / 8;
-    int w = sizeof(matrix[0]) / 8;
-    //int t;
+    int* histoH = malloc(sizeof(int) * *h);
+    int* histoW = malloc(sizeof(int) * *w);
+    int** res;
+    int resH = 0, resW = 0 ;
+    int y = 0, x = 0, rx = 0, ry =0;
+
+    InitArray(histoH, *h);
+    InitArray(histoW, *w);
+
+    MatrixHHistogram(matrix, histoH, *h, *w);
+    MatrixWHistogram(matrix, histoW, 0, *h, *w);
+
+    // Finds size of result matrix -> black pixels only
+    for (int i = 0; i < *h; i++) {
+        if (histoH[i] != 0)
+            resH++;
+    }
+
+    for (int i = 0; i < *w; i++) {
+        if (histoW[i] != 0)
+            resW++;
+    }
+
+    res = InitIntMatrix(resH, resW);
+
+    while (y < *h)
+    {
+        if (histoH[y] > 0) {
+            while (histoH[y] > 0) {
+                while (x < *w)
+                {
+                    if (histoW[x] > 0) {
+                        while (histoW[x] > 0) {
+                            res[ry][rx] = matrix[y][x];
+                            x++;
+                            rx++;
+                        }
+                    }
+                    else x++;
+                }
+                rx = 0;
+                x = 0;
+                ry++;
+                y++;
+            }
+        }
+        else y++;
+    }
+    *h = resH;
+    *w = resW;
+    return res;
+}
 
 
-    //if (h > w) t = h; else t = w;
-    int** res = malloc(sizeof(int*) * t);
-    for (int i = 0; i < t; i++)
-        res[i] = malloc(sizeof(int) * t);
+// Returns a squared matrix equivalent to the original
+int **SquareMatrix(int **matrix, int h, int w)
+{
+    /*** INIT ***/
+    int t;
 
-    InitMatrix(res, t, t);
+    if (h > w) t = h; else t = w;
+
+    int** res = NULL;
+    res = InitIntMatrix(t, t);
+
+    int offset = (t - w) / 2;
 
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
-            if (h > w)
-                res[w / 2 + i - h / 2][j] = matrix[i][j];
-            else
-                res[i][w / 2 + j - h / 2] = matrix[i][j];
-
+            if (matrix[i][j] == 1) {
+                if (h > w)
+                    res[i][j + offset] = matrix[i][j];
+                else
+                    res[i + offset][j] = matrix[i][j];
+            }
         }
     }
-
-    printf("%d\n", t);
     return res;
 }
 
 // Resize the matrix
-int **ResizeMatri(int **matrix)
+int **ResizeMatrix(int **matrix, int t)
 {
+    double xscale = (double) SIZE / t;
+    double yscale = (double) SIZE / t;
+    double threshold = 0.5 / (xscale * yscale);
+    double yend = 0.0;
 
+    int **resize = malloc(sizeof(int*) * t);
+    for (int i = 0; i < t; i++)
+        resize[i] = malloc(sizeof(int) * t);
+
+    for (int f = 0; f < SIZE; f++) // y on output
+    {
+        double ystart = yend;
+        yend = (f + 1) / yscale;
+        if (yend >= t) yend = t - 0.000001;
+        double xend = 0.0;
+        for (int g = 0; g < SIZE; g++) // x on output
+        {
+            double xstart = xend;
+            xend = (g + 1) / xscale;
+            if (xend >= t) xend = t - 0.000001;
+            double sum = 0.0;
+            for (int y = (int)ystart; y <= (int)yend; ++y)
+            {
+                double yportion = 1.0;
+                if (y == (int)ystart) yportion -= ystart - y;
+                if (y == (int)yend) yportion -= y+1 - yend;
+                for (int x = (int)xstart; x <= (int)xend; ++x)
+                {
+                    double xportion = 1.0;
+                    if (x == (int)xstart) xportion -= xstart - x;
+                    if (x == (int)xend) xportion -= x+1 - xend;
+                    sum += resize[y][x] * yportion * xportion;
+                }
+            }
+            matrix[f][g] = (sum > threshold) ? 1 : 0;
+        }
+    }
+
+    return resize;
 }

@@ -11,6 +11,6 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
 void ShowSegmentation(Queue *queue);
 
 void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2);
-int AverageSpace(int* histogram);
+float AverageSpace(int* histogram, int t);
 
 #endif

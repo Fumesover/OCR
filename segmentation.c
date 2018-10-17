@@ -15,13 +15,11 @@
 void Segmentation(int **matrix, int h, int w)
 {
     int *histo = NULL;
-    Pixel **pixels = malloc(sizeof(Pixel*) * h);
-
-    for (int i = 0; i < h; i++)
-        pixels[i] = malloc(sizeof(Pixel) * w);
+    Pixel **pixels;
 
     /*** INIT ***/
     histo = malloc(sizeof(int) * h);
+    pixels = InitPixelMatrix(h, w);
 
     Queue *queue = NULL;
     queue = malloc(sizeof(*queue));
@@ -54,15 +52,13 @@ void Segmentation(int **matrix, int h, int w)
 
 int** RLSA(int **matrix, int h, int w) {
     int nbzeros = 0;
-    int** resH = malloc(sizeof(int*) * h);
-    int** resW = malloc(sizeof(int*) * h);
-    int** res = malloc(sizeof(int*) * h);
+    int** resH;
+    int** resW;
+    int** res;
 
-    for (int i = 0; i < h; i++) {
-        resH[i] = malloc(sizeof(int) * w);
-        resW[i] = malloc(sizeof(int) * w);
-        res[i] = malloc(sizeof(int) * w);
-    }
+    resH = InitIntMatrix(h, w);
+    resW = InitIntMatrix(h, w);
+    res = InitIntMatrix(h, w);
 
     Copy(matrix, resH);
     Copy(matrix, resW);
@@ -148,7 +144,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     data->data = eol;
 
     // Find average space between lines
-    average_sp = AverageSpace(histogram);
+    average_sp = AverageSpace(histogram, h);
 
     /*** PROCESSING ALL LINES ***/
     while (i < h)
@@ -169,18 +165,15 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
                 matrix[x1][j] = 2;
             }
 
-            if (space >= average_sp)
-            {
-                // Clears and creates histogram for each detected line
-                InitArray(histoW, w);
-                MatrixWHistogram(matrix, histoW, x1, x2, w);
+            // Clears and creates histogram for each detected line
+            InitArray(histoW, w);
+            MatrixWHistogram(matrix, histoW, x1, x2, w);
 
-                // Cuts line in char
-                CutInChar(matrix, histoW, queue, x1, x2, w);
+            // Cuts line in char
+            CutInChar(matrix, histoW, queue, x1, x2, w);
 
-                // Enqueue eol after line is treated
-                Enqueue(queue, data);
-            }
+            // Enqueue eol after line is treated
+            Enqueue(queue, data);
             space = 0;
         }
 
@@ -219,7 +212,7 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
     data->data = sp;
 
     // Find average space between characters
-    average_sp = AverageSpace(histogram);
+    average_sp = AverageSpace(histogram, w);
 
     /*** PROCESSING ALL COLUMNS ***/
     while (i < w)
@@ -258,10 +251,9 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
 }
 
 // Returns the average white spaces in the histogram
-int AverageSpace(int* histogram)
+float AverageSpace(int* histogram, int t)
 {
-    int pos = 0, last_pos = sizeof(histogram) / 8 - 1;
-    float average_sp = 0.0;
+    int pos = 0, last_pos = t - 1;
     int space = 0, min_sp = 100, max_sp = 0;
 
     /*** FINDS AVERAGE SPACE OF LINE ***/
@@ -285,16 +277,14 @@ int AverageSpace(int* histogram)
         space = 0;
     }
 
-    average_sp = (float)(min_sp + max_sp) / 2;
+    return (float)(min_sp + max_sp) / 2;
 }
 
 
 void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 {
-    int **new = NULL;
-    new = malloc(sizeof(int *) * (h2 - h1));
-    for (int i = 0; i < (h2-h1); i++)
-        new[i] = malloc(sizeof(int) * (w2-w1));
+    int **new;
+    new = InitIntMatrix(h2-h1, w2-w1);
 
     for (int i = h1; i < h2; i++)
     {
@@ -325,36 +315,34 @@ void ShowSegmentation(Queue *queue)
 
     while (curr != NULL && curr->data != NULL)
     {
-        if (curr->data != NULL) {
-            c = curr->data->data;
+        c = curr->data->data;
 
-            if (c[0][0] == 10)
-                fprintf(file, "\n");
-            else if (c[0][0] == 32)
-                fprintf(file, " ");
-            else if (curr->data->width > 1 && curr->data->height > 1){
-                fprintf(file, "c");
+        if (c[0][0] == 10)
+            fprintf(file, "\n");
+        else if (c[0][0] == 32)
+            fprintf(file, " ");
+        else if (curr->data->width > 1 && curr->data->height > 1){
+            fprintf(file, "c");
 
-                int h = curr->data->height;
-                int w = curr->data->width;
+            int h = curr->data->height;
+            int w = curr->data->width;
 
-                if (h > w) t = h; else t = w;
+            int **rm = RemoveWhite(c, &h, &w);
+            int **square = SquareMatrix(rm, h, w);
 
-                    m = malloc(sizeof(Pixel *) * t);
-                    for (int i = 0; i < t; i++)
-                        m[i] = malloc(sizeof(int) * t);
-                printf("%d\n", t);
+            if (h > w) t = h; else t = w;
 
-                BinToPixels(SquareMatrix(c, t), m, t, t);
-                DisplayImage(MatrixToSurface(m, t, t));
+            m = InitPixelMatrix(t, t);
 
-                free(m);
-            }
-            else
-                fprintf(file, "\n");
+            BinToPixels(square, m, t, t);
+            DisplayImage(MatrixToSurface(m, t, t));
 
-            curr = curr->next;
+            free(m);
         }
+        else
+            fprintf(file, "\n");
+
+        curr = curr->next;
     }
 
     // Closing file
