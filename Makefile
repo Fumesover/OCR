@@ -31,16 +31,6 @@ run: all
 xor: 
 	(cd neuralNetwork; make xor; mv xor ..)
 
-.PHONY: run xor
-run xor: xor
-	./xor
-
-showgraph: 
-	(cd neuralNetwork; make showgraph)
-
-NNgraphviz:
-	(cd neuralNetwork; make NNgraphviz; mv NNgraphviz ..)
-
 .PHONY: clean
 clean:
 	${RM} *.o */*.o	  # remove object files
