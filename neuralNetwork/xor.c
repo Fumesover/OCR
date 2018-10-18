@@ -52,7 +52,7 @@ int main(void) {
         printf("n°%d : batch error : %f -- update rate : %f\n",
                 itteration / testLen, err, updateRate);
     } while (err > 0.01f);
-    
+
     printf("\n========\n\n");
 
     printf("Saving neural network to %s\n", filepath);
@@ -61,7 +61,7 @@ int main(void) {
 
     printf("Loading file %s\n", filepath);
     neuNet* loaded = NNload(filepath);
-    
+
     for (int i = 0; i < testLen; i++) {
         inpVals[0] = tests[i][0];
         inpVals[1] = tests[i][1];

@@ -45,7 +45,7 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
     // Statics
     nn->nbInputs = nbInputs;
     nn->nbHidden = malloc(nbLayers * sizeof(int));
-    for (int l = 0; l < nbLayers; l++) 
+    for (int l = 0; l < nbLayers; l++)
         nn->nbHidden[l] = nbHidden[l];
     nn->nbOutput = nbOutput;
     nn->nbLayers = nbLayers;
@@ -69,7 +69,7 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
     nn->biais     = malloc(nn->nbBiais   * sizeof(*nn->biais));
     nn->neuHidden = malloc(nn->ttHidden  * sizeof(*nn->neuHidden));
     nn->neuOutput = malloc(nn->nbOutput  * sizeof(*nn->neuOutput));
-    
+
     return nn;
 }
 
@@ -98,14 +98,14 @@ float primeOfAct(float act) {
 
 void oneLayerPropagation(float* previous, const int nbPrev, float* weights,
                          float* biais, float* destination, const int nbDest) {
-    
+
     // printf("starting layer\n");
     for (int d = 0; d < nbDest; d++) {
 
         float sum = 0.0f;
         for (int p = 0; p < nbPrev; p++)
             sum += previous[p] * weights[p * nbDest + d];
-    
+
     /*
         printf("  biais[%d] = ", d);
         fflush(stdout);
@@ -114,7 +114,7 @@ void oneLayerPropagation(float* previous, const int nbPrev, float* weights,
     */
         destination[d] = activation(sum + biais[d]);
     }
-    
+
     // printf("end layer\n");
 }
 
@@ -143,7 +143,7 @@ void forwardPropagation(neuNet* n, float* inp) {
 void NNfree(neuNet *n) {
     free(n->neuHidden);
     free(n->neuOutput);
-    
+
     free(n->nbHidden);
 
     free(n->weights);
@@ -173,7 +173,7 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
             sum += costOutp[o] * n->weights[wPos] * primeOfAct(n->neuOutput[o]);
             wPos++;
         }
-        
+
         costH[posH] = sum;
     }
 
@@ -242,7 +242,7 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
         }
     }
 
-    // Update biais 
+    // Update biais
     // Output Layer
     for (int pos = 0; pos < n->nbOutput; pos++) {
         float toUp = costOutp[pos] * primeOfAct(n->neuOutput[pos]);
@@ -321,7 +321,7 @@ neuNet* NNload(char* filename){
     int nbLayers = 0;
     if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
         nbLayers = atoi(line);
-    
+
     int* nbHidden = malloc(nbLayers * sizeof(int));
     for (int i = 0; i < nbLayers; i++)
         if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
@@ -329,7 +329,7 @@ neuNet* NNload(char* filename){
     read = getdelim(&line, &len, '\n', fp); // remove last space
 
     neuNet* n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput);
-    
+
     free(nbHidden);
 
     for (int i = 0; i < n->nbWeights; i++)
