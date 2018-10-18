@@ -142,32 +142,28 @@ static Data build(const char* path, const int nips, const int nops)
     return data;
 }
 
-// Learns and predicts hand written digits with 98% accuracy.
 int main()
 {
-    // Input and output size is harded coded here as machine learning
-    // repositories usually don't include the input and output size in the data itself.
     int nips = 256;
     int nops = 10;
-    // Hyper Parameters.
-    // Learning rate is annealed and thus not constant.
-    // It can be fine tuned along with the number of hidden layers.
-    // Feel free to modify the anneal rate.
-    // The number of iterations can be changed for stronger training.
+    
     float rate = 1.0f;
-    int nbLayers = 2;
-    int nbHidden[] = {28, 28};
+    int nbLayers = 1;
+    int nbHidden[] = {16, 16};
     float anneal = 0.99f;
     int iterations = 128;
-    // Load the training set.
+    
     Data data = build("semeion.data", nips, nops);
-    // Train, baby, train.
+    Data data2 = build("semeion.data", nips, nops); data2 = data2;
+    
     neuNet* nn = NNinit(nips, nbLayers, nbHidden, nops);
+    NNrand(nn);
+
     for(int i = 0; i < iterations; i++)
     {
         shuffle(data);
         float error = 0.0f;
-        for(int j = 0; j < data.rows; j++)
+        for(int j = 0; j < data.rows; j++) // 1; j++)
         {
             float* const in = data.in[j];
             float* const tg = data.tg[j];
@@ -176,28 +172,39 @@ int main()
         printf("error %.12f :: learning rate %f\n",
             (double) error / data.rows,
             (double) rate);
-        rate *= anneal;
+        // rate *= anneal;
+        anneal = anneal;
     }
-    // This is how you save the neural network to disk.
-    NNsave(nn, "saved.tinn");
+    
+    // NNsave(nn, "saved.tinn");
     NNfree(nn);
-    // This is how you load the neural network from disk.
+    
+    /*
+    printf("===================");
+    fflush(stdout);
+
     neuNet* loaded = NNload("saved.tinn");
-    // Now we do a prediction with the neural network we loaded from disk.
-    // Ideally, we would also load a testing set to make the prediction with,
-    // but for the sake of brevity here we just reuse the training set from earlier.
-    // One data set is picked at random (zero index of input and target arrays is enough
-    // as they were both shuffled earlier).
-    // const float* const in = data.in[0];
-    // const float* const tg = data.tg[0];
-    // const float* const pd = xtpredict(loaded, in);
-    // Prints target.
-    // xtprint(tg, data.nops);
-    // Prints prediction.
-    // xtprint(pd, data.nops);
-    // All done. Let's clean up.
+    
+    printf("nbHidden[0] = %d", nn->nbHidden[0]);
+
+    float* const in = data.in[0];
+    float* const tg = data.tg[0];
+    float* const pd = NNGuess(loaded, in);
+    
+    for (int i = 0; i < nops; i++)
+        printf("%f ", tg[i]);
+    printf("\n");
+    
+    for (int i = 0; i < nops; i++)
+        printf("%f ", pd[i]);
+    printf("\n");
+    
     NNfree(loaded);
+    
+    */
+    
     dfree(data);
+    dfree(data2);
     return 0;
 }
 

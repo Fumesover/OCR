@@ -44,7 +44,9 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
 
     // Statics
     nn->nbInputs = nbInputs;
-    nn->nbHidden = nbHidden;
+    nn->nbHidden = malloc(nbLayers * sizeof(int));
+    for (int l = 0; l < nbLayers; l++) 
+        nn->nbHidden[l] = nbHidden[l];
     nn->nbOutput = nbOutput;
     nn->nbLayers = nbLayers;
 
@@ -67,7 +69,7 @@ neuNet* NNinit(const int nbInputs, const int nbLayers,
     nn->biais     = malloc(nn->nbBiais   * sizeof(*nn->biais));
     nn->neuHidden = malloc(nn->ttHidden  * sizeof(*nn->neuHidden));
     nn->neuOutput = malloc(nn->nbOutput  * sizeof(*nn->neuOutput));
-
+    
     return nn;
 }
 
@@ -96,20 +98,36 @@ float primeOfAct(float act) {
 
 void oneLayerPropagation(float* previous, const int nbPrev, float* weights,
                          float* biais, float* destination, const int nbDest) {
-
+    
+    // printf("starting layer\n");
     for (int d = 0; d < nbDest; d++) {
 
         float sum = 0.0f;
         for (int p = 0; p < nbPrev; p++)
             sum += previous[p] * weights[p * nbDest + d];
     
+    /*
+        printf("  biais[%d] = ", d);
+        fflush(stdout);
+        printf("%f\n", biais[d]);
+        fflush(stdout);
+    */
         destination[d] = activation(sum + biais[d]);
     }
+    
+    // printf("end layer\n");
 }
 
 void forwardPropagation(neuNet* n, float* inp) {
-
+    /*
+    printf("Starting forward : \n");
+    fflush(stdout);
     // Input -> Hidden
+    printf("%d\n", n->nbLayers);
+    fflush(stdout);
+    printf("%d\n", n->nbHidden[0]);
+    fflush(stdout);
+    */
     oneLayerPropagation(inp, n->nbInputs, n->weights, n->biais, n->neuHidden, n->nbHidden[0]);
 
     // Hidden -> Hidden
@@ -118,6 +136,10 @@ void forwardPropagation(neuNet* n, float* inp) {
     float* neuHidden = n->neuHidden;
 
     for (int layer = 0; layer < n->nbLayers - 1; layer++) {
+        
+    //    printf("layer %d, n->nbHidden[layer + 1] = %d\n", layer, n->nbHidden[layer + 1]);
+        
+    //    fflush(stdout);
 
         oneLayerPropagation(neuHidden, n->nbHidden[layer], weights, biais,
                      neuHidden + n->nbHidden[layer], n->nbHidden[layer + 1]);
@@ -135,6 +157,8 @@ void forwardPropagation(neuNet* n, float* inp) {
 void NNfree(neuNet *n) {
     free(n->neuHidden);
     free(n->neuOutput);
+    
+    free(n->nbHidden);
 
     free(n->weights);
     free(n->biais);
@@ -148,7 +172,10 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
     // Outputs errors
     float *costOutp = malloc(n->nbOutput * sizeof(float));
     for (int o = 0; o < n->nbOutput; o++)
-        costOutp[o] = - 2 * (n->neuOutput[o] - targ[o]);
+    {
+        costOutp[o] = 2 * (targ[o] - n->neuOutput[o]);
+        // printf("output %d was %f instead of %f, so cost is %f\n", o, n->neuOutput[o], targ[o], costOutp[o]);
+    }
 
     float *costH = malloc(n->ttHidden * sizeof(float));
 
@@ -159,7 +186,15 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
         float sum = 0.0f;
 
         for (int o = 0; o < n->nbOutput; o++)
-            sum += costOutp[o] * n->weights[wPos++] * primeOfAct(n->neuOutput[o]);
+        {
+            float v = costOutp[o] * n->weights[wPos] * primeOfAct(n->neuOutput[o]);
+            printf("  hidden %d was %f and it affect %d with cost %f\n", posH, n->neuHidden[posH], o, v);
+            printf("   values are : costOutp[%d]=%f, n->weights[%d] = %f\n", o, costOutp[o], wPos, n->weights[wPos]);
+            sum += costOutp[o] * n->weights[wPos] * primeOfAct(n->neuOutput[o]);
+            wPos++;
+        }
+        
+        printf("  hidden costH[%d] = %f\n", posH, sum);
 
         costH[posH] = sum;
     }
@@ -229,8 +264,7 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
         }
     }
 
-    // Update biais
-
+    // Update biais 
     // Output Layer
     for (int pos = 0; pos < n->nbOutput; pos++) {
         float toUp = costOutp[pos] * primeOfAct(n->neuOutput[pos]);
@@ -242,6 +276,7 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
         float toUp = costH[posH] * primeOfAct(n->neuHidden[posH]);
         n->biais[posH] += toUp * rate;
     }
+    
 
     free(costH);
     free(costOutp);
@@ -263,6 +298,13 @@ float NNTrain(neuNet* n, float* inp, float* targ, float update) {
     forwardPropagation(n, inp);
     backPropagation(n, inp, targ, update);
     return NNerror(n, targ);
+}
+
+float* NNGuess(neuNet* n, float* inp) {
+    printf("nbHidden[0] = %d\n", n->nbHidden[0]);
+    fflush(stdout);
+    forwardPropagation(n, inp);
+    return n->neuOutput;
 }
 
 void NNsave(neuNet* n, char* filename){
@@ -304,16 +346,25 @@ neuNet* NNload(char* filename){
     int nbLayers = 0;
     if ((read = getdelim(&line, &len, '\n', fp)) != (size_t) -1)
         nbLayers = atoi(line);
-
+    
+    printf("nbHidden size = %ld\n", nbLayers * sizeof(int));
     int* nbHidden = malloc(nbLayers * sizeof(int));
     for (int i = 0; i < nbLayers; i++)
         if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
             nbHidden[i] = atoi(line);
     read = getdelim(&line, &len, '\n', fp); // remove last space
 
-    neuNet* n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput);
+    printf("nbHidden[0]= %d\n", nbHidden[0]);
 
+    neuNet* n = NNinit(nbInputs, nbLayers, nbHidden, nbOutput);
+    
     free(nbHidden);
+
+    printf("nbInputs = %d, nbLayers = %d, nbOutput = %d\n", nbInputs, nbLayers, nbOutput);
+    fflush(stdout);
+    for (int i = 0; i < nbLayers; i++) {
+        printf("  nbHidden[%d] = %d\n", i, n->nbHidden[i]);
+    }
 
     for (int i = 0; i < n->nbWeights; i++)
         if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)

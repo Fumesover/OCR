@@ -38,6 +38,9 @@ const float* NNinput(neuNet* n, float* inp);
 // Compute error
 float NNerror(neuNet* n, float* target);
 
+// Make a guess with input
+float* NNGuess(neuNet* n, float* inp);
+
 // Free NN
 void NNfree(neuNet* n);
 

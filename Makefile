@@ -31,6 +31,10 @@ run: all
 xor: 
 	(cd neuralNetwork; make xor; mv xor ..)
 
+.PHONY: run xor
+run xor: xor
+	./xor
+
 showgraph: 
 	(cd neuralNetwork; make showgraph)
 
@@ -42,9 +46,10 @@ clean:
 	${RM} *.o */*.o	  # remove object files
 	${RM} *.d */*.d   # remove dependency files
 	${RM} main   	  # remove programs
-	${RM} {,neuralNetwork/}xor 
-	${RM} {,neuralNetwork/}NNgraphviz
-	${RM} vgcore.*    
+	${RM} xor 
+	${RM} NNgraphviz
+	${RM} vgcore.*
+	${MAKE} -C neuralNetwork clean
 
 -include ${DEP}
 
