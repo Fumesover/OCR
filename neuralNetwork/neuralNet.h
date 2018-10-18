@@ -1,39 +1,35 @@
 #pragma once
 
 typedef struct {
-    // Statiques
-    int nbInputs;  // <= nb noeuds entree
-    int nbLayers;  // <= nb niveaux caches
-    int *nbHidden; // <= nb hidden de chaque lvl
-    int ttHidden;  // <= nb total hidden neurons
-    int nbOutput;  // <= nb noeuds de sortie
+    // Statics
+    int nbInputs;   // <= number of input neurons
+    int nbLayers;   // <= number of hidden layers
+    int *nbHidden;  // <= number of hidden neurons for each hidden layer
+    int ttHidden;   // <= total number of hidden neurons
+    int nbOutput;   // <= number of output neurons
 
     // To Compute
-    int nbWeights;
-    int nbBiais;
+    int nbWeights;  // <= number of weights in the network
+    int nbBiais;    // <= number of biais in the network
 
     // Values in arrays
-    float *weights;
-    float *biais;
+    float *weights; // <= array of all weights
+    float *biais;   // <= array of all biais
 
     // Neurons
-    float *neuHidden;
-    float *neuOutput;
+    float *neuHidden; // <= array of all hidden neurons
+    float *neuOutput; // <= array of all output neurons
 }
 neuNet;
 
-// Create a NN
-neuNet* NNinit(const int nbInputs, const int nbLayers,
-                int *nbHidden, const int nbOutput);
+// Create a neural network
+neuNet* NNinit(int nbInputs, int nbLayers, int *nbHidden, int nbOutput);
 
 // Init nerwork with random weights and biais
 void NNrand(neuNet* nn);
 
 // Train with one set, return output error
 float NNTrain(neuNet* n, float* inp, float* targ, float update);
-
-// Compute output of neural network with specific input
-const float* NNinput(neuNet* n, float* inp);
 
 // Compute error
 float NNerror(neuNet* n, float* target);

@@ -17,7 +17,7 @@ int main(void) {
 
     neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
 
-    if (!n)
+    if (!n) // TODO: Better errors
         return 1;
 
     // RANDOMISE
@@ -44,13 +44,14 @@ int main(void) {
             float errthis = NNTrain(n, inpVals, target, updateRate);
             err += errthis;
 
-            printf("  n°%d => error : %f vals : %d xor %d => %d (%f) \n",
-                    itteration++, errthis, (int) tests[testPos][0],
-                    (int)tests[testPos][1], (int) tests[testPos][2], n->neuOutput[0]);
+            printf("  n°%d", itteration++);
+            printf(" => error : %f", errthis);
+            printf(" vals : %1.f xor %1.f", inpVals[0], inpVals[1]);
+            printf(" => %1.f (%f)\n", tests[testPos][2], n->neuOutput[0]);
         }
 
-        printf("n°%d : batch error : %f -- update rate : %f\n",
-                itteration / testLen, err, updateRate);
+        printf("n°%d : batch error : ", itteration / testLen);
+        printf("%f -- update rate : %f\n", err, updateRate);
     } while (err > 0.01f);
 
     printf("\n========\n\n");
@@ -73,5 +74,4 @@ int main(void) {
     NNfree(loaded);
     return 0;
 }
-
 

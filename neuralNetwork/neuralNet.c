@@ -32,12 +32,11 @@ int NNmain(void) {
     return 0;
 }
 
-neuNet* NNinit(const int nbInputs, const int nbLayers,
-                int* nbHidden, const int nbOutput){
+neuNet* NNinit(int nbInputs, int nbLayers, int* nbHidden, int nbOutput){
 
     if (nbLayers < 1) {
         printf("Error : NeuralNetwork need at least one hidden layer");
-        // return NULL; // < TODO : gerer fail
+        // return NULL; // < TODO : return error
     }
 
     neuNet* nn = malloc(sizeof(neuNet));
@@ -99,27 +98,19 @@ float primeOfAct(float act) {
 void oneLayerPropagation(float* previous, const int nbPrev, float* weights,
                          float* biais, float* destination, const int nbDest) {
 
-    // printf("starting layer\n");
     for (int d = 0; d < nbDest; d++) {
 
         float sum = 0.0f;
         for (int p = 0; p < nbPrev; p++)
             sum += previous[p] * weights[p * nbDest + d];
 
-    /*
-        printf("  biais[%d] = ", d);
-        fflush(stdout);
-        printf("%f\n", biais[d]);
-        fflush(stdout);
-    */
         destination[d] = activation(sum + biais[d]);
     }
-
-    // printf("end layer\n");
 }
 
 void forwardPropagation(neuNet* n, float* inp) {
-    oneLayerPropagation(inp, n->nbInputs, n->weights, n->biais, n->neuHidden, n->nbHidden[0]);
+    oneLayerPropagation(inp, n->nbInputs, n->weights,
+                        n->biais, n->neuHidden, n->nbHidden[0]);
 
     // Hidden -> Hidden
     float* biais   = n->biais + n->nbHidden[0];
@@ -191,7 +182,8 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
             int neuNext = posH + n->nbHidden[layer];
             int neuEnd  = posH + n->nbHidden[layer] + n->nbHidden[layer + 1];
             for (; neuNext < neuEnd; neuNext++) {
-                sum += costH[neuNext] * n->weights[wPos++] * primeOfAct(n->neuHidden[neuNext]);
+                sum += costH[neuNext] * n->weights[wPos++]
+                                      * primeOfAct(n->neuHidden[neuNext]);
             }
 
             costH[pH] = sum;
@@ -204,7 +196,8 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
 
     // Last Hidden -> Output
     wPos = n->nbWeights - n->nbHidden[n->nbLayers - 1] * n->nbOutput;
-    for (int pos = n->ttHidden - n->nbHidden[n->nbLayers - 1]; pos < n->ttHidden; pos++) {
+    int pos = n->ttHidden - n->nbHidden[n->nbLayers - 1];
+    for (; pos < n->ttHidden; pos++) {
         for (int posD = 0; posD < n->nbOutput; posD++) {
             float toUp = costOutp[posD] * primeOfAct(n->neuOutput[posD])
                                           * n->neuHidden[pos];
@@ -220,12 +213,14 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
         posH -= n->nbHidden[layer];
         wPos -= n->nbHidden[layer] * n->nbHidden[layer + 1];
 
-        for (int pSource = posH; pSource < posH + n->nbHidden[layer]; pSource++) {
+        int pEnd = posH + n->nbHidden[layer];
+        for (int pSource = posH; pSource < pEnd; pSource++) {
             int pDest = posH + n->nbHidden[layer];
             int pBlock = posH + n->nbHidden[layer] + n->nbHidden[layer + 1];
 
             for (; pDest < pBlock; pDest++) {
-                float toUp = costH[pDest] * primeOfAct(n->neuHidden[pDest]) * n->neuHidden[pSource];
+                float toUp = costH[pDest] * primeOfAct(n->neuHidden[pDest])
+                                          * n->neuHidden[pSource];
                 n->weights[wPos++] += toUp * rate;
             }
         }
@@ -237,7 +232,7 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
     wPos = 0;
     for (int pos = 0; pos < n->nbInputs; pos++) {
         for (int posD = 0; posD < n->nbHidden[0]; posD++) {
-            float toUp = costH[posD] * primeOfAct(n->neuHidden[posD]) * inp[pos];
+            float toUp = costH[posD] * primeOfAct(n->neuHidden[posD]) *inp[pos];
             n->weights[wPos++] += toUp * rate;
         }
     }

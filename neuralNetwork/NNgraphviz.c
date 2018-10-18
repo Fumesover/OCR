@@ -4,61 +4,10 @@
 #include <unistd.h>
 #include "NNgraphviz.h"
 
-// void NNtoGraphviz(FILE* output, neuNet* n, float* input);
-char* getColor(float v);
-
-/*
-
-int main(int argc, char** argv) {
-    int hidden[] = {3,4};
-
-    neuNet* n = NNinit(3, 2, hidden, 3);
-
-    NNrand(n);
-
-    float inputs[] = {1.0f, 0.0f, 0.0f};
-    float target[] = {1.0f, 0.0f, 0.0f};
-
-    FILE* output = NULL;
-
-    int opt;
-    while ((opt = getopt(argc, argv, "o:")) != -1) {
-        switch (opt) {
-            case 'o':
-                output = fopen(optarg, "w");
-                break;
-            default:
-                break;
-        }
-    }
-
-    if (!output)
-        output = stdout;
-
-
-    //for (int i = 0; i < 1000; i++)
-    NNTrain(n, inputs, target, 0.1f);
-
-    n->neuOutput[0] = 0.0f;
-    n->neuOutput[1] = 0.5f;
-    n->neuOutput[2] = 0.0f;
-
-    // for (int i = 0; i < n->nbOutput; i++)
-    //    printf("output[%d] = %f\n", i, n->neuOutput[i]);
-
-    NNtoGraphviz(output, n, inputs);
-
-    NNfree(n);
-    fclose(output);
-    return 0;
-}
-
-*/
-
 char* getColor(float v) {
     unsigned int rgb[] = {0, 0, 0};
 
-    /*
+    /* // Blue / Red color
     if (v <= 0.5) {
         v *= 2.0;
         rgb[0] = (unsigned int)(255 * (1.0 - v) + 0.5);
@@ -69,6 +18,8 @@ char* getColor(float v) {
         rgb[2] = (unsigned int)(255 * (v) + 0.5);
     }
     */
+
+    // Grey colors
     rgb[0] = 255 * v;
     rgb[1] = 255 * v;
     rgb[2] = 255 * v;
@@ -84,7 +35,7 @@ void printsubgraph(FILE* output, float* n, float* vals, int nCount, int nStart,
     fprintf(output, "\tsubgraph cluster_%d {\n", layer);
     fprintf(output, "\t\tcolor=white;\n");
     fprintf(output, "\t\tlabel=\"%s\";\n", label);
-    fprintf(output, "\t\tnode [color=chartreuse, style=filled, shape=circle];\n");
+    fprintf(output, "\t\tnode [color=chartreuse,style=filled,shape=circle];\n");
 
     if (n[0] > -1.0f) {
         for (int i = 0; i < nCount; i++) {
@@ -99,7 +50,8 @@ void printsubgraph(FILE* output, float* n, float* vals, int nCount, int nStart,
         for (int i = 0; i < nCount; i++) {
             char* color = getColor(vals[nStart + i]);
 
-            fprintf(output, "\t\tx%d [color=\"#000000\", fillcolor=\"#%s\", label=\"\"];\n",
+            fprintf(output,
+                "\t\tx%d [color=\"#000000\", fillcolor=\"#%s\", label=\"\"];\n",
                 nameStart + i, color);
 
             free(color);
@@ -109,7 +61,8 @@ void printsubgraph(FILE* output, float* n, float* vals, int nCount, int nStart,
     fprintf(output, "\t}\n");
 }
 
-void printLinks(FILE* output, int inpCount, int inpOffset, int outCount, int outOffset) {
+void printLinks(FILE* output, int inpCount, int inpOffset,
+                    int outCount, int outOffset) {
     for (int i = 0; i < inpCount; i++)
         for (int j = 0; j < outCount; j++)
             fprintf(output, "\tx%d -> x%d;\n", i + inpOffset, j + outOffset);
@@ -153,11 +106,13 @@ void NNtoGraphviz(FILE* output, neuNet* n, float* input){
 
     int offset = n->nbInputs;
     for (int i = 0; i < n->nbLayers - 1; i++) {
-        printLinks(output, n->nbHidden[i], offset, n->nbHidden[i + 1], offset + n->nbHidden[i]);
+        printLinks(output, n->nbHidden[i], offset, n->nbHidden[i + 1],
+                                                    offset + n->nbHidden[i]);
         offset += n->nbHidden[i];
     }
 
-    printLinks(output, n->nbHidden[n->nbLayers - 1], offset, n->nbOutput, offset + n->nbHidden[n->nbLayers - 1]);
+    printLinks(output, n->nbHidden[n->nbLayers - 1], offset, n->nbOutput,
+                                         offset + n->nbHidden[n->nbLayers - 1]);
 
     fprintf(output, "}\n");
 }
