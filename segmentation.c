@@ -193,7 +193,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
 // Cutes line from h1 to h2 in "matrix" in characters
 // and puts them in the queue
-void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w)
+void CutInChar(int **matrix, int *histo, Queue *queue, int h1, int h2, int w)
 {
     /*** INIT ***/
     int i = 0, space = 0, x1 = 0, x2 = 0;
@@ -211,12 +211,12 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
     data->data = sp;
 
     // Find average space between characters
-    average_sp = AverageSpace(histogram, w);
+    average_sp = AverageSpace(histo, w);
 
     /*** PROCESSING ALL COLUMNS ***/
     while (i < w)
     {
-        if (histogram[i] > 0)
+        if (histo[i] > 0)
         {
             // If blank pixels considered as space
             // adds space in queue before next character
@@ -227,7 +227,7 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
             // Right side of character
             x1 = (i) ? i - 1 : 0;
 
-            while (histogram[i] > 0) i++;
+            while (histo[i] > 0) i++;
 
             // Left side of character
             x2 = i;

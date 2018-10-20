@@ -16,7 +16,7 @@ void DisplayImage(SDL_Surface *image)
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, image->w, image->h, 0);
+       SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, image->w, image->h, 0);
 
     SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen), 0);
 
