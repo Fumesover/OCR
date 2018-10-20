@@ -112,7 +112,6 @@ void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 // Load the image called 'path_image' int a Pixel matrix
 void LoadImage(SDL_Surface *image)
 {
-	int i = 0;
 	int h = 0, w = 0;
     Pixel **pixels; // To receive RGB value of the pixels of the image
     int **matrix; // Receives 0 and 1 considering the color of pixel
@@ -185,7 +184,7 @@ int Otsu(Pixel **pixels, int h, int w)
     int threshold = 0;
 
     InitArray(histogram, 256);
-    InitArray(probability, 256);
+    InitArray((int*)probability, 256);
 
     /**** FILLS HISTOGRAMS ****/
     for (int i = 0; i < h; i++)

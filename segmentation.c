@@ -36,7 +36,7 @@ void Segmentation(int **matrix, int h, int w)
     CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
-    ShowSegmentation(queue);
+    //ShowSegmentation(queue);
 
     BinToPixels(matrix, pixels, h, w);
     DisplayImage(MatrixToSurface(pixels, h, w));
@@ -128,7 +128,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     int i = 0, x1, x2;
     int *histoW = NULL;
     int space = 0;
-    float average_sp = 0.0;
+    //float average_sp = 0.0;
 
     Tuple *data = NewTuple();
     data->height = 1;
@@ -144,7 +144,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     data->data = eol;
 
     // Find average space between lines
-    average_sp = AverageSpace(histogram, h);
+    //average_sp = AverageSpace(histogram, h);
 
     /*** PROCESSING ALL LINES ***/
     while (i < h)
@@ -198,7 +198,6 @@ void CutInChar(int **matrix, int *histogram, Queue *queue, int h1, int h2, int w
     /*** INIT ***/
     int i = 0, space = 0, x1 = 0, x2 = 0;
     float average_sp = 0.0;
-    int pos = 0, last_pos = w - 1;
 
     Tuple *data = NewTuple();
     data->height = 1;
