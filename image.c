@@ -16,15 +16,31 @@ void DisplayImage(SDL_Surface *image)
     SDL_Init(SDL_INIT_VIDEO);
 
     SDL_Window *screen = SDL_CreateWindow("SDL2 Displaying Image",
-        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 1000, 1000, 0);
+        SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, image->w, image->h, 0);
 
-    SDL_Rect dest = { 1000/2 - image->w/2,1000/2 - image->h/2, 0, 0};
-    SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen),&dest);
+    SDL_BlitSurface(image,NULL,SDL_GetWindowSurface(screen), 0);
 
     SDL_UpdateWindowSurface(screen);
-    SDL_Delay(20000);
+    WaitForKeypressed();
 
     SDL_FreeSurface(image);
+}
+
+void WaitForKeypressed()
+{
+    SDL_Event event;
+    // Infinite loop, waiting for event
+    for (;;) {
+        // Take an event
+        SDL_PollEvent( &event );
+        // Switch on event type
+        switch (event.type) {
+            // Someone pressed a key -> leave the function
+            case SDL_KEYDOWN: return;
+            default: break;
+        }
+        // Loop until we got the expected event
+    }
 }
 
 // Returns the Uint32 value of the pixel at position x, y
@@ -98,20 +114,15 @@ void LoadImage(SDL_Surface *image)
 {
 	int i = 0;
 	int h = 0, w = 0;
-    Pixel **pixels = NULL; // To receive RGB value of the pixels of the image
-    int **matrix = NULL; // Receives 0 and 1 considering the color of pixel
+    Pixel **pixels; // To receive RGB value of the pixels of the image
+    int **matrix; // Receives 0 and 1 considering the color of pixel
 
     /*** INIT ***/
 	h = image->h;
 	w = image->w;
-	pixels = malloc(sizeof(Pixel*) * h);
-	matrix = malloc(sizeof(int*) * h);
 
-	for (i = 0; i < h; i++)
-	{
-		pixels[i] = malloc(sizeof(Pixel) * w);
-        matrix[i] = malloc(sizeof(int) * w);
-	}
+	pixels = InitPixelMatrix(h, w);
+	matrix = InitIntMatrix(h, w);
 
     // Fill the martix
     SurfaceToMatrix(pixels, image, h, w);
@@ -119,18 +130,17 @@ void LoadImage(SDL_Surface *image)
 	/*** BINARIZATION ***/
 	//Greyscale
 	GreyScale(pixels, h, w);
-    //DisplayImage(MatrixToSurface(pixels, h, w));
 
 	// Otsu method on matrix
 	int threshold = Otsu(pixels, h, w);
 	Binarization(pixels, h, w, threshold);
 
     BinarizeMatrix(pixels, matrix, h, w);
-    //DisplayImage(MatrixToSurface(pixels, h, w));
+    DisplayImage(MatrixToSurface(pixels, h, w));
 
     /*** SEGMENTATION ***/
     Segmentation(matrix, h, w);
-
+    //DisplayImage(MatrixToSurface(pixels, h, w));
 
     /*** FREE ALLOCATED MEMORY ***/
     for (int j = 0; j < h; j++)
@@ -174,12 +184,8 @@ int Otsu(Pixel **pixels, int h, int w)
     double max_sigma = 0.0;
     int threshold = 0;
 
-
-    for (int i = 0; i < 256; i++)
-    {
-        histogram[i] = 0;
-        probability[i] = 0;
-    }
+    InitArray(histogram, 256);
+    InitArray(probability, 256);
 
     /**** FILLS HISTOGRAMS ****/
     for (int i = 0; i < h; i++)
@@ -260,15 +266,13 @@ void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w)
 void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
 {
     for (int i = 0; i < h; i++)
-        pixels[i] = malloc(sizeof(Pixel) * w);
-
-    for (int i = 0; i < h; i++)
     {
         for (int j = 0; j < w; j++)
         {
             switch(matrix[i][j])
             {
                 case(1): // BLACK
+                case(4):
                     pixels[i][j].r = (Uint8)0;
                     pixels[i][j].g = (Uint8)0;
                     pixels[i][j].b = (Uint8)0;
@@ -278,17 +282,21 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w)
                     pixels[i][j].g = (Uint8)255;
                     pixels[i][j].b = (Uint8)255;
                     break;
-                case(2): // GREEN
-                    pixels[i][j].r = (Uint8)0;
-                    pixels[i][j].g = (Uint8)255;
+                case(2): // LINES
+                    pixels[i][j].r = (Uint8)255;
+                    pixels[i][j].g = (Uint8)204;
+
                     pixels[i][j].b = (Uint8)0;
                     break;
-                case(3): // RED
-                    pixels[i][j].r = (Uint8)0;
+                case(3): // CHARACTERS
+                    pixels[i][j].r = (Uint8)68;
                     pixels[i][j].g = (Uint8)0;
                     pixels[i][j].b = (Uint8)255;
                     break;
                 default:
+                    pixels[i][j].r = (Uint8)105;
+                    pixels[i][j].g = (Uint8)105;
+                    pixels[i][j].b = (Uint8)105;
                     break;
             }
         }
@@ -334,6 +342,7 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
         amask = 0xff000000;
     #endif
 
+    // Creates new surface
     surface = SDL_CreateRGBSurface(SDL_SWSURFACE, w, h, 32, 
                                    rmask, gmask, bmask, amask);
     if(surface == NULL) {

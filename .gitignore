@@ -9,6 +9,7 @@
 
 ### Now ingore what you want to
 
+.out
 .idea*
 *.o
 *.d

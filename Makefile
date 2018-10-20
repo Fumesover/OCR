@@ -36,9 +36,9 @@ clean:
 	${RM} *.o */*.o	  # remove object files
 	${RM} *.d */*.d   # remove dependency files
 	${RM} main   	  # remove programs
+	${RM} vgcore.*    
 	${RM} xor 
 	${RM} NNgraphviz
-	${RM} vgcore.*
 	${MAKE} -C neuralNetwork clean
 
 -include ${DEP}
