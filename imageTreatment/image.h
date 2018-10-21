@@ -15,7 +15,7 @@ Uint32 GetPixel(SDL_Surface *surface, int x, int y);
 void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel);
 
 /* MATRIX TREATMENT */
-void LoadImage(SDL_Surface *image);
+void LoadImage(char *path);
 
 
 /* MATRIX CONVERSION */

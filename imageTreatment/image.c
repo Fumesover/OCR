@@ -110,8 +110,16 @@ void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 }
 
 // Load the image called 'path_image' int a Pixel matrix
-void LoadImage(SDL_Surface *image)
+void LoadImage(char *path)
 {
+    SDL_Surface *image = NULL;
+    image = IMG_Load(path);
+
+    if (image == NULL)
+    {
+        fprintf(stderr, "Couldn't load %s: %s\n", path, SDL_GetError());
+    }
+
 	int h = 0, w = 0;
     Pixel **pixels; // To receive RGB value of the pixels of the image
     int **matrix; // Receives 0 and 1 considering the color of pixel

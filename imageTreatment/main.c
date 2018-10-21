@@ -8,11 +8,12 @@
 #include "image.h"
 #include "matrix.h"
 #include "queue.h"
+#include "../GUI/interface.h"
 
 int main(int argc, char** argv)
 {
     // TODO : Select file from interface file chooser
-    char *path_image = "/home/rhaeven/Documents/OCR/scan1.png";
+    /*char *path_image = "/home/rhaeven/Documents/OCR/scan1.png";
     char *enter = "", *tmp;
     enter = malloc(200*sizeof(char));
    
@@ -40,22 +41,15 @@ int main(int argc, char** argv)
     if ((tmp=strchr(enter, '\n')) != NULL)
         *tmp = '\0';
 
-
-    SDL_Surface *image = IMG_Load(path_image);
-
-    if (image == NULL)
-    {
-        fprintf(stderr, "Couldn't load %s: %s\n", path_image, SDL_GetError());
-        return 1;
-    }
-
     //DisplayImage(image);
 
 	// Return the corresponding Pixel matrix of the image
-	LoadImage(image);
+	LoadImage(path_image);
 
     free(enter);
-    return 0;
+    return 0;*/
+
+    StartGUI(argc, argv);
 
 }
 
