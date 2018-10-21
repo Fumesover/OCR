@@ -12,7 +12,7 @@
 
 // Main document segmentation functions
 // Makes histogram and calls line segmentation function
-void Segmentation(int **matrix, int h, int w)
+Queue *Segmentation(int **matrix, int h, int w)
 {
     int *histo = NULL;
     Pixel **pixels;
@@ -36,10 +36,10 @@ void Segmentation(int **matrix, int h, int w)
     CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
-    //ShowSegmentation(queue);
+    /*ShowSegmentation(queue);
 
     BinToPixels(matrix, pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));
+    DisplayImage(MatrixToSurface(pixels, h, w));*/
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -47,6 +47,8 @@ void Segmentation(int **matrix, int h, int w)
     for (int i = 0; i < h; i++)
         free(pixels[i]);
     free(pixels);
+
+    return queue;
 }
 
 
@@ -154,10 +156,11 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
             // Top of line
             x1 = (i) ? i-1 : 0;
 
-            while (histogram[i] >= 1) i++;
+            while (histogram[i] >= 1 && i < h) i++;
 
+            i--;
             // Bottom of line
-            if (i == h - 1) x2 = i; else x2 = i + 1;
+            if (i >= h - 1) x2 = i; else x2 = i + 1;
 
             // Draw line around the line
             for (int j = 0; j < w; j++){
@@ -175,6 +178,8 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
             // Enqueue eol after line is treated
             Enqueue(queue, data);
             space = 0;
+
+            i++;
         }
 
         else {
@@ -300,14 +305,17 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 }
 
 // Shows result of segmentation
-// Prints elements of the queue in a file
-void ShowSegmentation(Queue *queue)
+// Returns elements of the queue in a file
+char* ShowSegmentation(Queue *queue)
 {
+    char *s;
     Elt *curr = NULL;
     int **c;
-    Pixel **m;
-    FILE* file = fopen("out.treated","w");
-    int t;
+    //Pixel **m;
+    //FILE* file = fopen("out.treated","w");
+    int t = 0;
+
+    s = malloc(sizeof(char) * 1000);
 
     if (queue->first != NULL)
         curr = queue->first;
@@ -316,34 +324,43 @@ void ShowSegmentation(Queue *queue)
     {
         c = curr->data->data;
 
-        if (c[0][0] == 10)
-            fprintf(file, "\n");
-        else if (c[0][0] == 32)
-            fprintf(file, " ");
+        if (c[0][0] == 10) {
+            s[t] = '\n';
+            t++;
+        }
+        else if (c[0][0] == 32) {
+            s[t] = ' ';
+            t++;
+        }
         else if (curr->data->width > 1 && curr->data->height > 1){
-            fprintf(file, "c");
+            s[t] = 'c';
+            t++;
 
-            int h = curr->data->height;
-            int w = curr->data->width;
+            //int h = curr->data->height;
+            //int w = curr->data->width;
 
-            int **rm = RemoveWhite(c, &h, &w);
-            int **square = SquareMatrix(rm, h, w);
+            //int **rm = RemoveWhite(c, &h, &w);
+            //int **square = SquareMatrix(rm, h, w);
 
-            if (h > w) t = h; else t = w;
+            //if (h > w) t = h; else t = w;
 
-            m = InitPixelMatrix(t, t);
+            //m = InitPixelMatrix(t, t);
 
-            BinToPixels(square, m, t, t);
-            DisplayImage(MatrixToSurface(m, t, t));
+            //BinToPixels(square, m, t, t);
+            //DisplayImage(MatrixToSurface(m, t, t));
 
-            free(m);
+            //free(m);
         }
         else
-            fprintf(file, "\n");
+        {
+            s[t] = '\n';
+            t++;
+        }
 
         curr = curr->next;
     }
 
     // Closing file
-    fclose(file);
+    //fclose(file);
+    return s;
 }

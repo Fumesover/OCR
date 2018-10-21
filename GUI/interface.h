@@ -2,7 +2,9 @@
 #define INTERFACE_H
 
 void Load(GtkWidget * file_chooser);
-void Display(gchar *path);
+void DisplayIni(gchar *path);
+void DisplayResult(gchar *path);
+void PrintText();
 void Quit();
 void Seg();
 void Bin();
