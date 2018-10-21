@@ -18,3 +18,4 @@
 [Cc][Mm]ake*
 *.png
 vgcore.*
+!Makefile
