@@ -17,18 +17,18 @@ DEP = ${SRC:.c=.d}
 
 all: bins
 
-bins: imageTreatment xor
+bins: imagetreatment xor
 	mkdir -p bin
-	mv xor image bin
+	mv neuralNetwork/xor imageTreatment/main bin
 
 run: all
 	./bin/main
 
-imageTreatment:
-	(cd imageTreatment; make; mv main ../image)
+imagetreatment:
+	${MAKE} -C imageTreatment 
 
 xor: 
-	(cd neuralNetwork; make xor; mv xor ..)
+	${MAKE} -C neuralNetwork xor
 
 .PHONY: clean
 clean:
