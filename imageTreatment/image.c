@@ -112,47 +112,17 @@ void PutPixel(SDL_Surface *surface, int x, int y, Uint32 pixel)
 }
 
 // Load the image called 'path_image' int a Pixel matrix
-void LoadImage(SDL_Surface *image)
+SDL_Surface *LoadImage(char *path)
 {
-	int h = 0, w = 0;
-    Pixel **pixels; // To receive RGB value of the pixels of the image
-    int **matrix; // Receives 0 and 1 considering the color of pixel
+    SDL_Surface *image = NULL;
+    image = IMG_Load(path);
 
-    /*** INIT ***/
-	h = image->h;
-	w = image->w;
-
-	pixels = InitPixelMatrix(h, w);
-	matrix = InitIntMatrix(h, w);
-
-    // Fill the martix
-    SurfaceToMatrix(pixels, image, h, w);
-
-	/*** BINARIZATION ***/
-	//Greyscale
-	GreyScale(pixels, h, w);
-
-	// Otsu method on matrix
-	int threshold = Otsu(pixels, h, w);
-	Binarization(pixels, h, w, threshold);
-
-    BinarizeMatrix(pixels, matrix, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));
-
-    /*** SEGMENTATION ***/
-    Segmentation(matrix, h, w);
-    //DisplayImage(MatrixToSurface(pixels, h, w));
-
-    /*** FREE ALLOCATED MEMORY ***/
-    for (int j = 0; j < h; j++)
+    if (image == NULL)
     {
-        free(pixels[j]);
-        free(matrix[j]);
+        fprintf(stderr, "Couldn't load %s: %s\n", path, SDL_GetError());
     }
 
-    free(pixels);
-    free(matrix);
-
+	return image;
 }
 
 
