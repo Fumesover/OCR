@@ -17,9 +17,9 @@ DEP = ${SRC:.c=.d}
 
 all: bins
 
-bins: imagetreatment xor
+bins: imagetreatment xor minicli
 	mkdir -p bin
-	mv neuralNetwork/xor imageTreatment/main bin
+	mv neuralNetwork/xor imageTreatment/main minicli bin
 
 run: all
 	./bin/main
