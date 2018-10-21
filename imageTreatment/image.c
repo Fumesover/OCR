@@ -24,6 +24,8 @@ void DisplayImage(SDL_Surface *image)
     WaitForKeypressed();
 
     SDL_FreeSurface(image);
+
+    SDL_DestroyWindow(screen);
 }
 
 void WaitForKeypressed()
