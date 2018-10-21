@@ -39,6 +39,16 @@ void Quit()
     gtk_widget_show_all (window);
 }
 
+void Bin()
+{
+
+}
+
+void Seg()
+{
+
+}
+
 /**************/
 /**** MAIN ****/
 /**************/
@@ -52,14 +62,13 @@ int main(int argc, char *argv[])
     gtk_builder_add_from_file (builder, "interface.glade", NULL);
 
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main"));
+    gtk_builder_connect_signals(builder, NULL);
 
     imageIni = GTK_IMAGE(gtk_builder_get_object(builder, "Ini"));
     imageDone = GTK_IMAGE(gtk_builder_get_object(builder, "Final"));
     loadButton = GTK_WIDGET(gtk_builder_get_object(builder, "Load"));
     binButton = GTK_WIDGET(gtk_builder_get_object(builder, "Binarize"));
     segButton = GTK_WIDGET(gtk_builder_get_object(builder, "Segmentation"));
-
-    gtk_builder_connect_signals(builder, NULL);
 
     g_object_unref(builder);
     gtk_widget_show_all (window);

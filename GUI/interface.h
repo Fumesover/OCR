@@ -4,5 +4,7 @@
 void Load(GtkWidget * file_chooser);
 void Display(gchar *path);
 void Quit();
+void Seg();
+void Bin();
 
 #endif
