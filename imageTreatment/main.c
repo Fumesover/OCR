@@ -9,9 +9,6 @@
 #include "matrix.h"
 #include "queue.h"
 
-#include "neuralNetwork/neuralNet.h"
-
-
 int main(int argc, char** argv)
 {
     // TODO : Select file from interface file chooser

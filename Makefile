@@ -11,13 +11,13 @@ LDFLAGS =
 # Libs and path for linker
 LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm
 
-SRC = main.c image.c segmentation.c matrix.c queue.c neuralNetwork/neuralNet.c
+SRC = imageTreatment/main.c imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix.c imageTreatment/queue.c neuralNetwork/neuralNet.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: main
+all: imageTreatment/main 
 
-main: ${OBJ}
+imageTreatment/main: ${OBJ}
 
 valgrind: CFLAGS += -g
 valgrind: clean
