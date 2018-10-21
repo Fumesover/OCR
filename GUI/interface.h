@@ -1,7 +1,8 @@
-#ifndef INTERFACE_h
+#ifndef INTERFACE_H
 #define INTERFACE_H
 
 void Load(GtkWidget * file_chooser);
-int StartGUI(int argc, char *argv[]);
+void Display(gchar *path);
+void Quit();
 
 #endif

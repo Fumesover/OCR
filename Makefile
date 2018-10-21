@@ -5,19 +5,19 @@ CC = gcc
 # Options for pre-processor
 CPPFLAGS = -MMD
 # Main compilation options
-CFLAGS = -g -Wall -Wextra -Werror -std=c99 -O3 -march=native $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0`
+CFLAGS = -g -Wall -Wextra -Werror -std=c99 -O3 -march=native -rdynamic -export-dynamic $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0` 
 # Linker options
 LDFLAGS = 
 # Libs and path for linker
-LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm
+LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm -export-dynamic -rdynamic
 
-SRC = imageTreatment/main.c imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix.c imageTreatment/queue.c neuralNetwork/neuralNet.c GUI/interface.c
+SRC = imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix.c imageTreatment/queue.c neuralNetwork/neuralNet.c GUI/interface.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: imageTreatment/main 
+all: GUI/interface 
 
-imageTreatment/main: ${OBJ}
+GUI/interface: ${OBJ}
 
 valgrind: CFLAGS += -g
 valgrind: clean

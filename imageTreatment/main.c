@@ -10,7 +10,7 @@
 #include "queue.h"
 #include "../GUI/interface.h"
 
-int main(int argc, char** argv)
+int fdp(int argc, char** argv)
 {
     // TODO : Select file from interface file chooser
     /*char *path_image = "/home/rhaeven/Documents/OCR/scan1.png";
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     free(enter);
     return 0;*/
 
-    StartGUI(argc, argv);
+    //StartGUI(argc, argv);
 
 }
 
