@@ -11,24 +11,22 @@ LDFLAGS =
 # Libs and path for linker
 LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm
 
-SRC = imageTreatment/main.c imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix.c imageTreatment/queue.c neuralNetwork/neuralNet.c
+SRC = main.c image.c segmentation.c matrix.c queue.c 
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: bins
+all: main 
 
-bins: imageTreatment xor
-	mkdir -p bin
-	mv xor image bin
+main: ${OBJ}
+
+valgrind: CFLAGS += -g
+valgrind: clean
+valgrind: main
+valgrind:
+	valgrind ./main
 
 run: all
-	./bin/main
-
-imageTreatment:
-	(cd imageTreatment; make; mv main ../image)
-
-xor: 
-	(cd neuralNetwork; make xor; mv xor ..)
+	./main
 
 .PHONY: clean
 clean:
@@ -36,12 +34,6 @@ clean:
 	${RM} *.d */*.d   # remove dependency files
 	${RM} main   	  # remove programs
 	${RM} vgcore.*    
-	${RM} xor 
-	${RM} NNgraphviz
-	${RM} -r bin
-	${RM} {*,*/*}.nn
-	${MAKE} -C neuralNetwork clean 
-	${MAKE} -C imageTreatment clean
 
 -include ${DEP}
 
