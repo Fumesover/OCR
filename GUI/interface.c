@@ -106,8 +106,8 @@ void PrintText()
 
 void Quit()
 {
+    gtk_main_quit();
     gtk_widget_destroy(GTK_WIDGET(window));
-    gtk_widget_show_all (window);
 }
 
 void Bin()
