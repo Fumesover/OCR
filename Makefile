@@ -15,18 +15,16 @@ SRC = imageTreatment/main.c imageTreatment/image.c imageTreatment/segmentation.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: imageTreatment/main 
+all: bins
+
+bins: imageTreatment/main xor
+	mkdir -p bin
+	mv xor imageTreatment/main bin
 
 imageTreatment/main: ${OBJ}
 
-valgrind: CFLAGS += -g
-valgrind: clean
-valgrind: main
-valgrind:
-	valgrind ./main
-
 run: all
-	./main
+	./bin/main
 
 xor: 
 	(cd neuralNetwork; make xor; mv xor ..)
@@ -39,7 +37,9 @@ clean:
 	${RM} vgcore.*    
 	${RM} xor 
 	${RM} NNgraphviz
-	${MAKE} -C neuralNetwork clean
+	${RM} -r bin
+	${RM} {*,*/*}.nn
+	${MAKE} -C neuralNetwork clean 
 
 -include ${DEP}
 
