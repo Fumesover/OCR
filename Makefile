@@ -40,6 +40,7 @@ clean:
 	${RM} vgcore.*    
 	${RM} xor 
 	${RM} NNgraphviz
+	${RM} minicli
 	${RM} -r bin
 	${RM} {*,*/*}.nn
 	${MAKE} -C neuralNetwork clean 
