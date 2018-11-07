@@ -17,8 +17,6 @@ LDLIBS = -lm $(pkg-config --libs sdl2) `pkg-config --libs gtk+-3.0`
 
 all: xor
 
-main: ${OBJ}
-
 valgrind: CFLAGS += -g
 valgrind: clean
 valgrind: xor
@@ -31,11 +29,6 @@ run: all
 xor: xor.o neuralNet.o DataSet.o
 
 NNtest: NNtest.o DataSet.o neuralNet.o
-
-xorGraphviz: xorGraphviz.o neuralNet.o NNgraphviz.o
-
-xorgif: xorGraphviz
-	./gifCreator.sh
 
 remspaces: clean
 	sed -i 's/[ \t]*$$//' *.* Makefile

@@ -7,14 +7,14 @@ int main(void) { // int argc, char** argv) {
     // INIT
     int   nbInp = 2;
     float inpVals[] = {1, 1};
-    int   nbHidden = 1;
+    // int   nbHidden = 1;
     int   hidden[] = {3};
     int   nbOut = 1;
     float target[] = {0};
 
     float updateRate = 0.4f;
 
-    neuNet* n = NNinit(nbInp, nbHidden, hidden, nbOut);
+    neuNet* n = NNinit(nbInp, hidden[0], nbOut);
 
     if (!n)
         return 1;

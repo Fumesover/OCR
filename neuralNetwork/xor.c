@@ -1,5 +1,4 @@
 #include "neuralNet.h"
-#include "xor.h"
 #include "DataSet.h"
 
 #define _GNU_SOURCE
@@ -38,7 +37,7 @@ int main(void) {
 
         printf("n°%d : batch error : ", itteration / ds->nblines);
         printf("%f -- update rate : %f\n", err, updateRate);
-    } while (--nbItt)
+    } while (--nbItt);
 
     printf("\n========\n\n");
 
