@@ -33,6 +33,8 @@ NNtest: NNtest.o DataSet.o neuralNet.o
 remspaces: clean
 	sed -i 's/[ \t]*$$//' *.* Makefile
 
+NNtrainWdata: NNtrainWdata.o neuralNet.o DataSet.o
+
 .PHONY: clean
 clean:
 	${RM} *.o 		  	 # remove object files

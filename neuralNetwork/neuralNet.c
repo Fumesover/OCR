@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
-
+#include <err.h>
 #define _GNU_SOURCE
 #include <stdio.h>
 size_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
@@ -159,6 +159,9 @@ float* NNGuess(neuNet* n, float* inp) {
 
 void NNsave(neuNet* n, char* filename){
     FILE* fPointer = fopen(filename,"w");
+    
+    if (!fPointer)
+        errx(1, "Invalid path %s", filename);
 
     fprintf(fPointer,"%d\n",n->nbInputs);
     fprintf(fPointer,"%d\n",n->nbOutput);
@@ -183,6 +186,10 @@ void NNsave(neuNet* n, char* filename){
 
 neuNet* NNload(char* filename){
     FILE* fp = fopen(filename,"r");
+    
+    if (!fp)
+        return (neuNet*) NULL;
+    
     size_t len = 0;
     char* line = NULL;
     size_t read;

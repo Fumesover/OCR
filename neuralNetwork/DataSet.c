@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "DataSet.h"
+#include <err.h>
 
 Data* init_data(size_t nbInp, size_t nbOut) {
     Data* d = malloc(sizeof(Data));
@@ -77,4 +78,9 @@ void shuffle(DataSet* d) {
         }
     }
     return;
+}
+
+DataSet* datasetMerge(DataSet* a, DataSet* b) {
+    a = b; b = a;
+    errx(1, "TODO");
 }

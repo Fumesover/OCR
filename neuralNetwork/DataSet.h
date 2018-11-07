@@ -11,8 +11,14 @@ typedef struct {
     int    nboutputs;
 } DataSet;
 
-void datasetfree(DataSet* ds);
-
+// Get DataSet from file
 DataSet* getFromFile(char* path);
 
+// Shuffle the dataset
 void shuffle(DataSet* d);
+
+// Free a dataset
+void datasetfree(DataSet* ds);
+
+// Merge two DataSets together
+DataSet* datasetMerge(DataSet*, DataSet*);
