@@ -3,10 +3,11 @@
 typedef struct {
     // Statics
     int nbInputs;   // <= number of input neurons
-    int nbLayers;   // <= number of hidden layers
-    int *nbHidden;  // <= number of hidden neurons for each hidden layer
+//    int nbLayers;   // <= number of hidden layers
+//    int *nbHidden;  // <= number of hidden neurons for each hidden layer
     int ttHidden;   // <= total number of hidden neurons
     int nbOutput;   // <= number of output neurons
+//    int *nbNeurons; // <= number of neuron for each layer (including in and out)
 
     // To Compute
     int nbWeights;  // <= number of weights in the network
@@ -17,13 +18,14 @@ typedef struct {
     float *biais;   // <= array of all biais
 
     // Neurons
+    float *neuInputs; // <= array of all inputs neurons
     float *neuHidden; // <= array of all hidden neurons
     float *neuOutput; // <= array of all output neurons
 }
 neuNet;
 
 // Create a neural network
-neuNet* NNinit(int nbInputs, int nbLayers, int *nbHidden, int nbOutput);
+neuNet* NNinit(int nbInputs, int ttHidden, int nbOutput);
 
 // Init nerwork with random weights and biais
 void NNrand(neuNet* nn);
@@ -45,4 +47,7 @@ neuNet* NNload(char* filename);
 
 // save NN
 void NNsave(neuNet* n, char* filename);
+
+// print array of floats
+void NNprint(float* arr, int size);
 

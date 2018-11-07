@@ -4,7 +4,7 @@
 CC = gcc
 
 # Options for pre-processor
-CFLAGS = -Wall -Wextra -Werror -std=c99 -O3 -march=native # compilation flags
+CFLAGS = -g -Wall -Wextra -Werror -std=c99 -march=native # compilation flags
 CFLAGS += $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0`
 
 # Linker options
@@ -28,7 +28,9 @@ valgrind:
 run: all
 	./xor
 
-xor: xor.o neuralNet.o
+xor: xor.o neuralNet.o DataSet.o
+
+NNtest: NNtest.o DataSet.o neuralNet.o
 
 xorGraphviz: xorGraphviz.o neuralNet.o NNgraphviz.o
 
@@ -36,7 +38,7 @@ xorgif: xorGraphviz
 	./gifCreator.sh
 
 remspaces: clean
-	sed -i 's/[ \t]*$$//' *
+	sed -i 's/[ \t]*$$//' *.* Makefile
 
 .PHONY: clean
 clean:
@@ -44,7 +46,7 @@ clean:
 	${RM} *.d   	     # remove dependency files
 	${RM} NNgraphviz xor # remove main program
 	${RM} xorGraphviz xor.gif
-	${RM} NNtest
+	${RM} {NN,}test
 	${RM} vgcore.*		 # remove valgrind files
 	${RM} *.nn  		 # remove neural network files
 
