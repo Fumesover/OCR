@@ -3,11 +3,8 @@
 typedef struct {
     // Statics
     int nbInputs;   // <= number of input neurons
-//    int nbLayers;   // <= number of hidden layers
-//    int *nbHidden;  // <= number of hidden neurons for each hidden layer
     int ttHidden;   // <= total number of hidden neurons
     int nbOutput;   // <= number of output neurons
-//    int *nbNeurons; // <= number of neuron for each layer (including in and out)
 
     // To Compute
     int nbWeights;  // <= number of weights in the network
@@ -31,22 +28,22 @@ neuNet* NNinit(int nbInputs, int ttHidden, int nbOutput);
 void NNrand(neuNet* nn);
 
 // Train with one set, return output error
-float NNTrain(neuNet* n, float* inp, float* targ, float update);
+float NNTrain(neuNet* n, const float* inp, const float* targ, float update);
 
 // Compute error
-float NNerror(neuNet* n, float* target);
+float NNerror(neuNet* n, const float* target);
 
 // Make a guess with input
-float* NNGuess(neuNet* n, float* inp);
+float* NNGuess(neuNet* n, const float* inp);
 
 // Free NN
 void NNfree(neuNet* n);
 
 // load NN
-neuNet* NNload(char* filename);
+neuNet* NNload(const char* filename);
 
 // save NN
-void NNsave(neuNet* n, char* filename);
+void NNsave(neuNet* n, const char* filename);
 
 // print array of floats
 void NNprint(float* arr, int size);

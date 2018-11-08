@@ -6,7 +6,6 @@
 #include <math.h>
 #include <err.h>
 #include <stdio.h>
-size_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
 
 void NNprint(float* arr, int size) {
     for(int i = 0; i < size; i++)
@@ -15,56 +14,57 @@ void NNprint(float* arr, int size) {
 }
 
 neuNet* NNinit(int nbInputs, int ttHidden, int nbOutput) {
-    neuNet* nn = malloc(sizeof(neuNet));
+    // Init struct
+    neuNet* n = malloc(sizeof(neuNet));
 
     // Statics
-    nn->nbInputs = nbInputs;
-    nn->nbOutput = nbOutput;
+    n->nbInputs = nbInputs;
+    n->nbOutput = nbOutput;
 
     // Count hidden neurons
-    nn->ttHidden = ttHidden;
+    n->ttHidden = ttHidden;
 
     // Count weights
-    nn->nbWeights = ttHidden * (nbInputs + nbOutput);
+    n->nbWeights = ttHidden * (nbInputs + nbOutput);
 
     // Count biais
-    nn->nbBiais = 2;
+    n->nbBiais = 2;
 
     // Init arrays
-    nn->weights   = malloc(nn->nbWeights * sizeof(*nn->weights));
-    nn->biais     = malloc(nn->nbBiais   * sizeof(*nn->biais));
+    n->weights      = malloc(n->nbWeights * sizeof(*n->weights));
+    n->biais        = malloc(n->nbBiais   * sizeof(*n->biais));
 
-    int sumNeurons = nn->ttHidden + nn->nbOutput;
-    nn->neuHidden = malloc(sumNeurons * sizeof(*nn->neuHidden));
-    nn->neuOutput = nn->neuHidden + ttHidden;
+    int sumNeurons  = n->ttHidden + n->nbOutput;
+    n->neuHidden    = malloc(sumNeurons * sizeof(*n->neuHidden));
+    n->neuOutput    = n->neuHidden + ttHidden;
 
-    return nn;
+    return n;
 }
 
-float randF() {
+static float randF() {
     return rand() / (float) RAND_MAX;
 }
 
-void NNrand(neuNet* nn) {
+void NNrand(neuNet* n) {
     srand(time(NULL));
 
-    for (int p = 0; p < nn->nbWeights; p++)
-        nn->weights[p] = randF() - 0.5f;
+    for (int p = 0; p < n->nbWeights; p++)
+        n->weights[p] = randF() - 0.5f;
 
-    for (int p = 0; p < nn->nbBiais; p++)
-        nn->biais[p] = randF() - 0.5f;
+    for (int p = 0; p < n->nbBiais; p++)
+        n->biais[p] = randF() - 0.5f;
 }
 
-float activation(float inp) {
+static float activation(const float inp) {
     // Sigmoid :
     return 1.0f / (1.0f + expf(-inp));;
 }
 
-float primeOfAct(float act) {
+static float primeOfAct(const float act) {
     return act * (1 - act);
 }
 
-void forwardPropagation(neuNet* n, float* inp) {
+static void forwardPropagation(neuNet* n, const float* inp) {
     for(int i = 0; i < n->ttHidden; i++) {
         float sum = 0;
         for(int j = 0; j < n->nbInputs; j++)
@@ -84,9 +84,6 @@ void forwardPropagation(neuNet* n, float* inp) {
 
 void NNfree(neuNet *n) {
     free(n->neuHidden);
-    // free(n->neuOutput);
-
-    // free(n->nbNeurons);
 
     free(n->weights);
     free(n->biais);
@@ -94,8 +91,8 @@ void NNfree(neuNet *n) {
     free(n);
 }
 
-void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
-    int offsetWeights = n->nbInputs * n->ttHidden;
+static void backPropagation(neuNet* n, const float* inp, const float* targ, const float rate) {
+    const int offsetWeights = n->nbInputs * n->ttHidden;
 
     for(int i = 0; i < n->ttHidden; i++) {
         float sum = 0.0f;
@@ -117,30 +114,30 @@ void backPropagation(neuNet* n, float* inp, float* targ, float rate) {
     }
 }
 
-float error(float a, float b) {
+static float error(const float a, const float b) {
     // return (a - b) * (a - b);
     return 0.5 * (a - b) * (a - b);
 }
 
-float NNerror(neuNet *n, float* target) {
+float NNerror(neuNet *n, const float* target) {
     float sum = 0.0f;
     for (int p = 0; p < n->nbOutput; p++)
         sum += error(n->neuOutput[p], target[p]);
     return sum;
 }
 
-float NNTrain(neuNet* n, float* inp, float* targ, float update) {
+float NNTrain(neuNet* n, const float* inp, const float* targ, const float update) {
     forwardPropagation(n, inp);
     backPropagation(n, inp, targ, update);
     return NNerror(n, targ);
 }
 
-float* NNGuess(neuNet* n, float* inp) {
+float* NNGuess(neuNet* n, const float* inp) {
     forwardPropagation(n, inp);
     return n->neuOutput;
 }
 
-void NNsave(neuNet* n, char* filename){
+void NNsave(neuNet* n, const char* filename){
     FILE* fPointer = fopen(filename,"w");
     
     if (!fPointer)
@@ -148,12 +145,8 @@ void NNsave(neuNet* n, char* filename){
 
     fprintf(fPointer,"%d\n",n->nbInputs);
     fprintf(fPointer,"%d\n",n->nbOutput);
-    // fprintf(fPointer,"%d\n",n->nbLayers);
     fprintf(fPointer,"%d\n", 1);
 
-    /* for(int i = 0; i < n->nbLayers; i++)
-        fprintf(fPointer,"%d ",n->nbHidden[i]);
-    fprintf(fPointer,"\n"); */
     fprintf(fPointer, "%d \n", n->ttHidden);
 
     for(int i = 0; i < n->nbWeights; i++)
@@ -167,7 +160,7 @@ void NNsave(neuNet* n, char* filename){
     fclose(fPointer);
 }
 
-neuNet* NNload(char* filename){
+neuNet* NNload(const char* filename){
     FILE* fp = fopen(filename,"r");
     
     if (!fp)
