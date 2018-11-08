@@ -39,7 +39,7 @@ int main (int argc, char* argv[]) {
                 savepath = optarg;
                 break;
             case 'n':
-                nbItt = atoi(optarg) - 1;
+                nbItt = atoi(optarg);
                 break;
             case 'u':
                 updateRate = atof(optarg);
@@ -87,7 +87,7 @@ int main (int argc, char* argv[]) {
         NNrand(n);
     }
     
-    do {
+    while (nbItt-- > 0) {
         shuffle(ds);
         float err = 0.0f;
         
@@ -96,11 +96,11 @@ int main (int argc, char* argv[]) {
             err += NNTrain(n, d->inputs, d->output, updateRate);
         }
 
-        printf("n°%d : batch error :", nbItt);
+        printf("n°%d : batch error : ", nbItt);
         printf("%f -- update rate : %f\n", err, updateRate);
         
         updateRate *= anneal;
-    } while (--nbItt > 0);
+    } // while (--nbItt > 0);
     
     if (finalprint) {
         shuffle(ds);
@@ -116,6 +116,16 @@ int main (int argc, char* argv[]) {
                     getMaxPos(d->output, n->nbOutput));
         }
     }
+
+    int nbErrors = 0;
+    for (int i = 0; i < ds->nblines; i++) {
+        Data* d = ds->rows[i];
+        float* out = NNGuess(n, d->inputs);
+
+        if (getMaxPos(out, n->nbOutput) != getMaxPos(d->output, n->nbOutput))
+            nbErrors++;
+    }
+    printf("NeuralNet result : %d inputs -> %d errors.\n", ds->nblines, nbErrors);
 
     if (savepath) {
         NNsave(n, savepath);

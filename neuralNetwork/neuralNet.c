@@ -1,10 +1,10 @@
+#define _GNU_SOURCE
 #include "neuralNet.h"
 
 #include <stdlib.h>
 #include <time.h>
 #include <math.h>
 #include <err.h>
-#define _GNU_SOURCE
 #include <stdio.h>
 size_t getdelim(char **lineptr, size_t *n, int delim, FILE *stream);
 
@@ -15,28 +15,11 @@ void NNprint(float* arr, int size) {
 }
 
 neuNet* NNinit(int nbInputs, int ttHidden, int nbOutput) {
-    /*
-    if (nbLayers < 1) {
-        printf("Error : NeuralNetwork need at least one hidden layer");
-        // return NULL; // < TODO : return error
-    }
-    */
-
     neuNet* nn = malloc(sizeof(neuNet));
 
     // Statics
     nn->nbInputs = nbInputs;
-    // nn->nbHidden = malloc(nbLayers * sizeof(int));
-    // for (int l = 0; l < nbLayers; l++)
-    //    nn->nbHidden[l] = nbHidden[l];
     nn->nbOutput = nbOutput;
-    // nn->nbLayers = nbLayers;
-
-    /*
-    n->nbHidden = n->nbNeurons + 1;
-    for (int l = 0; l < nbLayers; l++)
-        nn->nbHidden[l] = nbHidden[l];
-    */
 
     // Count hidden neurons
     nn->ttHidden = ttHidden;
