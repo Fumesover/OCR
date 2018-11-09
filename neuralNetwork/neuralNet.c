@@ -13,30 +13,30 @@ void NNprint(float* arr, int size) {
     printf("\n");
 }
 
-neuNet* NNinit(int nbInputs, int ttHidden, int nbOutput) {
+neuNet NNinit(int nbInputs, int ttHidden, int nbOutput) {
     // Init struct
-    neuNet* n = malloc(sizeof(neuNet));
+    neuNet n ;//= malloc(sizeof(neuNet));
 
     // Statics
-    n->nbInputs = nbInputs;
-    n->nbOutput = nbOutput;
+    n.nbInputs = nbInputs;
+    n.nbOutput = nbOutput;
 
     // Count hidden neurons
-    n->ttHidden = ttHidden;
+    n.ttHidden = ttHidden;
 
     // Count weights
-    n->nbWeights = ttHidden * (nbInputs + nbOutput);
+    n.nbWeights = ttHidden * (nbInputs + nbOutput);
 
     // Count biais
-    n->nbBiais = 2;
+    n.nbBiais = 2;
 
     // Init arrays
-    n->weights      = malloc(n->nbWeights * sizeof(*n->weights));
-    n->biais        = malloc(n->nbBiais   * sizeof(*n->biais));
+    n.weights      = malloc(n.nbWeights * sizeof(*n.weights));
+    n.biais        = malloc(n.nbBiais   * sizeof(*n.biais));
 
-    int sumNeurons  = n->ttHidden + n->nbOutput;
-    n->neuHidden    = malloc(sumNeurons * sizeof(*n->neuHidden));
-    n->neuOutput    = n->neuHidden + ttHidden;
+    int sumNeurons  = n.ttHidden + n.nbOutput;
+    n.neuHidden    = malloc(sumNeurons * sizeof(*n.neuHidden));
+    n.neuOutput    = n.neuHidden + ttHidden;
 
     return n;
 }
@@ -45,14 +45,14 @@ static float randF() {
     return rand() / (float) RAND_MAX;
 }
 
-void NNrand(neuNet* n) {
+void NNrand(neuNet n) {
     srand(time(NULL));
 
-    for (int p = 0; p < n->nbWeights; p++)
-        n->weights[p] = randF() - 0.5f;
+    for (int p = 0; p < n.nbWeights; p++)
+        n.weights[p] = randF() - 0.5f;
 
-    for (int p = 0; p < n->nbBiais; p++)
-        n->biais[p] = randF() - 0.5f;
+    for (int p = 0; p < n.nbBiais; p++)
+        n.biais[p] = randF() - 0.5f;
 }
 
 static float activation(const float inp) {
@@ -64,52 +64,52 @@ static float primeOfAct(const float act) {
     return act * (1 - act);
 }
 
-static void forwardPropagation(neuNet* n, const float* inp) {
-    for(int i = 0; i < n->ttHidden; i++) {
+static void forwardPropagation(neuNet n, const float* inp) {
+    for(int i = 0; i < n.ttHidden; i++) {
         float sum = 0;
-        for(int j = 0; j < n->nbInputs; j++)
-            sum += inp[j] * n->weights[i * n->nbInputs + j];
-        n->neuHidden[i] = activation(sum + n->biais[0]);
+        for(int j = 0; j < n.nbInputs; j++)
+            sum += inp[j] * n.weights[i * n.nbInputs + j];
+        n.neuHidden[i] = activation(sum + n.biais[0]);
     }
 
-    float* weights = n->weights + n->nbInputs * n->ttHidden;
+    float* weights = n.weights + n.nbInputs * n.ttHidden;
 
-    for(int i = 0; i < n->nbOutput; i++) {
+    for(int i = 0; i < n.nbOutput; i++) {
         float sum = 0.0f;
-        for(int j = 0; j < n->ttHidden; j++)
-            sum += n->neuHidden[j] * weights[i * n->ttHidden + j];
-        n->neuOutput[i] = activation(sum + n->biais[1]);
+        for(int j = 0; j < n.ttHidden; j++)
+            sum += n.neuHidden[j] * weights[i * n.ttHidden + j];
+        n.neuOutput[i] = activation(sum + n.biais[1]);
     }
 }
 
-void NNfree(neuNet *n) {
-    free(n->neuHidden);
+void NNfree(neuNet n) {
+    free(n.neuHidden);
 
-    free(n->weights);
-    free(n->biais);
+    free(n.weights);
+    free(n.biais);
 
-    free(n);
+    // free(n);
 }
 
-static void backPropagation(neuNet* n, const float* inp, const float* targ, const float rate) {
-    const int offsetWeights = n->nbInputs * n->ttHidden;
+static void backPropagation(neuNet n, const float* inp, const float* targ, const float rate) {
+    const int offsetWeights = n.nbInputs * n.ttHidden;
 
-    for(int i = 0; i < n->ttHidden; i++) {
+    for(int i = 0; i < n.ttHidden; i++) {
         float sum = 0.0f;
 
-        for (int j = 0; j < n->nbOutput; j++) {
-            float err   = n->neuOutput[j] - targ[j];
-            float prime = primeOfAct(n->neuOutput[j]);
-            int   wpos  = offsetWeights + j * n->ttHidden + i;
+        for (int j = 0; j < n.nbOutput; j++) {
+            float err   = n.neuOutput[j] - targ[j];
+            float prime = primeOfAct(n.neuOutput[j]);
+            int   wpos  = offsetWeights + j * n.ttHidden + i;
 
-            sum += err * prime * n->weights[wpos];
+            sum += err * prime * n.weights[wpos];
 
-            n->weights[wpos] -= err * prime * n->neuHidden[i] * rate;
+            n.weights[wpos] -= err * prime * n.neuHidden[i] * rate;
         }
 
-        for(int j = 0; j < n->nbInputs; j++) {
-            float prime = primeOfAct(n->neuHidden[i]);
-            n->weights[i * n->nbInputs + j] -= rate * sum * prime * inp[j];
+        for(int j = 0; j < n.nbInputs; j++) {
+            float prime = primeOfAct(n.neuHidden[i]);
+            n.weights[i * n.nbInputs + j] -= rate * sum * prime * inp[j];
         }
     }
 }
@@ -119,52 +119,53 @@ static float error(const float a, const float b) {
     return 0.5 * (a - b) * (a - b);
 }
 
-float NNerror(neuNet *n, const float* target) {
+float NNerror(neuNet n, const float* target) {
     float sum = 0.0f;
-    for (int p = 0; p < n->nbOutput; p++)
-        sum += error(n->neuOutput[p], target[p]);
+    for (int p = 0; p < n.nbOutput; p++)
+        sum += error(n.neuOutput[p], target[p]);
     return sum;
 }
 
-float NNTrain(neuNet* n, const float* inp, const float* targ, const float update) {
+float NNTrain(neuNet n, const float* inp, const float* targ, const float update) {
     forwardPropagation(n, inp);
     backPropagation(n, inp, targ, update);
     return NNerror(n, targ);
 }
 
-float* NNGuess(neuNet* n, const float* inp) {
+float* NNGuess(neuNet n, const float* inp) {
     forwardPropagation(n, inp);
-    return n->neuOutput;
+    return n.neuOutput;
 }
 
-void NNsave(neuNet* n, const char* filename){
+void NNsave(neuNet n, const char* filename){
     FILE* fPointer = fopen(filename,"w");
     
     if (!fPointer)
         errx(1, "Invalid path %s", filename);
 
-    fprintf(fPointer,"%d\n",n->nbInputs);
-    fprintf(fPointer,"%d\n",n->nbOutput);
+    fprintf(fPointer,"%d\n",n.nbInputs);
+    fprintf(fPointer,"%d\n",n.nbOutput);
     fprintf(fPointer,"%d\n", 1);
 
-    fprintf(fPointer, "%d \n", n->ttHidden);
+    fprintf(fPointer, "%d \n", n.ttHidden);
 
-    for(int i = 0; i < n->nbWeights; i++)
-        fprintf(fPointer,"%f ",n->weights[i]);
+    for(int i = 0; i < n.nbWeights; i++)
+        fprintf(fPointer,"%f ",n.weights[i]);
     fprintf(fPointer,"\n");
 
-    for(int i = 0; i < n->nbBiais; i++)
-        fprintf(fPointer,"%f ",n->biais[i]);
+    for(int i = 0; i < n.nbBiais; i++)
+        fprintf(fPointer,"%f ",n.biais[i]);
 
     fprintf(fPointer,"\n");
     fclose(fPointer);
 }
 
-neuNet* NNload(const char* filename){
+neuNet NNload(const char* filename){
     FILE* fp = fopen(filename,"r");
     
     if (!fp)
-        return (neuNet*) NULL;
+        //return (neuNet*) NULL;
+        errx(1, "Invalid path");
     
     size_t len = 0;
     char* line = NULL;
@@ -188,18 +189,18 @@ neuNet* NNload(const char* filename){
             nbHidden[i] = atoi(line);
     read = getdelim(&line, &len, '\n', fp); // remove last space
 
-    neuNet* n = NNinit(nbInputs, nbHidden[0], nbOutput);
+    neuNet n = NNinit(nbInputs, nbHidden[0], nbOutput);
 
     free(nbHidden);
 
-    for (int i = 0; i < n->nbWeights; i++)
+    for (int i = 0; i < n.nbWeights; i++)
         if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
-            n->weights[i] = atof(line);
+            n.weights[i] = atof(line);
     read = getdelim(&line, &len, '\n', fp); // remove last space
 
-    for (int i = 0; i < n->nbBiais; i++)
+    for (int i = 0; i < n.nbBiais; i++)
         if ((read = getdelim(&line, &len, ' ', fp)) != (size_t) -1)
-            n->biais[i] = atof(line);
+            n.biais[i] = atof(line);
 
     free(line);
     fclose(fp);

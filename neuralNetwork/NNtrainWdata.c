@@ -74,11 +74,11 @@ int main (int argc, char* argv[]) {
     if (!ds)
         exit(1);
 
-    neuNet* n = NULL;
+    neuNet n;// = NULL;
     if (loadpath) {
         n = NNload(loadpath);
-        if (!n) 
-            errx(1, "Invalid path %s", loadpath); 
+        //if (!n) 
+        //    errx(1, "Invalid path %s", loadpath); 
     } else {
         if (nbHidden == 0) 
             errx(1, "Need at least 1 hidden neuron");
@@ -112,8 +112,8 @@ int main (int argc, char* argv[]) {
             float* out = NNGuess(n, d->inputs);
 
             printf("Preficted : %d -- Expects %d\n", 
-                    getMaxPos(out, n->nbOutput), 
-                    getMaxPos(d->output, n->nbOutput));
+                    getMaxPos(out, n.nbOutput), 
+                    getMaxPos(d->output, n.nbOutput));
         }
     }
 
@@ -122,7 +122,7 @@ int main (int argc, char* argv[]) {
         Data* d = ds->rows[i];
         float* out = NNGuess(n, d->inputs);
 
-        if (getMaxPos(out, n->nbOutput) != getMaxPos(d->output, n->nbOutput))
+        if (getMaxPos(out, n.nbOutput) != getMaxPos(d->output, n.nbOutput))
             nbErrors++;
     }
     printf("NeuralNet result : %d inputs -> %d errors.\n", ds->nblines, nbErrors);

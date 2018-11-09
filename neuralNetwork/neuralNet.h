@@ -22,28 +22,28 @@ typedef struct {
 neuNet;
 
 // Create a neural network
-neuNet* NNinit(int nbInputs, int ttHidden, int nbOutput);
+neuNet NNinit(int nbInputs, int ttHidden, int nbOutput);
 
 // Init nerwork with random weights and biais
-void NNrand(neuNet* nn);
+void NNrand(neuNet nn);
 
 // Train with one set, return output error
-float NNTrain(neuNet* n, const float* inp, const float* targ, float update);
+float NNTrain(neuNet n, const float* inp, const float* targ, float update);
 
 // Compute error
-float NNerror(neuNet* n, const float* target);
+float NNerror(neuNet n, const float* target);
 
 // Make a guess with input
-float* NNGuess(neuNet* n, const float* inp);
+float* NNGuess(neuNet n, const float* inp);
 
 // Free NN
-void NNfree(neuNet* n);
+void NNfree(neuNet n);
 
 // load NN
-neuNet* NNload(const char* filename);
+neuNet NNload(const char* filename);
 
 // save NN
-void NNsave(neuNet* n, const char* filename);
+void NNsave(neuNet n, const char* filename);
 
 // print array of floats
 void NNprint(float* arr, int size);
