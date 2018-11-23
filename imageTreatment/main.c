@@ -1,4 +1,4 @@
-include <stdlib.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <gtk/gtk.h>
 #include <SDL2/SDL.h>
@@ -10,13 +10,13 @@ include <stdlib.h>
 #include "queue.h"
 #include "../GUI/interface.h"
 
-int gentilmonsieur(int argc, char** argv)
+int main(int argc, char** argv)
 {
     // TODO : Select file from interface file chooser
     /*char *path_image = "/home/rhaeven/Documents/OCR/scan1.png";
     char *enter = "", *tmp;
     enter = malloc(200*sizeof(char));
-   
+
     int opt;
     while ((opt = getopt(argc, argv, "i:")) != -1) {
         switch (opt) {

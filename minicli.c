@@ -11,7 +11,9 @@
 #include "imageTreatment/matrix.h"
 #include "imageTreatment/queue.h"
 #include "imageTreatment/segmentation.h"
+#include "imageTreatment/matrix.h"
 
+/*
 void neuralnet() {
     // INIT
     int   nbInp     = 2;
@@ -84,6 +86,7 @@ void neuralnet() {
     NNfree(loaded);
     return;
 }
+ */
 
 void image() {
     int val = 0;
@@ -101,6 +104,7 @@ void image() {
         printf("\t2-> show image\n");
         printf("\t3-> run otsu & binarisation\n");
         printf("\t4-> show segmentation\n");
+        printf("\t5-> resize image\n");
 
         printf("\t9-> exit\n");
         
@@ -146,6 +150,19 @@ void image() {
                     Segmentation(matrix, h, w);
                 
                 break;
+            case 5:
+                if (image != NULL) {
+                    int t = h > w ? h : w;
+                    int** square = SquareMatrix(matrix, h, w);
+
+                    Pixel** pix = InitPixelMatrix(t, t);
+
+                    BinToPixels(square, pix, t, t);
+                    SDL_Surface *n = MatrixToSurface(pix, t, t);
+                    SDL_Surface *res = ResizeMatrix(n, 150);
+                    DisplayImage(res);
+                }
+                break;
             }
     }
     
@@ -177,7 +194,7 @@ int main() {
         
         switch (val) {
             case 1:
-                neuralnet();
+                //neuralnet();
                 break;
             case 2:
                 image();
