@@ -36,9 +36,9 @@ Queue *Segmentation(int **matrix, int h, int w)
     CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
-    /*ShowSegmentation(queue);
+    ShowSegmentation(queue);
 
-    BinToPixels(matrix, pixels, h, w);
+    /*BinToPixels(matrix, pixels, h, w);
     DisplayImage(MatrixToSurface(pixels, h, w));*/
 
     /*** FREE ALLOCATED MEMORY ***/
@@ -336,20 +336,33 @@ char* ShowSegmentation(Queue *queue)
             s[t] = 'c';
             t++;
 
-            //int h = curr->data->height;
-            //int w = curr->data->width;
+            int h = curr->data->height;
+            int w = curr->data->width;
 
-            //int **rm = RemoveWhite(c, &h, &w);
-            //int **square = SquareMatrix(rm, h, w);
 
-            //if (h > w) t = h; else t = w;
 
-            //m = InitPixelMatrix(t, t);
+            RemoveWhite(c, &h, &w);
+            int size = h > w ? h : w;
+            int** square = SquareMatrix(c, h, w);
 
-            //BinToPixels(square, m, t, t);
-            //DisplayImage(MatrixToSurface(m, t, t));
+            Pixel** pix = InitPixelMatrix(size, size);
 
-            //free(m);
+            BinToPixels(square, pix, size, size);
+            SDL_Surface *n = MatrixToSurface(pix, size, size);
+            SDL_Surface *res = ResizeMatrix(n, 20);
+            DisplayImage(res);
+
+
+            for (int i = 0; i < size; i++) {
+                free(pix[i]);
+                free(square[i]);
+            }
+
+            free(pix);
+            free(square);
+
+            SDL_FreeSurface(n);
+
         }
         else
         {
