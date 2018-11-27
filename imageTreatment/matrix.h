@@ -21,7 +21,8 @@ void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w);
 
 void Copy(int **mat1, int**mat2);
 int **SquareMatrix(int **matrix, int h, int w);
-SDL_Surface *ResizeMatrix(SDL_Surface *Surface, Uint16 t);
+int **Resize(int **matrix, int h, int w, int newsize);
+SDL_Surface *ResizeSurface(SDL_Surface *Surface, Uint16 t);
 int **RemoveWhite(int **matrix, int *h, int *w);
 
 #endif

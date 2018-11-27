@@ -2,7 +2,7 @@
 #include "neuralNetwork/neuralNet.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <unistd.h>
@@ -104,8 +104,7 @@ void image() {
         printf("\t2-> show image\n");
         printf("\t3-> run otsu & binarisation\n");
         printf("\t4-> show segmentation\n");
-        printf("\t5-> resize image\n");
-        printf("\t6-> automatic rotation\n");
+        printf("\t5-> automatic rotation\n");
 
         printf("\t9-> exit\n");
         
@@ -133,7 +132,7 @@ void image() {
                     SurfaceToMatrix(pixels, image, h, w);
                 }
                 break;
-            case 6:
+            case 5:
                 if (image != NULL) {
                     //Hough(matrix, h, w);
                 }
@@ -146,7 +145,7 @@ void image() {
                 if (image != NULL) {
                     GreyScale(pixels, h, w);
                     int threshold = Otsu(pixels, h, w);
-                    Binarization(pixels, h, w, threshold);
+                    OtsuBinarization(pixels, h, w, threshold);
                     BinarizeMatrix(pixels, matrix, h, w);
                 }
                 break;
@@ -155,35 +154,11 @@ void image() {
                     Segmentation(matrix, h, w);
                 
                 break;
-            case 5:
-                if (image != NULL) {
-                    int t = h > w ? h : w;
-                    int** square = SquareMatrix(matrix, h, w);
-
-                    Pixel** pix = InitPixelMatrix(t, t);
-
-                    BinToPixels(square, pix, t, t);
-                    SDL_Surface *n = MatrixToSurface(pix, t, t);
-                    SDL_Surface *res = ResizeMatrix(n, 150);
-                    DisplayImage(res);
-                }
-                break;
             }
     }
     
-    FreeMatrix(matrix, h, w);
-    FreeMatrix(pixels, h, w);
-    /*
-    if (matrix != NULL && pixels != NULL) {
-        for (int j = 0; j < h; j++) {
-            free(pixels[j]);
-            free(matrix[j]);
-        }
-    }
-
-    free(pixels);
-    free(matrix);
-     */
+    FreeMatrix(matrix, h);
+    FreeMatrix(pixels, h);
 }
 
 int main() {
