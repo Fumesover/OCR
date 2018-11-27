@@ -342,9 +342,9 @@ char* ShowSegmentation(Queue *queue)
             SDL_Surface *res = ResizeMatrix(n, 20);
             //DisplayImage(res);
 
-            FreeMatrix(pix, size, size);
-            FreeMatrix(square, size, size);
-            FreeMatrix(new, h, w);
+            FreeMatrix(pix, size);
+            FreeMatrix(square, size);
+            FreeMatrix(new, h);
             /*
             for (int i = 0; i < size; i++) {
                 free(pix[i]);

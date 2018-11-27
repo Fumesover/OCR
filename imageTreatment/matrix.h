@@ -9,7 +9,7 @@ Pixel** InitPixelMatrix(int h, int w);
 void InitArray(int *array, int h);
 
 /* FREE */
-void FreeMatrix(void **m, int h, int w);
+void FreeMatrix(void **m, int h);
 
 /* PRINT */
 void PrintMatrix(int **matrix, int h, int w);

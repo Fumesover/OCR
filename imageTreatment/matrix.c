@@ -40,7 +40,7 @@ int** InitIntMatrix(int h, int w)
     return matrix;
 }
 
-void FreeMatrix(void **m, int h, int w)
+void FreeMatrix(void **m, int h)
 {
     for (int i = 0; i < h; i++)
         free(m[i]);

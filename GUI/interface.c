@@ -18,6 +18,7 @@ GtkWidget *loadButton;
 GtkWidget *binButton;
 GtkWidget *segButton;
 GtkTextView *textBox;
+GtkWindow *about;
 char *s;
 
 void Display(gchar *path)
@@ -113,6 +114,11 @@ void Seg()
     PrintText();
 }
 
+void About()
+{
+    gtk_widget_show_all (about);
+}
+
 /**************/
 /**** MAIN ****/
 /**************/
@@ -134,6 +140,8 @@ int main(int argc, char *argv[])
     binButton = GTK_WIDGET(gtk_builder_get_object(builder, "Binarize"));
     segButton = GTK_WIDGET(gtk_builder_get_object(builder, "Segmentation"));
     textBox = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "TextBox"));
+    about = GTK_WIDGET(gtk_builder_get_object(builder, "About"));
+    gtk_window_set_transient_for(GTK_WINDOW(about), GTK_WINDOW(window));
 
     g_object_unref(builder);
     gtk_widget_show_all (window);
