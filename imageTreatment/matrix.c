@@ -15,10 +15,12 @@ void PrintMatrix(int **matrix, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            printf("(%d,%d)=%d, ", i, j, matrix[i][j]);
+            printf(" %d ", matrix[i][j]);
         }
         printf("\n");
     }
+
+    printf("=======================================================================================\n");
 }
 
 // Initializes the matrix
@@ -36,6 +38,13 @@ int** InitIntMatrix(int h, int w)
     }
 
     return matrix;
+}
+
+void FreeMatrix(void **m, int h, int w)
+{
+    for (int i = 0; i < h; i++)
+        free(m[i]);
+    free(m);
 }
 
 Pixel** InitPixelMatrix(int h, int w)
@@ -118,6 +127,7 @@ void Copy(int **mat1, int**mat2)
 
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
+    PrintMatrix(matrix, *h, *w);
     /*** INIT ***/
     int* histoH = malloc(sizeof(int) * *h);
     int* histoW = malloc(sizeof(int) * *w);
@@ -147,12 +157,13 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     while (y < *h)
     {
         if (histoH[y] > 0) {
-            while (histoH[y] > 0) {
+            while (y < *h && histoH[y] > 0) {
                 while (x < *w)
                 {
                     if (histoW[x] > 0) {
-                        while (histoW[x] > 0) {
+                        while (x < *w && histoW[x] > 0) {
                             res[ry][rx] = matrix[y][x];
+                            PrintMatrix(res, resH, resW);
                             x++;
                             rx++;
                         }
@@ -166,6 +177,7 @@ int **RemoveWhite(int **matrix, int *h, int *w)
             }
         }
         else y++;
+        x = 0;
     }
     *h = resH;
     *w = resW;
@@ -200,45 +212,23 @@ int **SquareMatrix(int **matrix, int h, int w)
 }
 
 // Resize the matrix
-int **ResizeMatrix(int **matrix, int t)
+SDL_Surface *ResizeMatrix(SDL_Surface *Surface, Uint16 t)
 {
-    double xscale = (double) SIZE / t;
-    double yscale = (double) SIZE / t;
-    double threshold = 0.5 / (xscale * yscale);
-    double yend = 0.0;
+    if(!Surface || !t)
+            return 0;
 
-    int **resize = malloc(sizeof(int*) * t);
-    for (int i = 0; i < t; i++)
-        resize[i] = malloc(sizeof(int) * t);
+        SDL_Surface *_ret = SDL_CreateRGBSurface(Surface->flags, t, t, Surface->format->BitsPerPixel,
+                                                 Surface->format->Rmask, Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
 
-    for (int f = 0; f < SIZE; f++) // y on output
-    {
-        double ystart = yend;
-        yend = (f + 1) / yscale;
-        if (yend >= t) yend = t - 0.000001;
-        double xend = 0.0;
-        for (int g = 0; g < SIZE; g++) // x on output
-        {
-            double xstart = xend;
-            xend = (g + 1) / xscale;
-            if (xend >= t) xend = t - 0.000001;
-            double sum = 0.0;
-            for (int y = (int)ystart; y <= (int)yend; ++y)
-            {
-                double yportion = 1.0;
-                if (y == (int)ystart) yportion -= ystart - y;
-                if (y == (int)yend) yportion -= y+1 - yend;
-                for (int x = (int)xstart; x <= (int)xend; ++x)
-                {
-                    double xportion = 1.0;
-                    if (x == (int)xstart) xportion -= xstart - x;
-                    if (x == (int)xend) xportion -= x+1 - xend;
-                    sum += resize[y][x] * yportion * xportion;
-                }
-            }
-            matrix[f][g] = (sum > threshold) ? 1 : 0;
-        }
-    }
+        double    _stretch_factor_x = ((double)(t)  / (double)(Surface->w)),
+                _stretch_factor_y = ((double)(t) / (double)(Surface->h));
 
-    return resize;
+        for(Sint32 y = 0; y < Surface->h; y++)
+            for(Sint32 x = 0; x < Surface->w; x++)
+                for(Sint32 o_y = 0; o_y < _stretch_factor_y; ++o_y)
+                    for(Sint32 o_x = 0; o_x < _stretch_factor_x; ++o_x)
+                        PutPixel(_ret, (Sint32)(_stretch_factor_x * x) + o_x,
+                                  (Sint32)(_stretch_factor_y * y) + o_y, GetPixel(Surface, x, y));
+
+        return _ret;
 }

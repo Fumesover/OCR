@@ -125,6 +125,7 @@ void Seg()
 /**** MAIN ****/
 /**************/
 
+/*
 int main(int argc, char *argv[])
 {
     GtkBuilder *builder;
@@ -151,3 +152,5 @@ int main(int argc, char *argv[])
 
 
 }
+
+ */
