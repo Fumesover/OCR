@@ -15,10 +15,12 @@ void PrintMatrix(int **matrix, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            printf("(%d,%d)=%d, ", i, j, matrix[i][j]);
+            printf(" %d ", matrix[i][j]);
         }
         printf("\n");
     }
+
+    printf("=======================================================================================\n");
 }
 
 // Initializes the matrix
@@ -36,6 +38,13 @@ int** InitIntMatrix(int h, int w)
     }
 
     return matrix;
+}
+
+void FreeMatrix(void **m, int h, int w)
+{
+    for (int i = 0; i < h; i++)
+        free(m[i]);
+    free(m);
 }
 
 Pixel** InitPixelMatrix(int h, int w)
@@ -118,6 +127,7 @@ void Copy(int **mat1, int**mat2)
 
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
+    PrintMatrix(matrix, *h, *w);
     /*** INIT ***/
     int* histoH = malloc(sizeof(int) * *h);
     int* histoW = malloc(sizeof(int) * *w);
@@ -147,12 +157,13 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     while (y < *h)
     {
         if (histoH[y] > 0) {
-            while (histoH[y] > 0) {
+            while (y < *h && histoH[y] > 0) {
                 while (x < *w)
                 {
                     if (histoW[x] > 0) {
-                        while (histoW[x] > 0) {
+                        while (x < *w && histoW[x] > 0) {
                             res[ry][rx] = matrix[y][x];
+                            PrintMatrix(res, resH, resW);
                             x++;
                             rx++;
                         }
@@ -166,6 +177,7 @@ int **RemoveWhite(int **matrix, int *h, int *w)
             }
         }
         else y++;
+        x = 0;
     }
     *h = resH;
     *w = resW;
@@ -176,7 +188,6 @@ int **RemoveWhite(int **matrix, int *h, int *w)
 // Returns a squared matrix equivalent to the original
 int **SquareMatrix(int **matrix, int h, int w)
 {
-    printf("square\n");
     /*** INIT ***/
     int t;
 

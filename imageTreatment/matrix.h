@@ -4,10 +4,12 @@
 #include "image.h"
 
 /* INITIALIZE */
-
 int** InitIntMatrix(int h, int w);
 Pixel** InitPixelMatrix(int h, int w);
 void InitArray(int *array, int h);
+
+/* FREE */
+void FreeMatrix(void **m, int h, int w);
 
 /* PRINT */
 void PrintMatrix(int **matrix, int h, int w);

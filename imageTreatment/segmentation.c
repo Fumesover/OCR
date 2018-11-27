@@ -141,9 +141,11 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     int **eol = NULL;
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
-    eol[0][0] = 10;
+    eol[0][0] = 38;
 
     data->data = eol;
+
+
 
     // Find average space between lines
     //average_sp = AverageSpace(histogram, h);
@@ -190,9 +192,6 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histoW);
-
-    free(eol[0]);
-    free(eol);
 }
 
 
@@ -324,26 +323,17 @@ char* ShowSegmentation(Queue *queue)
     {
         c = curr->data->data;
 
-        if (c[0][0] == 10) {
-            s[t] = '\n';
-            t++;
-        }
-        else if (c[0][0] == 32) {
-            s[t] = ' ';
-            t++;
-        }
-        else if (curr->data->width > 1 && curr->data->height > 1){
+        if (curr->data->width > 1 && curr->data->height > 1){
             s[t] = 'c';
             t++;
 
             int h = curr->data->height;
             int w = curr->data->width;
 
+            int **new = RemoveWhite(c, &h, &w);
 
-
-            RemoveWhite(c, &h, &w);
             int size = h > w ? h : w;
-            int** square = SquareMatrix(c, h, w);
+            int** square = SquareMatrix(new, h, w);
 
             Pixel** pix = InitPixelMatrix(size, size);
 
@@ -352,7 +342,10 @@ char* ShowSegmentation(Queue *queue)
             SDL_Surface *res = ResizeMatrix(n, 20);
             DisplayImage(res);
 
-
+            FreeMatrix(pix, size, size);
+            FreeMatrix(square, size, size);
+            FreeMatrix(new, h, w);
+            /*
             for (int i = 0; i < size; i++) {
                 free(pix[i]);
                 free(square[i]);
@@ -360,9 +353,19 @@ char* ShowSegmentation(Queue *queue)
 
             free(pix);
             free(square);
+             */
 
             SDL_FreeSurface(n);
 
+        }
+
+        else if (c != NULL && c[0][0] == 38) {
+            s[t] = '\n';
+            t++;
+        }
+        else if (c != NULL && c[0][0] == 32) {
+            s[t] = ' ';
+            t++;
         }
         else
         {

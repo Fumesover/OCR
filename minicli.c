@@ -2,7 +2,7 @@
 #include "neuralNetwork/neuralNet.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <unistd.h>
@@ -166,7 +166,9 @@ void image() {
             }
     }
     
-    
+    FreeMatrix(matrix, h, w);
+    FreeMatrix(pixels, h, w);
+    /*
     if (matrix != NULL && pixels != NULL) {
         for (int j = 0; j < h; j++) {
             free(pixels[j]);
@@ -176,8 +178,7 @@ void image() {
 
     free(pixels);
     free(matrix);
-    
-    return;
+     */
 }
 
 int main() {
