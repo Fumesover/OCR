@@ -105,6 +105,7 @@ void image() {
         printf("\t3-> run otsu & binarisation\n");
         printf("\t4-> show segmentation\n");
         printf("\t5-> resize image\n");
+        printf("\t6-> automatic rotation\n");
 
         printf("\t9-> exit\n");
         
@@ -132,6 +133,10 @@ void image() {
                     SurfaceToMatrix(pixels, image, h, w);
                 }
                 break;
+            case 6:
+                if (image != NULL) {
+                    //Hough(matrix, h, w);
+                }
             case 2:
                 if (image != NULL) {
                     DisplayImage(MatrixToSurface(pixels, h, w));
