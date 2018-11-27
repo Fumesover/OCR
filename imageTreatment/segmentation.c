@@ -340,7 +340,7 @@ char* ShowSegmentation(Queue *queue)
             BinToPixels(square, pix, size, size);
             SDL_Surface *n = MatrixToSurface(pix, size, size);
             SDL_Surface *res = ResizeMatrix(n, 20);
-            DisplayImage(res);
+            //DisplayImage(res);
 
             FreeMatrix(pix, size, size);
             FreeMatrix(square, size, size);

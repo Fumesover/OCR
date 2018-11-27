@@ -2,7 +2,7 @@
 #include "neuralNetwork/neuralNet.h"
 #include <stdlib.h>
 #include <stdio.h>
-//#include <gtk/gtk.h>
+#include <gtk/gtk.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <unistd.h>

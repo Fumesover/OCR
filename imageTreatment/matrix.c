@@ -127,7 +127,6 @@ void Copy(int **mat1, int**mat2)
 
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
-    PrintMatrix(matrix, *h, *w);
     /*** INIT ***/
     int* histoH = malloc(sizeof(int) * *h);
     int* histoW = malloc(sizeof(int) * *w);
@@ -163,7 +162,6 @@ int **RemoveWhite(int **matrix, int *h, int *w)
                     if (histoW[x] > 0) {
                         while (x < *w && histoW[x] > 0) {
                             res[ry][rx] = matrix[y][x];
-                            PrintMatrix(res, resH, resW);
                             x++;
                             rx++;
                         }
