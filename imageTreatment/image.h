@@ -26,7 +26,7 @@ void BinToPixels(int **matrix, Pixel **pixels, int h, int w);
 /* BINARIZATION */
 void GreyScale(Pixel **pixels, int h, int w);
 int Otsu(Pixel **pixels, int h, int w);
-void Binarization(Pixel **pixels, int h, int w, int threshold);
+void OtsuBinarization(Pixel **pixels, int h, int w, int threshold);
 void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w);
 void DebinarizeMatrix(int **binarized, Pixel **pixels, int h, int w);
 

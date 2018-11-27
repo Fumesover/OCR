@@ -10,6 +10,8 @@
 #define HOR_THRESH 150
 #define VER_THRESH 150
 
+#define SIZE 20
+
 // Main document segmentation functions
 // Makes histogram and calls line segmentation function
 Queue *Segmentation(int **matrix, int h, int w)
@@ -286,18 +288,22 @@ float AverageSpace(int* histogram, int t)
 
 void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 {
-    int **new;
-    new = InitIntMatrix(h2-h1, w2-w1);
+    int **original;
+    int h = h2-h1, w = w2-w1;
+    original = InitIntMatrix(h, w);
 
     for (int i = h1; i < h2; i++)
     {
         for (int j = w1; j < w2; j++)
-            new[i-h1][j-w1] = matrix[i][j];
+            original[i-h1][j-w1] = matrix[i][j];
     }
+
+    // Change matrix format
+    int **final = Resize(original, h, w, SIZE);
 
     Tuple *data = NewTuple();
 
-    data->data = new;
+    data->data = final;
     data->height = h2-h1;
     data->width = w2-w1;
     Enqueue(queue, data);
@@ -329,33 +335,6 @@ char* ShowSegmentation(Queue *queue)
 
             int h = curr->data->height;
             int w = curr->data->width;
-
-            int **new = RemoveWhite(c, &h, &w);
-
-            int size = h > w ? h : w;
-            int** square = SquareMatrix(new, h, w);
-
-            Pixel** pix = InitPixelMatrix(size, size);
-
-            BinToPixels(square, pix, size, size);
-            SDL_Surface *n = MatrixToSurface(pix, size, size);
-            SDL_Surface *res = ResizeMatrix(n, 20);
-            //DisplayImage(res);
-
-            FreeMatrix(pix, size);
-            FreeMatrix(square, size);
-            FreeMatrix(new, h);
-            /*
-            for (int i = 0; i < size; i++) {
-                free(pix[i]);
-                free(square[i]);
-            }
-
-            free(pix);
-            free(square);
-             */
-
-            SDL_FreeSurface(n);
 
         }
 

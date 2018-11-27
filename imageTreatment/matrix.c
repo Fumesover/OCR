@@ -125,6 +125,7 @@ void Copy(int **mat1, int**mat2)
     }
 }
 
+// Remove the white borders on the side of the matrix
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
     /*** INIT ***/
@@ -184,6 +185,7 @@ int **RemoveWhite(int **matrix, int *h, int *w)
 
 
 // Returns a squared matrix equivalent to the original
+// By adding white space on the thinner sides
 int **SquareMatrix(int **matrix, int h, int w)
 {
     /*** INIT ***/
@@ -209,8 +211,42 @@ int **SquareMatrix(int **matrix, int h, int w)
     return res;
 }
 
+// Returns the matrix to the adequate format and size
+int **Resize(int **matrix, int h, int w, int newsize)
+{
+    // Remove white borders of the matrix
+    int **cut = RemoveWhite(matrix, &h, &w);
+    // Squares matrix
+    int** square = SquareMatrix(cut, h, w);
+
+    int size = h > w ? h : w;
+
+    Pixel** pix1 = InitPixelMatrix(size, size);
+    Pixel** pix2 = InitPixelMatrix(newsize, newsize);
+
+    // Conversions and resize
+    BinToPixels(square, pix1, size, size);
+    SDL_Surface *n = MatrixToSurface(pix1, size, size);
+    SDL_Surface *res = ResizeSurface(n, (Uint16)newsize);
+
+    int **final = InitIntMatrix(newsize, newsize);
+
+    SurfaceToMatrix(pix2, res, newsize, newsize);
+    BinarizeMatrix(pix2, final, newsize, newsize);
+
+    FreeMatrix(pix1, size);
+    FreeMatrix(cut, h);
+    FreeMatrix(pix2, newsize);
+    FreeMatrix(square, size);
+
+    SDL_FreeSurface(res);
+    SDL_FreeSurface(n);
+
+    return final;
+}
+
 // Resize the matrix
-SDL_Surface *ResizeMatrix(SDL_Surface *Surface, Uint16 t)
+SDL_Surface *ResizeSurface(SDL_Surface *Surface, Uint16 t)
 {
     if(!Surface || !t)
             return 0;
