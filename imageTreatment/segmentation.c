@@ -37,11 +37,7 @@ Queue *Segmentation(int **matrix, int h, int w)
     /*** LINE SEGMENTATION ***/
     CutInLine(matrix, histo, queue, h,  w);
 
-    // TEST: displays result
-    ShowSegmentation(queue);
-
-    /*BinToPixels(matrix, pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));*/
+    //ShowSegmentation(queue);
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);

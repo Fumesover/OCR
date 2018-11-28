@@ -19,8 +19,13 @@ GtkWidget *loadButton;
 GtkWidget *binButton;
 GtkWidget *segButton;
 GtkTextView *textBox;
-GtkWindow *about;
+GtkWidget *about;
 char *s;
+
+int h, w;
+
+Pixel **pixels; // To receive RGB value of the pixels of the image
+int   **matrix; // Receives 0 and 1 considering the color of pixel
 
 void Display(gchar *path)
 {
@@ -32,14 +37,8 @@ void Display(gchar *path)
 void Load(GtkWidget *file_chooser)
 {
     int h = 0, w = 0;
-    Pixel **pixels; // To receive RGB value of the pixels of the image
-    int   **matrix; // Receives 0 and 1 considering the color of pixel
 
     // Queue for segmentation
-    Queue *queue = NULL;
-    queue = malloc(sizeof(*queue));
-    queue->first = NULL;
-
     gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
 
     printf("path: %s\n", path);
@@ -68,25 +67,6 @@ void Load(GtkWidget *file_chooser)
     BinarizeMatrix(pixels, matrix, h, w);
     BinToPixels(matrix, pixels, h, w);
     SDL_SaveBMP(MatrixToSurface(pixels, h, w), "bin.bmp");
-
-    /*** SEGMENTATION ***/
-    queue = Segmentation(matrix, h, w);
-    BinToPixels(matrix, pixels, h, w);
-    SDL_SaveBMP(MatrixToSurface(pixels, h, w), "seg.bmp");
-
-//    s = "nope";
-    s = extractstring("../neuralNetwork/92513--8158.inp", queue);
-//    s = ShowSegmentation(queue);
-
-    /*** FREE ALLOCATED MEMORY ***/
-    for (int j = 0; j < h; j++)
-    {
-        free(pixels[j]);
-        free(matrix[j]);
-    }
-
-    free(pixels);
-    free(matrix);
 }
 
 void PrintText()
@@ -107,11 +87,22 @@ void Quit()
 
 void Bin()
 {
+
     Display("bin.bmp");
 }
 
 void Seg()
 {
+    Queue *queue = NULL;
+    queue = malloc(sizeof(*queue));
+    queue->first = NULL;
+
+    queue = Segmentation(matrix, h, w);
+    BinToPixels(matrix, pixels, h, w);
+    SDL_SaveBMP(MatrixToSurface(pixels, h, w), "seg.bmp");
+
+    s = extractstring("../neuralNetwork/92513--8158.inp", queue);
+
     Display("seg.bmp");
     PrintText();
 }
@@ -143,6 +134,17 @@ int main(int argc, char *argv[])
     g_object_unref(builder);
     gtk_widget_show_all (window);
     gtk_main();
+
+
+    /*** FREE ALLOCATED MEMORY ***/
+    for (int j = 0; j < h; j++)
+    {
+        free(pixels[j]);
+        free(matrix[j]);
+    }
+
+    free(pixels);
+    free(matrix);
 
     return 0;
 }
