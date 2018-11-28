@@ -199,7 +199,7 @@ int Otsu(Pixel **pixels, int h, int w)
 }
 
 // Binarize the pixel matrix considering the threshold
-void Binarization(Pixel **pixels, int h, int w, int threshold)
+void OtsuBinarization(Pixel **pixels, int h, int w, int threshold)
 {
     int r;
     for (int i = 0; i < h; i++)

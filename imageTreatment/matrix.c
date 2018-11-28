@@ -15,10 +15,12 @@ void PrintMatrix(int **matrix, int h, int w)
     {
         for (int j = 0; j < w; j++)
         {
-            printf("(%d,%d)=%d, ", i, j, matrix[i][j]);
+            printf(" %d ", matrix[i][j]);
         }
         printf("\n");
     }
+
+    printf("=======================================================================================\n");
 }
 
 // Initializes the matrix
@@ -36,6 +38,13 @@ int** InitIntMatrix(int h, int w)
     }
 
     return matrix;
+}
+
+void FreeMatrix(void **m, int h)
+{
+    for (int i = 0; i < h; i++)
+        free(m[i]);
+    free(m);
 }
 
 Pixel** InitPixelMatrix(int h, int w)
@@ -116,6 +125,7 @@ void Copy(int **mat1, int**mat2)
     }
 }
 
+// Remove the white borders on the side of the matrix
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
     /*** INIT ***/
@@ -147,11 +157,11 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     while (y < *h)
     {
         if (histoH[y] > 0) {
-            while (histoH[y] > 0) {
+            while (y < *h && histoH[y] > 0) {
                 while (x < *w)
                 {
                     if (histoW[x] > 0) {
-                        while (histoW[x] > 0) {
+                        while (x < *w && histoW[x] > 0) {
                             res[ry][rx] = matrix[y][x];
                             x++;
                             rx++;
@@ -166,6 +176,7 @@ int **RemoveWhite(int **matrix, int *h, int *w)
             }
         }
         else y++;
+        x = 0;
     }
     *h = resH;
     *w = resW;
@@ -174,6 +185,7 @@ int **RemoveWhite(int **matrix, int *h, int *w)
 
 
 // Returns a squared matrix equivalent to the original
+// By adding white space on the thinner sides
 int **SquareMatrix(int **matrix, int h, int w)
 {
     /*** INIT ***/
@@ -199,46 +211,58 @@ int **SquareMatrix(int **matrix, int h, int w)
     return res;
 }
 
-// Resize the matrix
-int **ResizeMatrix(int **matrix, int t)
+// Returns the matrix to the adequate format and size
+int **Resize(int **matrix, int h, int w, int newsize)
 {
-    double xscale = (double) SIZE / t;
-    double yscale = (double) SIZE / t;
-    double threshold = 0.5 / (xscale * yscale);
-    double yend = 0.0;
+    // Remove white borders of the matrix
+    int **cut = RemoveWhite(matrix, &h, &w);
+    // Squares matrix
+    int** square = SquareMatrix(cut, h, w);
 
-    int **resize = malloc(sizeof(int*) * t);
-    for (int i = 0; i < t; i++)
-        resize[i] = malloc(sizeof(int) * t);
+    int size = h > w ? h : w;
 
-    for (int f = 0; f < SIZE; f++) // y on output
-    {
-        double ystart = yend;
-        yend = (f + 1) / yscale;
-        if (yend >= t) yend = t - 0.000001;
-        double xend = 0.0;
-        for (int g = 0; g < SIZE; g++) // x on output
-        {
-            double xstart = xend;
-            xend = (g + 1) / xscale;
-            if (xend >= t) xend = t - 0.000001;
-            double sum = 0.0;
-            for (int y = (int)ystart; y <= (int)yend; ++y)
-            {
-                double yportion = 1.0;
-                if (y == (int)ystart) yportion -= ystart - y;
-                if (y == (int)yend) yportion -= y+1 - yend;
-                for (int x = (int)xstart; x <= (int)xend; ++x)
-                {
-                    double xportion = 1.0;
-                    if (x == (int)xstart) xportion -= xstart - x;
-                    if (x == (int)xend) xportion -= x+1 - xend;
-                    sum += resize[y][x] * yportion * xportion;
-                }
-            }
-            matrix[f][g] = (sum > threshold) ? 1 : 0;
-        }
-    }
+    Pixel** pix1 = InitPixelMatrix(size, size);
+    Pixel** pix2 = InitPixelMatrix(newsize, newsize);
 
-    return resize;
+    // Conversions and resize
+    BinToPixels(square, pix1, size, size);
+    SDL_Surface *n = MatrixToSurface(pix1, size, size);
+    SDL_Surface *res = ResizeSurface(n, (Uint16)newsize);
+
+    int **final = InitIntMatrix(newsize, newsize);
+
+    SurfaceToMatrix(pix2, res, newsize, newsize);
+    BinarizeMatrix(pix2, final, newsize, newsize);
+
+    FreeMatrix(pix1, size);
+    FreeMatrix(cut, h);
+    FreeMatrix(pix2, newsize);
+    FreeMatrix(square, size);
+
+    SDL_FreeSurface(res);
+    SDL_FreeSurface(n);
+
+    return final;
+}
+
+// Resize the matrix
+SDL_Surface *ResizeSurface(SDL_Surface *Surface, Uint16 t)
+{
+    if(!Surface || !t)
+            return 0;
+
+        SDL_Surface *_ret = SDL_CreateRGBSurface(Surface->flags, t, t, Surface->format->BitsPerPixel,
+                                                 Surface->format->Rmask, Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
+
+        double    _stretch_factor_x = ((double)(t)  / (double)(Surface->w)),
+                _stretch_factor_y = ((double)(t) / (double)(Surface->h));
+
+        for(Sint32 y = 0; y < Surface->h; y++)
+            for(Sint32 x = 0; x < Surface->w; x++)
+                for(Sint32 o_y = 0; o_y < _stretch_factor_y; ++o_y)
+                    for(Sint32 o_x = 0; o_x < _stretch_factor_x; ++o_x)
+                        PutPixel(_ret, (Sint32)(_stretch_factor_x * x) + o_x,
+                                  (Sint32)(_stretch_factor_y * y) + o_y, GetPixel(Surface, x, y));
+
+        return _ret;
 }

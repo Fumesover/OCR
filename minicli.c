@@ -2,7 +2,7 @@
 #include "neuralNetwork/neuralNet.h"
 #include <stdlib.h>
 #include <stdio.h>
-#include <gtk/gtk.h>
+//#include <gtk/gtk.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <unistd.h>
@@ -11,7 +11,9 @@
 #include "imageTreatment/matrix.h"
 #include "imageTreatment/queue.h"
 #include "imageTreatment/segmentation.h"
+#include "imageTreatment/matrix.h"
 
+/*
 void neuralnet() {
     // INIT
     int   nbInp     = 2;
@@ -84,6 +86,7 @@ void neuralnet() {
     NNfree(loaded);
     return;
 }
+ */
 
 void image() {
     int val = 0;
@@ -101,6 +104,7 @@ void image() {
         printf("\t2-> show image\n");
         printf("\t3-> run otsu & binarisation\n");
         printf("\t4-> show segmentation\n");
+        printf("\t5-> automatic rotation\n");
 
         printf("\t9-> exit\n");
         
@@ -128,6 +132,10 @@ void image() {
                     SurfaceToMatrix(pixels, image, h, w);
                 }
                 break;
+            case 5:
+                if (image != NULL) {
+                    //Hough(matrix, h, w);
+                }
             case 2:
                 if (image != NULL) {
                     DisplayImage(MatrixToSurface(pixels, h, w));
@@ -137,7 +145,7 @@ void image() {
                 if (image != NULL) {
                     GreyScale(pixels, h, w);
                     int threshold = Otsu(pixels, h, w);
-                    Binarization(pixels, h, w, threshold);
+                    OtsuBinarization(pixels, h, w, threshold);
                     BinarizeMatrix(pixels, matrix, h, w);
                 }
                 break;
@@ -149,18 +157,8 @@ void image() {
             }
     }
     
-    
-    if (matrix != NULL && pixels != NULL) {
-        for (int j = 0; j < h; j++) {
-            free(pixels[j]);
-            free(matrix[j]);
-        }
-    }
-
-    free(pixels);
-    free(matrix);
-    
-    return;
+    FreeMatrix(matrix, h);
+    FreeMatrix(pixels, h);
 }
 
 int main() {
@@ -177,7 +175,7 @@ int main() {
         
         switch (val) {
             case 1:
-                neuralnet();
+                //neuralnet();
                 break;
             case 2:
                 image();

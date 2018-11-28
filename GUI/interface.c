@@ -14,25 +14,18 @@
 
 GtkWidget *window;
 GtkImage *imageIni;
-GtkImage *imageDone;
 GtkWidget *loadButton;
 GtkWidget *binButton;
 GtkWidget *segButton;
 GtkTextView *textBox;
+GtkWindow *about;
 char *s;
 
-void DisplayIni(gchar *path)
+void Display(gchar *path)
 {
     //GtkWidget *image = gtk_image_new_from_file(path);
     printf("file=%s\n", path);
     gtk_image_set_from_file(imageIni, path);
-}
-
-void DisplayResult(gchar *path)
-{
-    //GtkWidget *image = gtk_image_new_from_file(path);
-    printf("file=%s\n", path);
-    gtk_image_set_from_file(imageDone, path);
 }
 
 void Load(GtkWidget *file_chooser)
@@ -49,7 +42,7 @@ void Load(GtkWidget *file_chooser)
     gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
 
     printf("path: %s\n", path);
-    DisplayIni(path);
+    Display(path);
 
     SDL_Surface *image = LoadImage(path);
 
@@ -99,7 +92,7 @@ void PrintText()
     printf("%s\n", s);
     printf("%lu\n", strlen(s));
     GtkTextBuffer *buffer = gtk_text_buffer_new(NULL);
-    gtk_text_buffer_set_text(buffer, s, (strlen(s)));
+    gtk_text_buffer_set_text(buffer, s, -1);
     gtk_text_view_set_buffer(textBox, buffer);
     free(s);
 }
@@ -112,18 +105,24 @@ void Quit()
 
 void Bin()
 {
-    DisplayResult("bin.bmp");
+    Display("bin.bmp");
 }
 
 void Seg()
 {
-    DisplayResult("seg.bmp");
+    Display("seg.bmp");
     PrintText();
+}
+
+void About()
+{
+    gtk_widget_show_all (about);
 }
 
 /**************/
 /**** MAIN ****/
 /**************/
+
 
 int main(int argc, char *argv[])
 {
@@ -137,11 +136,12 @@ int main(int argc, char *argv[])
     gtk_builder_connect_signals(builder, NULL);
 
     imageIni = GTK_IMAGE(gtk_builder_get_object(builder, "Ini"));
-    imageDone = GTK_IMAGE(gtk_builder_get_object(builder, "Final"));
     loadButton = GTK_WIDGET(gtk_builder_get_object(builder, "Load"));
     binButton = GTK_WIDGET(gtk_builder_get_object(builder, "Binarize"));
     segButton = GTK_WIDGET(gtk_builder_get_object(builder, "Segmentation"));
     textBox = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "TextBox"));
+    about = GTK_WIDGET(gtk_builder_get_object(builder, "About"));
+    gtk_window_set_transient_for(GTK_WINDOW(about), GTK_WINDOW(window));
 
     g_object_unref(builder);
     gtk_widget_show_all (window);

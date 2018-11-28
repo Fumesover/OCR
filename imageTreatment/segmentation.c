@@ -10,6 +10,8 @@
 #define HOR_THRESH 150
 #define VER_THRESH 150
 
+#define SIZE 20
+
 // Main document segmentation functions
 // Makes histogram and calls line segmentation function
 Queue *Segmentation(int **matrix, int h, int w)
@@ -36,9 +38,9 @@ Queue *Segmentation(int **matrix, int h, int w)
     CutInLine(matrix, histo, queue, h,  w);
 
     // TEST: displays result
-    /*ShowSegmentation(queue);
+    ShowSegmentation(queue);
 
-    BinToPixels(matrix, pixels, h, w);
+    /*BinToPixels(matrix, pixels, h, w);
     DisplayImage(MatrixToSurface(pixels, h, w));*/
 
     /*** FREE ALLOCATED MEMORY ***/
@@ -141,9 +143,11 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     int **eol = NULL;
     eol = malloc(sizeof(int*) * 1);
     eol[0] = malloc(sizeof(int) * 1);
-    eol[0][0] = 10;
+    eol[0][0] = 38;
 
     data->data = eol;
+
+
 
     // Find average space between lines
     //average_sp = AverageSpace(histogram, h);
@@ -190,9 +194,6 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histoW);
-
-    free(eol[0]);
-    free(eol);
 }
 
 
@@ -287,18 +288,22 @@ float AverageSpace(int* histogram, int t)
 
 void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 {
-    int **new;
-    new = InitIntMatrix(h2-h1, w2-w1);
+    int **original;
+    int h = h2-h1, w = w2-w1;
+    original = InitIntMatrix(h, w);
 
     for (int i = h1; i < h2; i++)
     {
         for (int j = w1; j < w2; j++)
-            new[i-h1][j-w1] = matrix[i][j];
+            original[i-h1][j-w1] = matrix[i][j];
     }
+
+    // Change matrix format
+    int **final = Resize(original, h, w, SIZE);
 
     Tuple *data = NewTuple();
 
-    data->data = new;
+    data->data = final;
     data->height = h2-h1;
     data->width = w2-w1;
     Enqueue(queue, data);
@@ -324,32 +329,22 @@ char* ShowSegmentation(Queue *queue)
     {
         c = curr->data->data;
 
-        if (c[0][0] == 10) {
-            s[t] = '\n';
-            t++;
-        }
-        else if (c[0][0] == 32) {
-            s[t] = ' ';
-            t++;
-        }
-        else if (curr->data->width > 1 && curr->data->height > 1){
+        if (curr->data->width > 1 && curr->data->height > 1){
             s[t] = 'c';
             t++;
 
-            //int h = curr->data->height;
-            //int w = curr->data->width;
+            int h = curr->data->height;
+            int w = curr->data->width;
 
-            //int **rm = RemoveWhite(c, &h, &w);
-            //int **square = SquareMatrix(rm, h, w);
+        }
 
-            //if (h > w) t = h; else t = w;
-
-            //m = InitPixelMatrix(t, t);
-
-            //BinToPixels(square, m, t, t);
-            //DisplayImage(MatrixToSurface(m, t, t));
-
-            //free(m);
+        else if (c != NULL && c[0][0] == 38) {
+            s[t] = '\n';
+            t++;
+        }
+        else if (c != NULL && c[0][0] == 32) {
+            s[t] = ' ';
+            t++;
         }
         else
         {
