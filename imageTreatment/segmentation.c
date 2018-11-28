@@ -310,7 +310,7 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 }
 
 // Shows result of segmentation
-// Returns elements of the queue in a file
+// Returns elements of the queue in a char array 
 char* ShowSegmentation(Queue *queue)
 {
     char *s;

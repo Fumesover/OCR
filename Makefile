@@ -5,21 +5,17 @@ CC = gcc
 # Options for pre-processor
 CPPFLAGS = -MMD
 # Main compilation options
-CFLAGS = -g -Wall -Wextra -std=c99 -O3 -march=native -rdynamic -export-dynamic $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0` 
+CFLAGS = -g -Wall -Wextra -std=c99 -rdynamic -export-dynamic $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0` 
 # Linker options
 LDFLAGS = 
 # Libs and path for linker
 LDLIBS = `pkg-config --libs sdl2` `pkg-config --libs gtk+-3.0` -lSDL2 -lSDL2_image -lm -export-dynamic -rdynamic
 
-SRC = imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix.c imageTreatment/queue.c neuralNetwork/neuralNet.c
+SRC = imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix.c imageTreatment/queue.c neuralNetwork/neuralNet.c neuralNetwork/fromqueue.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: bins
-
-bins: xor minicli GUI/interface
-	mkdir -p bin
-	mv neuralNetwork/xor minicli bin
+all: GUI/interface 
 
 GUI/interface: ${OBJ} GUI/interface.o
 

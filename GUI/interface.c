@@ -11,6 +11,7 @@
 #include "../imageTreatment/queue.h"
 #include "../imageTreatment/segmentation.h"
 #include "../neuralNetwork/neuralNet.h"
+#include "../neuralNetwork/fromqueue.h"
 
 GtkWidget *window;
 GtkImage *imageIni;
@@ -32,7 +33,7 @@ void Load(GtkWidget *file_chooser)
 {
     int h = 0, w = 0;
     Pixel **pixels; // To receive RGB value of the pixels of the image
-    int **matrix; // Receives 0 and 1 considering the color of pixel
+    int   **matrix; // Receives 0 and 1 considering the color of pixel
 
     // Queue for segmentation
     Queue *queue = NULL;
@@ -62,7 +63,7 @@ void Load(GtkWidget *file_chooser)
 
     // Otsu method on matrix
     int threshold = Otsu(pixels, h, w);
-    Binarization(pixels, h, w, threshold);
+    OtsuBinarization(pixels, h, w, threshold);
 
     BinarizeMatrix(pixels, matrix, h, w);
     BinToPixels(matrix, pixels, h, w);
@@ -73,7 +74,9 @@ void Load(GtkWidget *file_chooser)
     BinToPixels(matrix, pixels, h, w);
     SDL_SaveBMP(MatrixToSurface(pixels, h, w), "seg.bmp");
 
-    s = ShowSegmentation(queue);
+//    s = "nope";
+    s = extractstring("../neuralNetwork/92513--8158.inp", queue);
+//    s = ShowSegmentation(queue);
 
     /*** FREE ALLOCATED MEMORY ***/
     for (int j = 0; j < h; j++)
@@ -84,7 +87,6 @@ void Load(GtkWidget *file_chooser)
 
     free(pixels);
     free(matrix);
-
 }
 
 void PrintText()
@@ -119,11 +121,6 @@ void About()
     gtk_widget_show_all (about);
 }
 
-/**************/
-/**** MAIN ****/
-/**************/
-
-
 int main(int argc, char *argv[])
 {
     GtkBuilder *builder;
@@ -135,12 +132,12 @@ int main(int argc, char *argv[])
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main"));
     gtk_builder_connect_signals(builder, NULL);
 
-    imageIni = GTK_IMAGE(gtk_builder_get_object(builder, "Ini"));
-    loadButton = GTK_WIDGET(gtk_builder_get_object(builder, "Load"));
-    binButton = GTK_WIDGET(gtk_builder_get_object(builder, "Binarize"));
-    segButton = GTK_WIDGET(gtk_builder_get_object(builder, "Segmentation"));
-    textBox = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "TextBox"));
-    about = GTK_WIDGET(gtk_builder_get_object(builder, "About"));
+    imageIni    = GTK_IMAGE(gtk_builder_get_object(builder, "Ini"));
+    loadButton  = GTK_WIDGET(gtk_builder_get_object(builder, "Load"));
+    binButton   = GTK_WIDGET(gtk_builder_get_object(builder, "Binarize"));
+    segButton   = GTK_WIDGET(gtk_builder_get_object(builder, "Segmentation"));
+    textBox     = GTK_TEXT_VIEW(gtk_builder_get_object(builder, "TextBox"));
+    about       = GTK_WIDGET(gtk_builder_get_object(builder, "About"));
     gtk_window_set_transient_for(GTK_WINDOW(about), GTK_WINDOW(window));
 
     g_object_unref(builder);
@@ -148,6 +145,4 @@ int main(int argc, char *argv[])
     gtk_main();
 
     return 0;
-
-
 }
