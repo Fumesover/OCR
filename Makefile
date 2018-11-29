@@ -5,7 +5,7 @@ CC = gcc
 # Options for pre-processor
 CPPFLAGS = -MMD
 # Main compilation options
-CFLAGS = -g -Wall -Wextra -std=c99 -rdynamic -export-dynamic $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0` 
+CFLAGS = -g2 -Wall -Wextra -std=c99 -rdynamic -export-dynamic $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0` 
 # Linker options
 LDFLAGS = 
 # Libs and path for linker
@@ -15,7 +15,7 @@ SRC = imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: GUI/interface 
+all: minicli #GUI/interface 
 
 GUI/interface: ${OBJ} GUI/interface.o
 
