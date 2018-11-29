@@ -41,6 +41,7 @@ clean:
 	${RM} *.d   	     # remove dependency files
 	${RM} NNgraphviz xor # remove main program
 	${RM} xorGraphviz xor.gif
+	${RM} NNtrainWdata
 	${RM} {NN,}test
 	${RM} vgcore.*		 # remove valgrind files
 	${RM} *.nn  		 # remove neural network files
