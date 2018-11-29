@@ -148,8 +148,8 @@ char* extractstring(char* filepath, Queue *q) {
             if (h != SIZE || w != SIZE)
                 errx(1, "Issue in matrix size");
 
-            s[t - 1] = NNfindChar(n, c);
-            //NNwriteValue(c, inp[posRealString++]);
+//            s[t - 1] = NNfindChar(n, c);
+            NNwriteValue(c, inp[posRealString++]);
             
         } else if (c && c[0][0] == 38) {
             s[t] = '\n';
