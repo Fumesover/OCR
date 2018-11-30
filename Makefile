@@ -43,6 +43,7 @@ clean:
 	${RM} {*,*/*}.nn
 	${MAKE} -C neuralNetwork clean 
 	${MAKE} -C imageTreatment clean
+	${RM} GUI/interface
 
 -include ${DEP}
 
