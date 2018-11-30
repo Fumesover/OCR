@@ -30,4 +30,6 @@ void OtsuBinarization(Pixel **pixels, int h, int w, int threshold);
 void BinarizeMatrix(Pixel **pixels, int **binarized, int h, int w);
 void DebinarizeMatrix(int **binarized, Pixel **pixels, int h, int w);
 
+void DisplayMatrix(int **matrix, int h, int w);
+
 #endif

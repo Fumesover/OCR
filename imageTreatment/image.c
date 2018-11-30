@@ -337,3 +337,16 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
 
     return surface;
 }
+
+// Converts the matrix "matrix" to a sdl_surface
+// Displays the matrix on screen
+void DisplayMatrix(int **matrix, int h, int w)
+{
+    Pixel **pixels = InitPixelMatrix(h, w);
+    BinToPixels(matrix, pixels, h, w);
+    SDL_Surface *surface = MatrixToSurface(pixels, h, w);
+    DisplayImage(surface);
+
+    //SDL_FreeSurface(surface);
+    FreeMatrix((void**)pixels, h);
+}
