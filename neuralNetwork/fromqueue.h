@@ -4,5 +4,6 @@
 #include "../imageTreatment/queue.h"
 
 char* extractstring(char* filepath, Queue *q);
+void adddatatoset(Queue *q);
 
 #endif
