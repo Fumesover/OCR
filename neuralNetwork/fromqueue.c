@@ -51,16 +51,10 @@ void NNwriteValue(int **matrix, char value) {
 
     printArr(inp);
 
-//    printf("Witch char it is ? (space to not chose)");
-//    char value = 10;
-//    while (value == 10)
-//        scanf("%c", &value);
     printf(" You selected : %c (%d)\n", value, value);
-    
     printf(" Confirm ? [Y]/n");
     
     char confirm;
-    // scanf(" %c", &confirm);
     confirm = getchar();
     if (confirm != '\n') {
         printf("Nope for this one\n");
@@ -97,8 +91,6 @@ unsigned char NNfindChar(neuNet n, int **matrix) {
         }
     }
 
-   // printf("\t\tmatrix converted to float list\n");
-
     float* out = NNGuess(n, inp);
     
     unsigned char result = getMaxPos(out, n.nbOutput) + OFFSET;
@@ -108,32 +100,50 @@ unsigned char NNfindChar(neuNet n, int **matrix) {
     return result;
 }
 
-char* extractstring(char* filepath, Queue *q) {
-    printf("extractstring [\n");
-    char   *s;
+void adddatatoset(Queue *q) {
     Elt    *curr    = NULL;
-    size_t t        = 0;
-    size_t capacity = 100; 
-
-    s = malloc(sizeof(char) * capacity);
-    if (s)
-        printf("\ts malloced perfectly\n");
-    else
-        errx(1, "malloc issue");
 
     if (q->first)
         curr = q->first;
 
     printf("Pleaze, insert real string (just the letters):\n");
-    char inp[10000] = "";
+    char inp[10000] = ""; // Sorry it's hardcoded
     
     scanf("%s", inp);
     printf("You just chosed : %s\n", inp);
     
     int posRealString = 0;
 
-    // Loading neuralNetwork
+    while (curr && curr->data) {
+        int **c = curr->data->data;
+
+        if (curr->data->width > 1 && curr->data->height > 1){
+            int h = curr->data->height;
+            int w = curr->data->width;
+            if (h != SIZE || w != SIZE)
+                errx(1, "Issue in matrix size");
+
+            printf(" ( %d )\n", posRealString);
+            NNwriteValue(c, inp[posRealString++]);
+        }
+
+        curr = curr->next;
+    }
+}
+
+char* extractstring(char* filepath, Queue *q) {
+    Elt    *curr    = NULL;
+    size_t t        = 0;
+    size_t capacity = 100; 
+
+    char *s = malloc(sizeof(char) * capacity);
+    if (!s)
+        errx(1, "malloc issue");
+    
     neuNet n = NNload(filepath);
+
+    if (q->first)
+        curr = q->first;
 
     while (curr && curr->data) {
         int **c = curr->data->data;
@@ -148,9 +158,7 @@ char* extractstring(char* filepath, Queue *q) {
             if (h != SIZE || w != SIZE)
                 errx(1, "Issue in matrix size");
 
-//            s[t - 1] = NNfindChar(n, c);
-            NNwriteValue(c, inp[posRealString++]);
-            
+            s[t - 1] = NNfindChar(n, c);
         } else if (c && c[0][0] == 38) {
             s[t] = '\n';
             t++;
@@ -176,7 +184,6 @@ char* extractstring(char* filepath, Queue *q) {
     s[t] = 0;
     
     NNfree(n);
-    printf("]\n");
 
     return s;
 }

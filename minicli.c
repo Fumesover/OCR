@@ -35,6 +35,7 @@ void image() {
         printf("\t4-> show segmentation\n");
         printf("\t5-> automatic rotation\n");
         printf("\t6-> run text recognotion\n");
+        printf("\t7-> add values to dataset using image\n");
 
         printf("\t9-> exit\n");
         
@@ -62,11 +63,6 @@ void image() {
                     SurfaceToMatrix(pixels, image, h, w);
                 }
                 break;
-            case 5:
-                if (image != NULL) {
-                    //Hough(matrix, h, w);
-                }
-                break;
             case 2:
                 if (image != NULL) {
                     DisplayImage(MatrixToSurface(pixels, h, w));
@@ -84,7 +80,11 @@ void image() {
                 if (image != NULL) 
                     queue =  Segmentation(matrix, h, w);
                 break;
-
+            case 5:
+                if (image != NULL) {
+                    //Hough(matrix, h, w);
+                }
+                break;
             case 6:
                 if (queue == NULL)
                     break;
@@ -94,11 +94,13 @@ void image() {
                 
                 printf("String is : \"%s\"\n", s);
                 free(s);
-                break;
-                    
+                break;       
+            case 7:
+                if (queue == NULL)
+                    break;
+
+                adddatatoset(queue);
             }
-
-
     }
     
     FreeMatrix(matrix, h);
