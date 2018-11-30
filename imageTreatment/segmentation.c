@@ -348,6 +348,8 @@ char* ShowSegmentation(Queue *queue)
             t++;
         }
 
+
+
         curr = curr->next;
     }
 

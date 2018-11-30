@@ -132,8 +132,7 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     int* histoH = malloc(sizeof(int) * *h);
     int* histoW = malloc(sizeof(int) * *w);
     int** res;
-    int resH = 0, resW = 0 ;
-    int y = 0, x = 0, rx = 0, ry =0;
+    int y = 0, x = 0, rx = *w - 1, ry = *h - 1;
 
     InitArray(histoH, *h);
     InitArray(histoW, *w);
@@ -141,45 +140,27 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     MatrixHHistogram(matrix, histoH, *h, *w);
     MatrixWHistogram(matrix, histoW, 0, *h, *w);
 
-    // Finds size of result matrix -> black pixels only
-    for (int i = 0; i < *h; i++) {
-        if (histoH[i] != 0)
-            resH++;
+    // Find boundaries of matrixes
+    while (x < *w && histoW[x] == 0)
+        x++;
+    while (rx > 0 && histoW[rx] == 0)
+        rx--;
+    while (y < *h && histoH[y] == 0)
+        y++;
+    while (ry > 0 && histoH[ry] == 0)
+        ry--;
+
+    int resh = ry - y + 1, resw = rx - x + 1;
+    res = InitIntMatrix(resh, resw);
+
+    for (int i = 0; i < resh; i++) {
+        for (int j = 0; j < resw; j++)
+            res[i][j] = matrix[i + y][j + x];
     }
 
-    for (int i = 0; i < *w; i++) {
-        if (histoW[i] != 0)
-            resW++;
-    }
+    *h = resh;
+    *w = resw;
 
-    res = InitIntMatrix(resH, resW);
-
-    while (y < *h)
-    {
-        if (histoH[y] > 0) {
-            while (y < *h && histoH[y] > 0) {
-                while (x < *w)
-                {
-                    if (histoW[x] > 0) {
-                        while (x < *w && histoW[x] > 0) {
-                            res[ry][rx] = matrix[y][x];
-                            x++;
-                            rx++;
-                        }
-                    }
-                    else x++;
-                }
-                rx = 0;
-                x = 0;
-                ry++;
-                y++;
-            }
-        }
-        else y++;
-        x = 0;
-    }
-    *h = resH;
-    *w = resW;
     return res;
 }
 
