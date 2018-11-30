@@ -299,9 +299,9 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 
     Tuple *data = NewTuple();
 
-    data->data = final;
-    data->height = h2-h1;
-    data->width = w2-w1;
+    data->data      = final;
+    data->height    = SIZE;
+    data->width     = SIZE;
     Enqueue(queue, data);
 }
 

@@ -4,7 +4,7 @@
 CC = gcc
 
 # Options for pre-processor
-CFLAGS = -o3 -Wall -Wextra -Werror -std=c99 -march=native # compilation flag
+CFLAGS = -g3 -Wall -Wextra -Werror -std=c99 -march=native # compilation flag
 CFLAGS += $(pkg-config --cflags sdl2) `pkg-config --cflags --libs gtk+-3.0`
 
 # Linker options
@@ -41,6 +41,7 @@ clean:
 	${RM} *.d   	     # remove dependency files
 	${RM} NNgraphviz xor # remove main program
 	${RM} xorGraphviz xor.gif
+	${RM} NNtrainWdata
 	${RM} {NN,}test
 	${RM} vgcore.*		 # remove valgrind files
 	${RM} *.nn  		 # remove neural network files

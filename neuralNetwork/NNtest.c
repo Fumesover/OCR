@@ -23,7 +23,7 @@ int main() {
 
     shuffle(ds);
 
-    neuNet* n = NNinit(ds->nbinputs, 28, ds->nboutputs);
+    neuNet n = NNinit(ds->nbinputs, 28, ds->nboutputs);
     NNrand(n);
     int nbItt = 1000;
 
@@ -41,7 +41,7 @@ int main() {
     for (int i = 0; i < ds->nblines; i++) {
         Data* d = ds->rows[i];
         float* out = NNGuess(n, d->inputs);
-        char c = findMaxPos(out, n->nbOutput);
+        char c = findMaxPos(out, n.nbOutput);
         printf("%c output is : %c (%d)\n", findMaxPos(d->output, ds->nboutputs),
                                            c, (int) c);
     }

@@ -12,7 +12,7 @@ int main(void) {
 
     float updateRate = 1.0f;
 
-    neuNet* n = NNinit(2, 3, 1);
+    neuNet n = NNinit(2, 3, 1);
     NNrand(n);
 
     float err;
@@ -46,7 +46,7 @@ int main(void) {
     NNfree(n);
 
     printf("Loading file %s\n", filepath);
-    neuNet* loaded = NNload(filepath);
+    neuNet loaded = NNload(filepath);
 
     float data[4][3] = {
         {0.0f, 0.0f, 0.0f},
