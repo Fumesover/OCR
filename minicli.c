@@ -90,7 +90,7 @@ void image() {
                     break;
                 
                 // char* s = extractstring("neuralNetwork/92513--8158.inp", queue);
-                /*char* s = extractstring("test.nn", queue);
+                char* s = extractstring("test.nn", queue);
                 
                 printf("String is : \"%s\"\n", s);
                 free(s);

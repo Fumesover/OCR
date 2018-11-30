@@ -347,8 +347,8 @@ float hough(int **matrix, size_t h, size_t w){
 	float dtheta = PI/Ntheta;
 	float drho = floor(sqrt(h*h+w+w))/Nrho;
 	int accum[Ntheta][Nrho];
-	for(int j = 0; j < h; j++){
-		for(int i = 0; i < w; i++){
+	for(size_t j = 0; j < h; j++){
+		for(size_t i = 0; i < w; i++){
 			if(matrix[j][i] != 0){
 				for(int i_theta = 0; i_theta < Ntheta; i_theta++){
 					theta = i_theta * dtheta;
@@ -372,31 +372,6 @@ float hough(int **matrix, size_t h, size_t w){
 	}
 	return 0.0f;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 // Converts the matrix "matrix" to a sdl_surface
 // Displays the matrix on screen
