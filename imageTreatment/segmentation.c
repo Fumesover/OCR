@@ -7,8 +7,8 @@
 #include "queue.h"
 #include "matrix.h"
 
-#define HOR_THRESH 150
-#define VER_THRESH 150
+#define HOR_THRESH 100
+#define VER_THRESH 100
 
 #define SIZE 20
 
@@ -31,8 +31,8 @@ Queue *Segmentation(int **matrix, int h, int w)
     MatrixHHistogram(matrix, histo, h, w);
 
     /*** RLSA ***/
-    /*BinToPixels(RLSA(matrix, h, w), pixels, h, w);
-    DisplayImage(MatrixToSurface(pixels, h, w));*/
+    /*int ** res = RLSA(matrix, h, w);
+    RLSA(res, h, w);*/
 
     /*** LINE SEGMENTATION ***/
     CutInLine(matrix, histo, queue, h,  w);
@@ -52,16 +52,14 @@ Queue *Segmentation(int **matrix, int h, int w)
 
 int** RLSA(int **matrix, int h, int w) {
     int nbzeros = 0;
-    int** resH;
-    int** resW;
-    int** res;
+    int** resH = InitIntMatrix(h, w);
+    int** resW = InitIntMatrix(h, w);
+    int** res = InitIntMatrix(h, w);
 
-    resH = InitIntMatrix(h, w);
-    resW = InitIntMatrix(h, w);
-    res = InitIntMatrix(h, w);
+    Copy(matrix, resH, h, w);
+    Copy(matrix, resW, h, w);
 
-    Copy(matrix, resH);
-    Copy(matrix, resW);
+    DisplayMatrix(resH, h, w);
 
     /*** ROW PROCESSING ***/
     for (int i = 0; i < h; i++)
@@ -72,7 +70,7 @@ int** RLSA(int **matrix, int h, int w) {
             {
                     if (nbzeros <= HOR_THRESH)
                     {
-                        for (int k = j - nbzeros + 1; k < j-1; k++)
+                        for (int k = j - nbzeros; k < j; k++)
                             resH[i][k] = 4;
                     }
                     nbzeros = 0;
@@ -81,6 +79,8 @@ int** RLSA(int **matrix, int h, int w) {
                 nbzeros++;
         }
     }
+
+    DisplayMatrix(resH, h, w);
 
     nbzeros = 0;
 
@@ -93,7 +93,7 @@ int** RLSA(int **matrix, int h, int w) {
             {
                     if (nbzeros <= VER_THRESH)
                     {
-                        for (int k = i - nbzeros + 1; k < i-1; k++)
+                        for (int k = i - nbzeros; k < i; k++)
                             if (k >= 0)
                                 resW[k][j] = 4;
                     }
@@ -103,6 +103,8 @@ int** RLSA(int **matrix, int h, int w) {
         }
     }
 
+    DisplayMatrix(resW, h, w);
+
     /*** AND OPERATOR ON BOTH MATRIXES ***/
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
@@ -110,11 +112,11 @@ int** RLSA(int **matrix, int h, int w) {
         }
     }
 
+    DisplayMatrix(res, h, w);
+
     /*** FREE ALLOCATED MEMORY ***/
-    for (int i = 0; i < h; i++) {
-        free(resH[i]);
-        free(resW[i]);
-    }
+    //FreeMatrix(resH, h);
+    //FreeMatrix(resW, h);
 
     return res;
 }
@@ -329,8 +331,8 @@ char* ShowSegmentation(Queue *queue)
             s[t] = 'c';
             t++;
 
-            int h = curr->data->height;
-            int w = curr->data->width;
+            /*int h = curr->data->height;
+            int w = curr->data->width;*/
 
         }
 

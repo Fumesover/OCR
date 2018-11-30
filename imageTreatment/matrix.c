@@ -114,10 +114,8 @@ void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w)
 }
 
 // Copy content of mat1 into mat2
-void Copy(int **mat1, int**mat2)
+void Copy(int **mat1, int**mat2, int h, int w)
 {
-    int w = sizeof(mat1) / 8;
-    int h = sizeof(mat1[0]) / 8;
     for (int i = 0; i < h; i++)
     {
          for (int j = 0; j < w; j++)
@@ -215,10 +213,10 @@ int **Resize(int **matrix, int h, int w, int newsize)
     SurfaceToMatrix(pix2, res, newsize, newsize);
     BinarizeMatrix(pix2, final, newsize, newsize);
 
-    FreeMatrix(pix1, size);
-    FreeMatrix(cut, h);
-    FreeMatrix(pix2, newsize);
-    FreeMatrix(square, size);
+    FreeMatrix((void**)pix1, size);
+    FreeMatrix((void**)cut, h);
+    FreeMatrix((void**)pix2, newsize);
+    FreeMatrix((void**)square, size);
 
     SDL_FreeSurface(res);
     SDL_FreeSurface(n);

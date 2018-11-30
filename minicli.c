@@ -82,8 +82,8 @@ void image() {
                 break;
             case 5:
                 if (image != NULL) {
-                    float angle = hough(matrix, h, w);
-                    printf("Hough: %f detected\n", angle);
+                    float angle = hough(matrix, (size_t)h, (size_t)w);
+                    printf("Hough : %f detected\n", angle);
                 }
                 break;
             case 6:
@@ -104,8 +104,8 @@ void image() {
             }
     }
     
-    FreeMatrix(matrix, h);
-    FreeMatrix(pixels, h);
+    FreeMatrix((void**)matrix, h);
+    FreeMatrix((void**)pixels, h);
 }
 
 int main() {
