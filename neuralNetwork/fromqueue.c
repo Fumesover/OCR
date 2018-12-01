@@ -15,6 +15,7 @@
 
 #define SIZE   20
 #define OFFSET 33
+
 void printArr(float* arr) {
     for (int i = 0; i < SIZE; i++) {
         for (int j = 0; j < SIZE; j++) {
@@ -95,7 +96,7 @@ unsigned char NNfindChar(neuNet n, int **matrix) {
     
     unsigned char result = getMaxPos(out, n.nbOutput) + OFFSET;
 
-    printf("Predicted : %c (%d)\n", result, result);
+    // printf("Predicted : %c (%d)\n", result, result);
 
     return result;
 }

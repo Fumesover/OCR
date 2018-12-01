@@ -20,3 +20,4 @@
 vgcore.*
 !Makefile
 *.bmp
+.temp/*
