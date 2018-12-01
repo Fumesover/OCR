@@ -36,7 +36,6 @@ void Display(gchar *path)
 
 void Load(GtkWidget *file_chooser)
 {
-    int h = 0, w = 0;
 
     // Queue for segmentation
     gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
@@ -87,23 +86,20 @@ void Quit()
 
 void Bin()
 {
-
     Display("bin.bmp");
 }
 
 void Seg()
 {
-    Queue *queue = NULL;
-    queue = malloc(sizeof(*queue));
-    queue->first = NULL;
+    Queue *queue;
 
     queue = Segmentation(matrix, h, w);
     BinToPixels(matrix, pixels, h, w);
-    SDL_SaveBMP(MatrixToSurface(pixels, h, w), "seg.bmp");
-
-    s = extractstring("../neuralNetwork/92513--8158.inp", queue);
-
-    Display("seg.bmp");
+    //SDL_SaveBMP(MatrixToSurface(pixels, h, w), "seg.bmp");
+    
+    s = extractstring("../test.nn", queue);
+    
+    //Display("seg.bmp");
     PrintText();
 }
 

@@ -37,7 +37,7 @@ Queue *Segmentation(int **matrix, int h, int w)
     /*** LINE SEGMENTATION ***/
     CutInLine(matrix, histo, queue, h,  w);
 
-    //ShowSegmentation(queue);
+        //ShowSegmentation(queue);
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -311,6 +311,7 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 // Returns elements of the queue in a char array 
 char* ShowSegmentation(Queue *queue)
 {
+    printf("y\n");
     char *s;
     Elt *curr = NULL;
     int **c;
@@ -325,14 +326,17 @@ char* ShowSegmentation(Queue *queue)
 
     while (curr != NULL && curr->data != NULL)
     {
+        printf("data\n");
         c = curr->data->data;
 
         if (curr->data->width > 1 && curr->data->height > 1){
             s[t] = 'c';
             t++;
 
-            /*int h = curr->data->height;
-            int w = curr->data->width;*/
+            int h = curr->data->height;
+            int w = curr->data->width;
+
+            DisplayMatrix(c, h, w);
 
         }
 

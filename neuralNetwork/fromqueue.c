@@ -145,6 +145,8 @@ char* extractstring(char* filepath, Queue *q) {
 
     if (q->first)
         curr = q->first;
+    else
+        printf("nope 123");
 
     while (curr && curr->data) {
         int **c = curr->data->data;
@@ -160,15 +162,21 @@ char* extractstring(char* filepath, Queue *q) {
                 errx(1, "Issue in matrix size");
 
             s[t - 1] = NNfindChar(n, c);
+            printf("%c\n", s[t - 1]);
         } else if (c && c[0][0] == 38) {
             s[t] = '\n';
             t++;
+
+            printf("ajlkdsalkd");
         } else if (c && c[0][0] == 32) {
             s[t] = ' ';
             t++;
+            printf("qwewqwqw");
         } else  {
             s[t] = '\n';
             t++;
+
+            printf("asads");
         }
 
         curr = curr->next;
