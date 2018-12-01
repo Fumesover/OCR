@@ -12,6 +12,8 @@
 
 #define SIZE 20
 
+Queue *queue;
+
 // Main document segmentation functions
 // Makes histogram and calls line segmentation function
 Queue *Segmentation(int **matrix, int h, int w)
@@ -23,7 +25,6 @@ Queue *Segmentation(int **matrix, int h, int w)
     histo = malloc(sizeof(int) * h);
     pixels = InitPixelMatrix(h, w);
 
-    Queue *queue = NULL;
     queue = malloc(sizeof(*queue));
     queue->first = NULL;
 
@@ -32,12 +33,9 @@ Queue *Segmentation(int **matrix, int h, int w)
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
-    //RLSA(res, h, w);
 
     /*** LINE SEGMENTATION ***/
     //CutInLine(matrix, histo, queue, h,  w);
-
-        //ShowSegmentation(queue);
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -62,13 +60,11 @@ void RLSA(int **matrix, int h, int w)
             res[i][j] = (rlsah[i][j] && rlsaw[i][j]) ? 4 : 0;
         }
     }
-    DisplayMatrix(rlsah, h, w);
-    DisplayMatrix(rlsaw, h, w);
-    DisplayMatrix(res, h, w);
+    CutInBlockH(matrix, h, w);
 
     /*** FREE ALLOCATED MEMORY ***/
-    FreeMatrix((void**)rlsah, h);
-    FreeMatrix((void**)rlsaw, h);
+    //FreeMatrix((void**)rlsah, h);
+    //FreeMatrix((void**)rlsaw, h);
 }
 
 int** RLSAw(int **matrix, int h, int w) {
@@ -122,10 +118,91 @@ int** RLSAh(int **matrix, int h, int w) {
     return res;
 }
 
+void CutInBlockH(int** matrix, int h, int w) {
+    int *histo = MatrixHHistogram(matrix, h, w);
+    int begin = 0, end = w-1;
+    int n = 0, sum = 0;
+    int av = 0, sp = 0;
 
-// Cuts matrix in lines of characters and sends thems
+    while (begin < w && histo[begin] == 0) begin++;
+    while (end > 0 && histo[end] == 0) end--;
+
+    int i = begin;
+    while (i < end){
+        if (histo[i] == 0){
+            while (histo[i] == 0){
+                sum++;
+                i++;
+            }
+            n++;
+        }
+        i++;
+    }
+    av = sum / n;
+
+    i = begin;
+    int w1 = begin;
+    while (i < end)
+    {
+        if (histo[i] == 0) {
+            int w2 = i+1;
+            while (histo[i] == 0) {
+                sp++;
+                i++;
+            }
+            if (sp > av)
+                CutInBlockW(matrix, h, w, w1, w2);
+            w1 = i;
+        }
+        i++;
+    }
+}
+
+void CutInBlockW(int** matrix, int h, int w, int w1, int w2) {
+    int *histo = MatrixW1Histogram(matrix, w1, w2, h);
+    int begin = 0, end = h-1;
+    int n = 0, sum = 0;
+    int av = 0, sp = 0;
+
+    while (begin < h && histo[begin] == 0) begin++;
+    while (end > 0 && histo[end] == 0) end--;
+
+    int i = begin;
+    while (i < end){
+        if (histo[i] == 0){
+            while (histo[i] == 0){
+                sum++;
+                i++;
+            }
+            n++;
+        }
+        i++;
+    }
+    av = sum / n;
+    i = begin;
+    int h1 = begin;
+    while (i < end)
+    {
+        if (histo[i] == 0) {
+            int h2 = i+1;
+            while (histo[i] == 0) {
+                sp++;
+                i++;
+            }
+            if (sp > av) {
+                //DrawBlock(matrix, h, w, w1, w2, h1, h2);
+                CutInLine(CutMatrix(matrix, h, w, h1, h2, w1, w2), h, w);
+            }
+            h1 = i;
+        }
+        i++;
+    }
+}
+
+
+// Cuts matrix in lines of characters and sends them
 // to CutInChar with the corresponding histogram
-void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
+void CutInLine(int **matrix, int *histogram, int h, int w)
 {
     /*** INIT ***/
     int i = 0, x1, x2;
@@ -136,8 +213,6 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
     Tuple *data = NewTuple();
     data->height = 1;
     data->width = 1;
-
-    histoW = malloc(sizeof(int) * w);
 
     int **eol = NULL;
     eol = malloc(sizeof(int*) * 1);
@@ -173,10 +248,10 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
             // Clears and creates histogram for each detected line
             InitArray(histoW, w);
-            MatrixWHistogram(matrix, histoW, x1, x2, w);
+            histoW = MatrixWHistogram(matrix, x1, x2, w);
 
             // Cuts line in char
-            CutInChar(matrix, histoW, queue, x1, x2, w);
+            CutInChar(matrix, histoW, x1, x2, w);
 
             // Enqueue eol after line is treated
             Enqueue(queue, data);
@@ -198,7 +273,7 @@ void CutInLine(int **matrix, int *histogram, Queue *queue, int h, int w)
 
 // Cutes line from h1 to h2 in "matrix" in characters
 // and puts them in the queue
-void CutInChar(int **matrix, int *histo, Queue *queue, int h1, int h2, int w)
+void CutInChar(int **matrix, int *histo, int h1, int h2, int w)
 {
     /*** INIT ***/
     int i = 0, space = 0, x1 = 0, x2 = 0;

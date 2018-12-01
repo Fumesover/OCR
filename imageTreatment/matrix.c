@@ -87,30 +87,52 @@ void PrintArray(int *list, int h)
 /*** Histograms of black pixels ***/
 
 // Returns the histogram of all lines of the matrix
-void MatrixHHistogram(int **matrix, int *histogram, int h, int w)
+int* MatrixHHistogram(int **matrix, int h, int w)
 {
+    int *histo = malloc(sizeof(int) * h);
+
     for (int i = 0; i < h; i++)
     {
         for (int j = 0; j < w; j++)
         {
             if (matrix[i][j] == 1)
-                histogram[i]++;
+                histo[i]++;
         }
     }
+
+    return histo;
 }
 
 // Returns the histogram of all columns of the matrix
 // in the line range [h1, h2]
-void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w)
+int* MatrixWHistogram(int **matrix, int h1, int h2, int w)
 {
+    int *histo = malloc(sizeof(int) * w);
     for (int x = 0; x < w; x++)
     {
         for (int y = h1; y < h2; y++)
         {
             if (matrix[y][x] == 1)
-                histogram[x]++;
+                histo[x]++;
         }
     }
+
+    return histo;
+}
+
+int* MatrixW1Histogram(int **matrix, int w1, int w2, int h)
+{
+    int *histo = malloc(sizeof(int) * (w2-w1));
+    for (int x = w1; x < w2; x++)
+    {
+        for (int y = 0; y < h; y++)
+        {
+            if (matrix[y][x] == 1)
+                histo[x]++;
+        }
+    }
+
+    return histo;
 }
 
 // Copy content of mat1 into mat2
@@ -120,6 +142,16 @@ void Copy(int **mat1, int**mat2, int h, int w)
     {
          for (int j = 0; j < w; j++)
             mat2[i][j] = mat1[i][j];
+    }
+}
+
+int** CutMatrix(int **matrix, int h, int w, int h1, int h2, int w1, int w2)
+{
+    int **cut = InitIntMatrix(h2-h1, w2-w1);
+    for (int i = h1; i < h2; i++) {
+        for (int j = w1; j < w2; j++) {
+
+        }
     }
 }
 

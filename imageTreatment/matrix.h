@@ -16,10 +16,12 @@ void PrintMatrix(int **matrix, int h, int w);
 void PrintArray(int *list, int h);
 
 /* FILL HISTOGRAM */
-void MatrixHHistogram(int **matrix, int *histogram, int h, int w);
-void MatrixWHistogram(int **matrix, int *histogram, int h1, int h2, int w);
+int* MatrixWHistogram(int **matrix, int h1, int h2, int w);
+int* MatrixW1Histogram(int **matrix, int w1, int w2, int h);
+int* MatrixHHistogram(int **matrix, int h, int w);
 
 void Copy(int **mat1, int**mat2, int h, int w);
+int** CutMatrix(int **matrix, int h, int w, int h1, int h2, int w1, int w2);
 int **SquareMatrix(int **matrix, int h, int w);
 int **Resize(int **matrix, int h, int w, int newsize);
 SDL_Surface *ResizeSurface(SDL_Surface *Surface, Uint16 t);
