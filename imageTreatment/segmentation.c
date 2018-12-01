@@ -7,8 +7,8 @@
 #include "queue.h"
 #include "matrix.h"
 
-#define HOR_THRESH 100
-#define VER_THRESH 100
+#define HOR_THRESH 2000
+#define VER_THRESH 2000
 
 #define SIZE 20
 
@@ -31,11 +31,11 @@ Queue *Segmentation(int **matrix, int h, int w)
     MatrixHHistogram(matrix, histo, h, w);
 
     /*** RLSA ***/
-    /*int ** res = RLSA(matrix, h, w);
-    RLSA(res, h, w);*/
+    RLSA(matrix, h, w);
+    //RLSA(res, h, w);
 
     /*** LINE SEGMENTATION ***/
-    CutInLine(matrix, histo, queue, h,  w);
+    //CutInLine(matrix, histo, queue, h,  w);
 
     //ShowSegmentation(queue);
 
@@ -49,40 +49,33 @@ Queue *Segmentation(int **matrix, int h, int w)
     return queue;
 }
 
+void RLSA(int **matrix, int h, int w)
+{
+    int **res = InitIntMatrix(h, w);
+    int **rlsah = RLSAh(matrix, h, w);
+    int **rlsaw = RLSAw(matrix, h, w);
 
-int** RLSA(int **matrix, int h, int w) {
-    int nbzeros = 0;
-    int** resH = InitIntMatrix(h, w);
-    int** resW = InitIntMatrix(h, w);
-    int** res = InitIntMatrix(h, w);
 
-    Copy(matrix, resH, h, w);
-    Copy(matrix, resW, h, w);
-
-    DisplayMatrix(resH, h, w);
-
-    /*** ROW PROCESSING ***/
-    for (int i = 0; i < h; i++)
-    {
-        for (int j = 0; j < w; j++)
-        {
-            if (matrix[i][j] == 1)
-            {
-                    if (nbzeros <= HOR_THRESH)
-                    {
-                        for (int k = j - nbzeros; k < j; k++)
-                            resH[i][k] = 4;
-                    }
-                    nbzeros = 0;
-            }
-            else
-                nbzeros++;
+    /*** AND OPERATOR ON BOTH MATRIXES ***/
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            res[i][j] = (rlsah[i][j] && rlsaw[i][j]) ? 4 : 0;
         }
     }
+    DisplayMatrix(rlsah, h, w);
+    DisplayMatrix(rlsaw, h, w);
+    DisplayMatrix(res, h, w);
 
-    DisplayMatrix(resH, h, w);
+    /*** FREE ALLOCATED MEMORY ***/
+    FreeMatrix((void**)rlsah, h);
+    FreeMatrix((void**)rlsaw, h);
+}
 
-    nbzeros = 0;
+int** RLSAw(int **matrix, int h, int w) {
+    int nbzeros = 0;
+    int** res = InitIntMatrix(h, w);
+
+    Copy(matrix, res, h, w);
 
     /*** COLUMN PROCESSING ***/
     for (int j = 0; j < w; j++)
@@ -91,32 +84,40 @@ int** RLSA(int **matrix, int h, int w) {
         {
             if (matrix[i][j] == 1)
             {
-                    if (nbzeros <= VER_THRESH)
-                    {
-                        for (int k = i - nbzeros; k < i; k++)
-                            if (k >= 0)
-                                resW[k][j] = 4;
-                    }
-                    nbzeros = 0;
+                if (nbzeros <= VER_THRESH)
+                {
+                    for (int k = i - nbzeros; k < i; k++)
+                        if (k >= 0)
+                            res[k][j] = 4;
+                }
+                nbzeros = 0;
             }
             nbzeros++;
         }
     }
 
-    DisplayMatrix(resW, h, w);
+    return res;
+}
 
-    /*** AND OPERATOR ON BOTH MATRIXES ***/
+int** RLSAh(int **matrix, int h, int w) {
+    int nbzeros = 0;
+    int** res = InitIntMatrix(h, w);
+
+    Copy(matrix, res, h, w);
+
+    /*** ROW PROCESSING ***/
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
-            res[i][j] = (resW[i][j] && resH[i][j]) ? 4 : 0;
+            if (matrix[i][j] == 1) {
+                if (nbzeros <= HOR_THRESH) {
+                    for (int k = j - nbzeros; k < j; k++)
+                        res[i][k] = 4;
+                }
+                nbzeros = 0;
+            } else
+                nbzeros++;
         }
     }
-
-    DisplayMatrix(res, h, w);
-
-    /*** FREE ALLOCATED MEMORY ***/
-    //FreeMatrix(resH, h);
-    //FreeMatrix(resW, h);
 
     return res;
 }

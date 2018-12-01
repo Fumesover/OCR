@@ -89,18 +89,17 @@ void image() {
             case 6:
                 if (queue == NULL)
                     break;
+
+                //char* s = extractstring("test.nn", queue);
                 
-                // char* s = extractstring("neuralNetwork/92513--8158.inp", queue);
-                char* s = extractstring("test.nn", queue);
-                
-                printf("String is : \"%s\"\n", s);
-                free(s);
+                //printf("String is : \"%s\"\n", s);
+                //free(s);
                 break;       
             case 7:
                 if (queue == NULL)
                     break;
 
-                adddatatoset(queue);
+                //adddatatoset(queue);
             }
     }
     
