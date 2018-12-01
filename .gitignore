@@ -21,3 +21,4 @@ vgcore.*
 !Makefile
 *.bmp
 .temp/*
+neuralNetwork/data/*
