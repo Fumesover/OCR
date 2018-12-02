@@ -98,8 +98,7 @@ void Seg()
     //SDL_SaveBMP(MatrixToSurface(pixels, h, w), "seg.bmp");
     
     s = extractstring("../test.nn", queue);
-    
-    //Display("seg.bmp");
+
     PrintText();
 }
 

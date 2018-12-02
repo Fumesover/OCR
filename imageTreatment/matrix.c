@@ -151,9 +151,6 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     int** res;
     int y = 0, x = 0, rx = *w - 1, ry = *h - 1;
 
-    InitArray(histoH, *h);
-    InitArray(histoW, *w);
-
     // Find boundaries of matrixes
     while (x < *w && histoW[x] == 0)
         x++;

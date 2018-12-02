@@ -33,6 +33,7 @@ Queue *Segmentation(int **matrix, int h, int w)
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
+    ShowSegmentation();
 
     /*** LINE SEGMENTATION ***/
     //CutInLine(matrix, histo, queue, h,  w);
@@ -121,7 +122,6 @@ int** RLSAh(int **matrix, int h, int w) {
 void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
     DisplayMatrix(rlsa, h, w);
     int *histo = MatrixWHistogram(rlsa, 0, h, w);
-    PrintArray(histo, h);
     int begin = 0, end = w-1;
     int n = 0, sum = 0;
     int av = 0, sp = 0;
@@ -154,7 +154,7 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
                 i++;
             }
             if (sp > av || (i == end)) {
-                CutInBlockW(matrix, rlsa, h, w, w1, w2);
+                CutInBlockW(matrix, rlsa, h, w1, w2);
                 w1 = i;
             }
             sp = 0;
@@ -165,7 +165,7 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
     free(histo);
 }
 
-void CutInBlockW(int** matrix, int **rlsa, int h, int w, int w1, int w2) {
+void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
     int *histo = MatrixHHistogram(rlsa, h, w1, w2);
     int begin = 0, end = h-1;
     int n = 0, sum = 0;
@@ -186,8 +186,6 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w, int w1, int w2) {
         i++;
     }
 
-    PrintArray(histo, h);
-
     if (n > 0)
         av = sum / n;
 
@@ -206,7 +204,6 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w, int w1, int w2) {
                 int **m = CutMatrix(matrix, h1, h2, w1, w2);
                 int nh = h2-h1, nw = w2-w1;
                 CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
-                //FreeMatrix((void**)m, h2-h1);
                 h1 = i;
             }
             sp = 0;
@@ -220,6 +217,7 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w, int w1, int w2) {
 // to CutInChar with the corresponding histogram
 void CutInLine(int **matrix, int *histogram, int h, int w)
 {
+    DisplayMatrix(matrix, h, w);
     /*** INIT ***/
     int i = 0, x1, x2;
     int *histoW = NULL;
@@ -332,7 +330,7 @@ void CutInChar(int **matrix, int *histo, int h1, int h2, int w)
             }
 
             // Enqueue character
-            EnqueueMatrix(matrix, queue, h1, h2, x1, x2);
+            EnqueueMatrix(matrix, h1, h2, x1, x2);
         }
 
         else {
@@ -373,7 +371,7 @@ float AverageSpace(int* histogram, int t)
 }
 
 
-void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
+void EnqueueMatrix(int **matrix, int h1, int h2, int w1, int w2)
 {
     int **original;
     int h = h2-h1, w = w2-w1;
@@ -387,7 +385,6 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 
     // Change matrix format
     int **final = Resize(original, h, w, SIZE);
-
     Tuple *data = NewTuple();
 
     data->data      = final;
@@ -398,7 +395,7 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
 
 // Shows result of segmentation
 // Returns elements of the queue in a char array 
-char* ShowSegmentation(Queue *queue)
+char* ShowSegmentation()
 {
     printf("y\n");
     char *s;
@@ -415,9 +412,7 @@ char* ShowSegmentation(Queue *queue)
 
     while (curr != NULL && curr->data != NULL)
     {
-        printf("data\n");
         c = curr->data->data;
-
         if (curr->data->width > 1 && curr->data->height > 1){
             s[t] = 'c';
             t++;
