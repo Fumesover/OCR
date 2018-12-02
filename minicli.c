@@ -71,6 +71,7 @@ void image() {
             case 3:
                 if (image != NULL) {
                     GreyScale(pixels, h, w);
+					Median_Filter(pixels, h, w);
                     int threshold = Otsu(pixels, h, w);
                     OtsuBinarization(pixels, h, w, threshold);
                     BinarizeMatrix(pixels, matrix, h, w);
