@@ -78,9 +78,8 @@ void image() {
                 }
                 break;
             case 4:
-                if (image != NULL) 
+                if (matrix != NULL) 
                     queue =  Segmentation(matrix, h, w);
-                    ShowSegmentation();
                 break;
             case 5:
                 if (image != NULL) {
