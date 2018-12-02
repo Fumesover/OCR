@@ -36,8 +36,8 @@ float hough(int **matrix, size_t h, size_t w);
 void DisplayMatrix(int **matrix, int h, int w);
 
 /* MEDIAN FILTER */
-int Is_Sorted(int array[]);
-void Array_Swap( int array[] , int i ; int j);
-void Sort(int array[]);
 void Median_Filter(Pixel **pixel, int h, int w);
+void merge(int arr[], int l, int m, int r);
+void mergeSort(int arr[], int l, int r) ;
+
 #endif
