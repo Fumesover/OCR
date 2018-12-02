@@ -60,8 +60,6 @@ void RLSA(int **matrix, int h, int w)
     }
     CutInBlockH(matrix, res, h, w);
 
-    DisplayMatrix(res, h, w);
-
     /*** FREE ALLOCATED MEMORY ***/
     //FreeMatrix((void**)rlsah, h);
     //FreeMatrix((void**)rlsaw, h);
