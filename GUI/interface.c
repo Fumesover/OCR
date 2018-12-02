@@ -49,8 +49,8 @@ void Load(GtkWidget *file_chooser)
     h = image->h;
     w = image->w;
 
-    pixels = InitPixelMatrix(h, w);
     matrix = InitIntMatrix(h, w);
+    pixels = InitPixelMatrix(h, w);
 
     // Fill the martix
     SurfaceToMatrix(pixels, image, h, w);
@@ -58,16 +58,6 @@ void Load(GtkWidget *file_chooser)
     /*** BINARIZATION ***/
     //Greyscale
     GreyScale(pixels, h, w);
-
-	// Reducing image noise
-	Median_Filter(pixels, h , w);
-    // Otsu method on matrix
-    int threshold = Otsu(pixels, h, w);
-    OtsuBinarization(pixels, h, w, threshold);
-
-    BinarizeMatrix(pixels, matrix, h, w);
-    BinToPixels(matrix, pixels, h, w);
-    SDL_SaveBMP(MatrixToSurface(pixels, h, w), "bin.bmp");
 }
 
 void PrintText()
@@ -86,8 +76,25 @@ void Quit()
     gtk_widget_destroy(GTK_WIDGET(window));
 }
 
+void Noise()
+{
+    Median_Filter(pixels, h , w);
+    BinarizeMatrix(pixels, matrix, h, w);
+
+    SDL_SaveBMP(MatrixToSurface(pixels, h, w), "noise.bmp");
+    Display("noise.bmp");
+}
+
 void Bin()
 {
+    // Otsu method on matrix
+    int threshold = Otsu(pixels, h, w);
+    OtsuBinarization(pixels, h, w, threshold);
+
+    BinarizeMatrix(pixels, matrix, h, w);
+    BinToPixels(matrix, pixels, h, w);
+    SDL_SaveBMP(MatrixToSurface(pixels, h, w), "bin.bmp");
+
     Display("bin.bmp");
 }
 
