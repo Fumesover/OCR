@@ -419,7 +419,7 @@ void Sort(int array[])
 			int posmin = j;
 			for(int i = j; i < 9; i++)
 			{
-				if(min > array[i]
+				if(min > array[i])
 				{
 					min = array[i];
 					posmin = i;
