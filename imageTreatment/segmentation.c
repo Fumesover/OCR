@@ -10,7 +10,6 @@
 #define HOR_THRESH 2000
 #define VER_THRESH 2000
 
-#define BLOCS 1.5
 #define SIZE 20
 
 Queue *queue;
@@ -34,10 +33,7 @@ Queue *Segmentation(int **matrix, int h, int w)
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
-    //ShowSegmentation();
-    /*** LINE SEGMENTATION ***
 
-    //CutInLine(matrix, histo, queue, h,  w);
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -153,7 +149,7 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
                 sp++;
                 i++;
             }
-            if (sp > av*BLOCS || (i == end)) {
+            if (sp >= av || (i == end)) {
                 CutInBlockW(matrix, rlsa, h, w1, w2);
                 w1 = i;
             }
@@ -210,7 +206,7 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
                 sp++;
                 i++;
             }
-            if (sp > av*BLOCS || (i == end)) {
+            if (sp >= av || (i == end)) {
                 int **m = CutMatrix(matrix, h1, h2, w1, w2);
                 int nh = h2-h1, nw = w2-w1;
                 CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
