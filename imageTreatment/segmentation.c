@@ -206,13 +206,11 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
                 sp++;
                 i++;
             }
-            if (sp >= av || (i == end)) {
-                int **m = CutMatrix(matrix, h1, h2, w1, w2);
-                int nh = h2-h1, nw = w2-w1;
-                CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
-                Enqueue(queue, data);
-                h1 = i;
-            }
+            int **m = CutMatrix(matrix, h1, h2, w1, w2);
+            int nh = h2-h1, nw = w2-w1;
+            CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
+            Enqueue(queue, data);
+            h1 = i;
             sp = 0;
         }
         i++;

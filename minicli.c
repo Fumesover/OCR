@@ -85,7 +85,7 @@ void image() {
             case 5:
                 if (image != NULL) {
                 }
-                break;/*
+                break;
             case 6:
                 if (queue == NULL)
                     break;
@@ -99,7 +99,7 @@ void image() {
                 if (queue == NULL)
                     break;
 
-                adddatatoset(queue);*/
+                adddatatoset(queue);
             }
     }
     
