@@ -225,7 +225,7 @@ int **Resize(int **matrix, int h, int w, int newsize)
 }
 
 // Resize the matrix
-SDL_Surface *ResizeSurface(SDL_Surface *Surface, Uint16 t)
+SDL_Surface *ResizeSurface(SDL_Surface *Surface, int s)
 {
     SDL_Surface *res = SDL_CreateRGBSurface(Surface->flags, (Uint16)s, (Uint16)s,
                                             Surface->format->BitsPerPixel,
