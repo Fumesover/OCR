@@ -17,7 +17,7 @@
 Emma' Rhaeven' Leroy
 Artem 'Gagarin1961' Platonov
 Mai-Linh 'Kakadu' Lannes</property>
-    <property name="logo">../../../Téléchargements/logosimple.png</property>
+    <property name="logo">../images/logosimple.png</property>
     <child>
       <placeholder/>
     </child>
@@ -82,15 +82,15 @@ Mai-Linh 'Kakadu' Lannes</property>
           </packing>
         </child>
         <child>
-          <object class="GtkButton" id="QUIT">
-            <property name="label" translatable="yes">QUIT</property>
+          <object class="GtkButton">
+            <property name="label" translatable="yes">Noise reduction</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <signal name="clicked" handler="Quit" swapped="no"/>
+            <signal name="clicked" handler="Noise" swapped="no"/>
           </object>
           <packing>
-            <property name="position">3</property>
+            <property name="position">2</property>
           </packing>
         </child>
         <child>
@@ -100,6 +100,18 @@ Mai-Linh 'Kakadu' Lannes</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
             <signal name="clicked" handler="About" swapped="no"/>
+          </object>
+          <packing>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="QUIT">
+            <property name="label" translatable="yes">QUIT</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <signal name="clicked" handler="Quit" swapped="no"/>
           </object>
           <packing>
             <property name="position">4</property>
