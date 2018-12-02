@@ -52,13 +52,10 @@ void NNwriteValue(int **matrix, char value) {
     printf(" You selected : %c (%d)\n", value, value);
     printf(" Confirm ? [Y]/n");
     
-    char confirm;
-    confirm = getchar();
+    char confirm = getchar();
     if (confirm != '\n') {
-        printf("Nope for this one\n");
+        printf("Skipping this char ...\n");
         return;
-    } else {
-        printf("YEAR !!!\n");
     }
 
     FILE *f;
@@ -66,11 +63,9 @@ void NNwriteValue(int **matrix, char value) {
     if (f == NULL)
         errx(1, "Something went wrong when oppenning ocr_to_train.data");
     
-    for (int i = 0; i < SIZE; i++) {
-        for (int j = 0; j < SIZE; j++) {
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             fprintf(f, "%1.4f ", inp[i * SIZE + j]);
-        }
-    }
 
     for (int i = OFFSET; i < 126; i++)
         fprintf(f, "%d ", i == value);
@@ -83,17 +78,13 @@ void NNwriteValue(int **matrix, char value) {
 unsigned char NNfindChar(neuNet n, int **matrix) {
     float inp[SIZE * SIZE];
 
-    for (int i = 0; i < SIZE; i++) {
-        for (int j = 0; j < SIZE; j++) {
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             inp[i * SIZE + j] = matrix[i][j];
-        }
-    }
-
+    
     float* out = NNGuess(n, inp);
     
     unsigned char result = getMaxPos(out, n.nbOutput) + OFFSET;
-
-    // printf("Predicted : %c (%d)\n", result, result);
 
     return result;
 }
@@ -147,17 +138,13 @@ char* extractstring(char* filepath, Queue *q) {
         int **c = curr->data->data;
 
         if (curr->data->width > 1 && curr->data->height > 1){
-            s[t] = 'c';
-            t++;
-
             int h = curr->data->height;
             int w = curr->data->width;
             
             if (h != SIZE || w != SIZE)
                 errx(1, "Issue in matrix size");
 
-            s[t - 1] = NNfindChar(n, c);
-            printf("%c\n", s[t - 1]);
+            s[t++] = NNfindChar(n, c);
         } else if (c && c[0][0] == 38) {
             s[t] = '\n';
             t++;
