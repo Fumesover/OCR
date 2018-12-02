@@ -15,18 +15,12 @@ SRC = imageTreatment/image.c imageTreatment/segmentation.c imageTreatment/matrix
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
-all: minicli #GUI/interface 
-
-GUI/interface: ${OBJ} GUI/interface.o
+all: minicli GUI/interface 
 
 run: all
-	./bin/main
+	(cd GUI; ./interface)
 
-#imagetreatment:
-#	${MAKE} -C imageTreatment 
-
-xor: 
-	${MAKE} -C neuralNetwork xor
+GUI/interface: ${OBJ} GUI/interface.o
 
 minicli: ${OBJ} minicli.o
 
