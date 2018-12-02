@@ -338,41 +338,6 @@ SDL_Surface *MatrixToSurface(Pixel **pixels, int h, int w)
     return surface;
 }
 
-float hough(int **matrix, size_t h, size_t w){
-	float PI = 3.1415926f;
-	float rho = 1.0f;
-	float theta = 1.0f;
-	int Ntheta = (int)(180.0/theta);
-	int Nrho = (int)(floor(sqrt(h*h+w*w))/rho);
-	float dtheta = PI/Ntheta;
-	float drho = floor(sqrt(h*h+w+w))/Nrho;
-	int accum[Ntheta][Nrho];
-	for(size_t j = 0; j < h; j++){
-		for(size_t i = 0; i < w; i++){
-			if(matrix[j][i] != 0){
-				for(int i_theta = 0; i_theta < Ntheta; i_theta++){
-					theta = i_theta * dtheta;
-					rho = i * cos(theta)+(h-j)*sin(theta);
-					int i_rho = (int)(rho/drho);
-				        if(i_rho > 0 && i_rho < Nrho){
-						accum[i_theta][i_rho] += 1;
-					}
-				}
-			}
-		}
-	}
-	int seuil = 100;
-	for(int i_theta = 0; i_theta < Ntheta; i_theta++){
-		for(int i_rho = 0; i_rho < Nrho; i_rho++){
-			if(accum[i_theta][i_rho] >= seuil){
-				float theta = i_theta * dtheta;
-				return theta;
-			}
-		}
-	}
-	return 0.0f;
-}
-
 // Converts the matrix "matrix" to a sdl_surface
 // Displays the matrix on screen
 void DisplayMatrix(int **matrix, int h, int w)

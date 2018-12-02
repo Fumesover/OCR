@@ -72,8 +72,8 @@ void Load(GtkWidget *file_chooser)
 
 void PrintText()
 {
-    printf("%s\n", s);
-    printf("%lu\n", strlen(s));
+    // printf("%s\n", s);
+    // printf("%lu\n", strlen(s));
     GtkTextBuffer *buffer = gtk_text_buffer_new(NULL);
     gtk_text_buffer_set_text(buffer, s, -1);
     gtk_text_view_set_buffer(textBox, buffer);
