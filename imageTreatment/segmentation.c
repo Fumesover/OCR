@@ -34,7 +34,7 @@ Queue *Segmentation(int **matrix, int h, int w)
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
-    ShowSegmentation();
+    //ShowSegmentation();
     /*** LINE SEGMENTATION ***
 
     //CutInLine(matrix, histo, queue, h,  w);
