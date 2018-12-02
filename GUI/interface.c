@@ -59,6 +59,8 @@ void Load(GtkWidget *file_chooser)
     //Greyscale
     GreyScale(pixels, h, w);
 
+	// Reducing image noise
+	Median_Filter(pixels, h , w);
     // Otsu method on matrix
     int threshold = Otsu(pixels, h, w);
     OtsuBinarization(pixels, h, w, threshold);
