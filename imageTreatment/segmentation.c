@@ -400,6 +400,7 @@ void EnqueueMatrix(int **matrix, int h1, int h2, int w1, int w2)
     Enqueue(queue, data);
 }
 
+// TEST FUNCTION
 // Shows result of segmentation
 // Returns elements of the queue in a char array 
 char* ShowSegmentation()

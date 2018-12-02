@@ -71,6 +71,7 @@ void image() {
             case 3:
                 if (image != NULL) {
                     GreyScale(pixels, h, w);
+					Median_Filter(pixels, h, w);
                     int threshold = Otsu(pixels, h, w);
                     OtsuBinarization(pixels, h, w, threshold);
                     BinarizeMatrix(pixels, matrix, h, w);
@@ -82,8 +83,6 @@ void image() {
                 break;
             case 5:
                 if (image != NULL) {
-                    float angle = hough(matrix, (size_t)h, (size_t)w);
-                    printf("Hough : %f detected\n", angle);
                 }
                 break;
             case 6:

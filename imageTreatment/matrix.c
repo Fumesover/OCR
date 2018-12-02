@@ -238,18 +238,18 @@ int **Resize(int **matrix, int h, int w, int newsize)
 }
 
 // Resize the matrix
-SDL_Surface *ResizeSurface(SDL_Surface *Surface, size_t s)
+SDL_Surface *ResizeSurface(SDL_Surface *Surface, int s)
 {
     SDL_Surface *res = SDL_CreateRGBSurface(Surface->flags, (Uint16)s, (Uint16)s,
-                                             Surface->format->BitsPerPixel,
-                                             Surface->format->Rmask, Surface->format->Gmask,
-                                             Surface->format->Bmask, Surface->format->Amask);
+                                            Surface->format->BitsPerPixel,
+                                            Surface->format->Rmask, Surface->format->Gmask,
+                                            Surface->format->Bmask, Surface->format->Amask);
 
     int h = Surface->h;
     int w = Surface->w;
 
-    double resizeX = ((double)(s)  / (double)(Surface->w));
-    double resizeY = ((double)(s) / (double)(Surface->h));
+    double resizeX = ((double)(s)  / (double)(w));
+    double resizeY = ((double)(s) / (double)(h));
 
     for(int y = 0; y < h; y++)
         for(int x = 0; x < w; x++)
