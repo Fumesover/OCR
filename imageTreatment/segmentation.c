@@ -60,6 +60,8 @@ void RLSA(int **matrix, int h, int w)
     }
     CutInBlockH(matrix, res, h, w);
 
+    DisplayMatrix(res, h, w);
+
     /*** FREE ALLOCATED MEMORY ***/
     //FreeMatrix((void**)rlsah, h);
     //FreeMatrix((void**)rlsaw, h);
@@ -164,54 +166,24 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
 void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
     int *histo = MatrixHHistogram(rlsa, h, w1, w2);
     int begin = 0, end = h-1;
-    int n = 0, sum = 0;
-    int av = 0, sp = 0;
-
-    Tuple *data = NewTuple();
-    data->height = 1;
-    data->width = 1;
-
-    int **eol = NULL;
-    eol = malloc(sizeof(int*) * 1);
-    eol[0] = malloc(sizeof(int) * 1);
-    eol[0][0] = 38;
-
-    data->data = eol;
 
     while (begin < h && histo[begin] == 0) begin++;
     while (end > 0 && histo[end] == 0) end--;
 
+
     int i = begin;
-    while (i < end){
-        if (histo[i] == 0){
-            while (histo[i] == 0){
-                sum++;
-                i++;
-            }
-            n++;
-        }
-        i++;
-    }
-
-    if (n > 0)
-        av = sum / n;
-
-    i = begin;
     int h1 = begin;
     while (i <= end)
     {
         if (histo[i] == 0 ||i == end) {
             int h2 = i;
             while (histo[i] == 0 || i == end) {
-                sp++;
                 i++;
             }
             int **m = CutMatrix(matrix, h1, h2, w1, w2);
             int nh = h2-h1, nw = w2-w1;
             CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
-            Enqueue(queue, data);
             h1 = i;
-            sp = 0;
         }
         i++;
     }
