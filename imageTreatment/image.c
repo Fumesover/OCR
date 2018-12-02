@@ -385,3 +385,143 @@ void DisplayMatrix(int **matrix, int h, int w)
     //SDL_FreeSurface(surface);
     FreeMatrix((void**)pixels, h);
 }
+
+// Check if array is sorted for Sort()
+int Is_Sorted(int array[])
+{
+	for(int i = 0; i < 8; i ++)
+	{
+		if(array[i] > array[i + 1])
+		{
+			return 0; //array is not sorted
+		}
+	}
+	return 1;
+}
+
+// Swap values in array at position i and j
+void Array_Swap( int array[] , int i ; int j)
+{
+	int cell_j = array[j];
+	int cell_i = array[i];
+	array[i] = cell_j;
+	array[j] = cell_i;
+}				
+
+// Sort the 9 slot array used in median_filter()	
+void Sort(int array[])
+{
+	while(Is_Sorted(array))
+	{
+		for(int j = 0; j < 9; j ++)
+		{
+			int min = array[j];
+			int posmin = j;
+			for(int i = j; i < 9; i++)
+			{
+				if(min > array[i]
+				{
+					min = array[i];
+					posmin = i;
+				}
+			}
+			Array_Swap(array, j , posmin);
+		}
+	}
+}
+
+// Reducing noise in image after greyscale
+// We can consider only 1 component of pixel (here .r)
+void Median_Filter(Pixel **pixels, int h, int w)
+{
+	int neighbor_array[9];
+	for(int i = 0; i < h; i ++)
+	{
+		for(int j = 0; j < w; j ++)
+		{
+			neighbor_array[0] = (int)(pixels[i][j].r);
+			// Case pixel is in top border of matrix
+			if(i == 0)
+			{	
+				neighbor_array[1] = (int)(pixels[i + 1][j].r);
+				// Upper left corner
+				if(j == 0)
+				{
+					neighbor_array[2] = (int)(pixels[i][j+1].r);
+					neighbor_array[3] = (int)(pixels[i + 1][j + 1].r);
+					neighbor_array[4] = 0;
+					neighbor_array[5] = 255;
+				}
+				// Upper right corner
+				if(j == (w - 1))
+				{
+					neighbor_array[2] = (int)(pixels[i][j - 1].r);
+					neighbor_array[3] = (int)(pixels[i + 1][j - 1].r);
+					neighbor_array[4] = 0;
+					neighbor_array[5] = 255;
+				}
+				// Upper middle
+				else
+				{
+					neighbor_array[2] = (int)(pixels[i][j+1].r);
+					neighbor_array[3] = (int)(pixels[i + 1][j + 1].r);
+					neighbor_array[4] = (int)(pixels[i][j - 1].r);
+					neighbor_array[5] = (int)(pixels[i + 1][j - 1].r);
+
+				}
+				neighbor_array[6] = 0;
+				neighbor_array[7] = 0;
+				neighbor_array[8] = 255;
+			}
+
+			// Case pixel is in bottom border of matrix
+			if(i == (h - 1))
+			{
+				neighbor_array[1] = (int)(pixels[i - 1][j].r);
+				// Case bottom left corner
+				if(j == 0)
+				{
+					neighbor_array[2] = (int)(pixels[i - 1][j + 1].r);
+					neighbor_array[3] = (int)(pixels[i][j + 1].r);
+					neighbor_array[4] = 0;
+					neighbor_array[5] = 255;
+				}
+				// Case bottom right corner
+				if(j == (w - 1))
+				{
+					neighbor_array[2] = (int)(pixels[i - 1][j - 1].r);
+					neighbor_array[3] = (int)(pixels[i][j - 1].r);
+					neighbor_array[4] = 0;
+					neighbor_array[5] = 255;
+				}
+				// Case bottom middle
+				else
+				{
+					neighbor_array[2] = (int)(pixels[i - 1][j + 1].r);
+					neighbor_array[3] = (int)(pixels[i][j + 1].r);
+					neighbor_array[4] = (int)(pixels[i - 1][j - 1].r);
+					neighbor_array[5] = (int)(pixels[i][j - 1].r);
+				}
+				neighbor_array[6] = 0;
+				neighbor_array[7] = 0;
+				neighbor_array[8] = 255;
+			}
+			// Case pixel has 8 neighbors
+			neighbor[1] = (int)(pixels[i][j + 1].r);
+			neighbor[2] = (int)(pixels[i][j - 1].r);
+			neighbor[3] = (int)(pixels[i + 1][j].r);
+			neighbor[4] = (int)(pixels[i - 1][j].r);
+			neighbor[5] = (int)(pixels[i + 1][j + 1].r);
+			neighbor[6] = (int)(pixels[i - 1][j + 1].r);				
+			neighbor[7] = (int)(pixels[i + 1][j - 1].r);	
+			neighbor[8] = (int)(pixels[i - 1][j - 1].r);
+
+			// Sort array
+			Sort(neighbor_array);
+			// Correct pixel value with median value in array
+			pixels[i][j].r = neighbor_array[4];
+			pixels[i][j].g = neighbor_array[4];
+			pixels[i][j].b = neighbor_array[4];
+		}
+	}
+}
