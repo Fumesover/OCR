@@ -33,7 +33,6 @@ Queue *Segmentation(int **matrix, int h, int w)
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
-    ShowSegmentation();
 
     /*** LINE SEGMENTATION ***/
     //CutInLine(matrix, histo, queue, h,  w);
@@ -120,7 +119,6 @@ int** RLSAh(int **matrix, int h, int w) {
 }
 
 void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
-    DisplayMatrix(rlsa, h, w);
     int *histo = MatrixWHistogram(rlsa, 0, h, w);
     int begin = 0, end = w-1;
     int n = 0, sum = 0;
@@ -200,7 +198,6 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
                 i++;
             }
             if (sp > av || (i == end)) {
-                //DrawBlock(matrix, h, w, w1, w2, h1, h2);
                 int **m = CutMatrix(matrix, h1, h2, w1, w2);
                 int nh = h2-h1, nw = w2-w1;
                 CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
@@ -217,7 +214,6 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
 // to CutInChar with the corresponding histogram
 void CutInLine(int **matrix, int *histogram, int h, int w)
 {
-    DisplayMatrix(matrix, h, w);
     /*** INIT ***/
     int i = 0, x1, x2;
     int *histoW = NULL;
@@ -234,9 +230,6 @@ void CutInLine(int **matrix, int *histogram, int h, int w)
     eol[0][0] = 38;
 
     data->data = eol;
-
-    // Find average space between lines
-    //average_sp = AverageSpace(histogram, h);
 
     /*** PROCESSING ALL LINES ***/
     while (i < h)
@@ -401,8 +394,6 @@ char* ShowSegmentation()
     char *s;
     Elt *curr = NULL;
     int **c;
-    //Pixel **m;
-    //FILE* file = fopen("out.treated","w");
     int t = 0;
 
     s = malloc(sizeof(char) * 1000);
@@ -443,7 +434,5 @@ char* ShowSegmentation()
         curr = curr->next;
     }
 
-    // Closing file
-    //fclose(file);
     return s;
 }

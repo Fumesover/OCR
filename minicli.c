@@ -90,16 +90,16 @@ void image() {
                 if (queue == NULL)
                     break;
 
-                /*char* s = extractstring("test.nn", queue);
+                char* s = extractstring("test.nn", queue);
                 
                 printf("String is : \"%s\"\n", s);
-                free(s);*/
+                free(s);
                 break;       
             case 7:
                 if (queue == NULL)
                     break;
 
-                //adddatatoset(queue);
+                adddatatoset(queue);
             }
     }
     
