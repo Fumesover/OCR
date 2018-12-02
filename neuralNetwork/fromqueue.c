@@ -23,7 +23,6 @@ void printArr(float* arr) {
                 printf("1");
             else
                 printf(" ");
-            // printf("%1.f", arr[SIZE * i + j]);
         }
         printf("\n");
     }
@@ -31,7 +30,7 @@ void printArr(float* arr) {
 
 unsigned char getMaxPos(float* arr, char len) {
     // We can limit to char because NN output layer is composed of 94 neurons
-    unsigned char max = 0;
+    unsigned char max =  0;
     unsigned char pos = -1;
 
     while(++pos < len)
@@ -44,11 +43,9 @@ unsigned char getMaxPos(float* arr, char len) {
 void NNwriteValue(int **matrix, char value) {
     float inp[SIZE * SIZE];
 
-    for (int i = 0; i < SIZE; i++) {
-        for (int j = 0; j < SIZE; j++) {
+    for (int i = 0; i < SIZE; i++)
+        for (int j = 0; j < SIZE; j++)
             inp[i * SIZE + j] = matrix[i][j];
-        }
-    }
 
     printArr(inp);
 
@@ -145,8 +142,6 @@ char* extractstring(char* filepath, Queue *q) {
 
     if (q->first)
         curr = q->first;
-    else
-        printf("nope 123");
 
     while (curr && curr->data) {
         int **c = curr->data->data;
@@ -166,17 +161,12 @@ char* extractstring(char* filepath, Queue *q) {
         } else if (c && c[0][0] == 38) {
             s[t] = '\n';
             t++;
-
-            printf("ajlkdsalkd");
         } else if (c && c[0][0] == 32) {
             s[t] = ' ';
             t++;
-            printf("qwewqwqw");
         } else  {
             s[t] = '\n';
             t++;
-
-            printf("asads");
         }
 
         curr = curr->next;
@@ -186,7 +176,6 @@ char* extractstring(char* filepath, Queue *q) {
             s = realloc(s, capacity * sizeof(char));
             if (!s)
                 errx(1, "Not enough memory");
-            printf("\tstring upgraded to : %lu\n", capacity);
         }
     }
     
