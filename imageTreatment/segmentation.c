@@ -31,13 +31,10 @@ Queue *Segmentation(int **matrix, int h, int w)
     MatrixHHistogram(matrix, histo, h, w);
 
     /*** RLSA ***/
-    /*int ** res = RLSA(matrix, h, w);
-    RLSA(res, h, w);*/
+    //RLSA(matrix, h, w);
 
     /*** LINE SEGMENTATION ***/
     CutInLine(matrix, histo, queue, h,  w);
-
-        //ShowSegmentation(queue);
 
     /*** FREE ALLOCATED MEMORY ***/
     free(histo);
@@ -49,77 +46,176 @@ Queue *Segmentation(int **matrix, int h, int w)
     return queue;
 }
 
+/*
+void RLSA(int **matrix, int h, int w)
+{
+    int **res = InitIntMatrix(h, w);
+    int **rlsah = RLSAh(matrix, h, w);
+    int **rlsaw = RLSAw(matrix, h, w);
 
-int** RLSA(int **matrix, int h, int w) {
-    int nbzeros = 0;
-    int** resH = InitIntMatrix(h, w);
-    int** resW = InitIntMatrix(h, w);
-    int** res = InitIntMatrix(h, w);
 
-    Copy(matrix, resH, h, w);
-    Copy(matrix, resW, h, w);
-
-    DisplayMatrix(resH, h, w);
-
-    /*** ROW PROCESSING ***/
-    for (int i = 0; i < h; i++)
-    {
-        for (int j = 0; j < w; j++)
-        {
-            if (matrix[i][j] == 1)
-            {
-                    if (nbzeros <= HOR_THRESH)
-                    {
-                        for (int k = j - nbzeros; k < j; k++)
-                            resH[i][k] = 4;
-                    }
-                    nbzeros = 0;
-            }
-            else
-                nbzeros++;
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            res[i][j] = (rlsah[i][j] && rlsaw[i][j]) ? 1 : 0;
         }
     }
+    CutInBlockH(matrix, res, h, w);
 
-    DisplayMatrix(resH, h, w);
+}
 
-    nbzeros = 0;
+int** RLSAw(int **matrix, int h, int w) {
+    int nbzeros = 0;
+    int** res = InitIntMatrix(h, w);
 
-    /*** COLUMN PROCESSING ***/
+    Copy(matrix, res, h, w);
+
     for (int j = 0; j < w; j++)
     {
         for (int i = 0; i < h; i++)
         {
             if (matrix[i][j] == 1)
             {
-                    if (nbzeros <= VER_THRESH)
-                    {
-                        for (int k = i - nbzeros; k < i; k++)
-                            if (k >= 0)
-                                resW[k][j] = 4;
-                    }
-                    nbzeros = 0;
+                if (nbzeros <= VER_THRESH)
+                {
+                    for (int k = i - nbzeros; k < i; k++)
+                        if (k >= 0)
+                            res[k][j] = 1;
+                }
+                nbzeros = 0;
             }
             nbzeros++;
         }
     }
 
-    DisplayMatrix(resW, h, w);
+    return res;
+}
 
-    /*** AND OPERATOR ON BOTH MATRIXES ***/
+int** RLSAh(int **matrix, int h, int w) {
+    int nbzeros = 0;
+    int** res = InitIntMatrix(h, w);
+
+    Copy(matrix, res, h, w);
+
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
-            res[i][j] = (resW[i][j] && resH[i][j]) ? 4 : 0;
+            if (matrix[i][j] == 1) {
+                if (nbzeros <= HOR_THRESH) {
+                    for (int k = j - nbzeros; k < j; k++)
+                        res[i][k] = 1;
+                }
+                nbzeros = 0;
+            } else
+                nbzeros++;
         }
     }
 
-    DisplayMatrix(res, h, w);
-
-    /*** FREE ALLOCATED MEMORY ***/
-    //FreeMatrix(resH, h);
-    //FreeMatrix(resW, h);
-
     return res;
 }
+
+void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
+    int *histo = MatrixWHistogram(rlsa, 0, h, w);
+    int begin = 0, end = w-1;
+    int n = 0, sum = 0;
+    int av = 0, sp = 0;
+
+    while (begin < w && histo[begin] == 0) begin++;
+    while (end > 0 && histo[end] == 0) end--;
+
+    int i = begin;
+    while (i < end){
+        if (histo[i] == 0){
+            while (histo[i] == 0){
+                sum++;
+                i++;
+            }
+            n++;
+        }
+        i++;
+    }
+    if (n > 0)
+        av = sum / n;
+
+    i = begin;
+    int w1 = begin;
+    while (i <= end)
+    {
+        if (histo[i] == 0 || i == end) {
+            int w2 = i;
+            while (histo[i] == 0 || i == end) {
+                sp++;
+                i++;
+            }
+            if (sp > av*BLOCS || (i == end)) {
+                CutInBlockW(matrix, rlsa, h, w1, w2);
+                w1 = i;
+            }
+            sp = 0;
+        }
+        i++;
+    }
+
+    free(histo);
+}
+
+void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
+    int *histo = MatrixHHistogram(rlsa, h, w1, w2);
+    int begin = 0, end = h-1;
+    int n = 0, sum = 0;
+    int av = 0, sp = 0;
+
+    Tuple *data = NewTuple();
+    data->height = 1;
+    data->width = 1;
+
+    int **eol = NULL;
+    eol = malloc(sizeof(int*) * 1);
+    eol[0] = malloc(sizeof(int) * 1);
+    eol[0][0] = 38;
+
+    data->data = eol;
+
+    while (begin < h && histo[begin] == 0) begin++;
+    while (end > 0 && histo[end] == 0) end--;
+
+    int i = begin;
+    while (i < end){
+        if (histo[i] == 0){
+            while (histo[i] == 0){
+                sum++;
+                i++;
+            }
+            n++;
+        }
+        i++;
+    }
+
+    if (n > 0)
+        av = sum / n;
+
+    i = begin;
+    int h1 = begin;
+    while (i <= end)
+    {
+        if (histo[i] == 0 ||i == end) {
+            int h2 = i;
+            while (histo[i] == 0 || i == end) {
+                sp++;
+                i++;
+            }
+            if (sp > av*BLOCS || (i == end)) {
+                int **m = CutMatrix(matrix, h1, h2, w1, w2);
+                int nh = h2-h1, nw = w2-w1;
+                CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
+                Enqueue(queue, data);
+                h1 = i;
+            }
+            sp = 0;
+        }
+        i++;
+    }
+}
+
+*/
 
 
 // Cuts matrix in lines of characters and sends thems
@@ -307,6 +403,7 @@ void EnqueueMatrix(int **matrix, Queue *queue, int h1, int h2, int w1, int w2)
     Enqueue(queue, data);
 }
 
+// TEST FUNCTION
 // Shows result of segmentation
 // Returns elements of the queue in a char array 
 char* ShowSegmentation(Queue *queue)
@@ -315,8 +412,6 @@ char* ShowSegmentation(Queue *queue)
     char *s;
     Elt *curr = NULL;
     int **c;
-    //Pixel **m;
-    //FILE* file = fopen("out.treated","w");
     int t = 0;
 
     s = malloc(sizeof(char) * 1000);
@@ -359,7 +454,5 @@ char* ShowSegmentation(Queue *queue)
         curr = curr->next;
     }
 
-    // Closing file
-    //fclose(file);
     return s;
 }

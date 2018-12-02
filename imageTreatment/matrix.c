@@ -227,21 +227,23 @@ int **Resize(int **matrix, int h, int w, int newsize)
 // Resize the matrix
 SDL_Surface *ResizeSurface(SDL_Surface *Surface, Uint16 t)
 {
-    if(!Surface || !t)
-            return 0;
+    SDL_Surface *res = SDL_CreateRGBSurface(Surface->flags, (Uint16)s, (Uint16)s,
+                                            Surface->format->BitsPerPixel,
+                                            Surface->format->Rmask, Surface->format->Gmask,
+                                            Surface->format->Bmask, Surface->format->Amask);
 
-        SDL_Surface *_ret = SDL_CreateRGBSurface(Surface->flags, t, t, Surface->format->BitsPerPixel,
-                                                 Surface->format->Rmask, Surface->format->Gmask, Surface->format->Bmask, Surface->format->Amask);
+    int h = Surface->h;
+    int w = Surface->w;
 
-        double    _stretch_factor_x = ((double)(t)  / (double)(Surface->w)),
-                _stretch_factor_y = ((double)(t) / (double)(Surface->h));
+    double resizeX = ((double)(s)  / (double)(w));
+    double resizeY = ((double)(s) / (double)(h));
 
-        for(Sint32 y = 0; y < Surface->h; y++)
-            for(Sint32 x = 0; x < Surface->w; x++)
-                for(Sint32 o_y = 0; o_y < _stretch_factor_y; ++o_y)
-                    for(Sint32 o_x = 0; o_x < _stretch_factor_x; ++o_x)
-                        PutPixel(_ret, (Sint32)(_stretch_factor_x * x) + o_x,
-                                  (Sint32)(_stretch_factor_y * y) + o_y, GetPixel(Surface, x, y));
+    for(int y = 0; y < h; y++)
+        for(int x = 0; x < w; x++)
+            for(int i = 0; i < resizeY; i++)
+                for(int j = 0; j < resizeX; j++)
+                    PutPixel(res, (int)(resizeX * x) + j,
+                             (int)(resizeY * y) + i, GetPixel(Surface, x, y));
 
-        return _ret;
+    return res;
 }
