@@ -29,7 +29,7 @@ Queue *Segmentation(int **matrix, int h, int w)
     queue->first = NULL;
 
     InitArray(histo, h);
-    MatrixHHistogram(matrix, histo, h, w);
+    //MatrixHHistogram(matrix, h, w);
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
@@ -57,10 +57,10 @@ void RLSA(int **matrix, int h, int w)
     /*** AND OPERATOR ON BOTH MATRIXES ***/
     for (int i = 0; i < h; i++) {
         for (int j = 0; j < w; j++) {
-            res[i][j] = (rlsah[i][j] && rlsaw[i][j]) ? 4 : 0;
+            res[i][j] = (rlsah[i][j] && rlsaw[i][j]) ? 1 : 0;
         }
     }
-    CutInBlockH(matrix, h, w);
+    CutInBlockH(matrix, res, h, w);
 
     /*** FREE ALLOCATED MEMORY ***/
     //FreeMatrix((void**)rlsah, h);
@@ -84,7 +84,7 @@ int** RLSAw(int **matrix, int h, int w) {
                 {
                     for (int k = i - nbzeros; k < i; k++)
                         if (k >= 0)
-                            res[k][j] = 4;
+                            res[k][j] = 1;
                 }
                 nbzeros = 0;
             }
@@ -107,7 +107,7 @@ int** RLSAh(int **matrix, int h, int w) {
             if (matrix[i][j] == 1) {
                 if (nbzeros <= HOR_THRESH) {
                     for (int k = j - nbzeros; k < j; k++)
-                        res[i][k] = 4;
+                        res[i][k] = 1;
                 }
                 nbzeros = 0;
             } else
@@ -118,8 +118,10 @@ int** RLSAh(int **matrix, int h, int w) {
     return res;
 }
 
-void CutInBlockH(int** matrix, int h, int w) {
-    int *histo = MatrixHHistogram(matrix, h, w);
+void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
+    DisplayMatrix(rlsa, h, w);
+    int *histo = MatrixWHistogram(rlsa, 0, h, w);
+    PrintArray(histo, h);
     int begin = 0, end = w-1;
     int n = 0, sum = 0;
     int av = 0, sp = 0;
@@ -138,28 +140,33 @@ void CutInBlockH(int** matrix, int h, int w) {
         }
         i++;
     }
-    av = sum / n;
+    if (n > 0)
+        av = sum / n;
 
     i = begin;
     int w1 = begin;
-    while (i < end)
+    while (i <= end)
     {
-        if (histo[i] == 0) {
-            int w2 = i+1;
-            while (histo[i] == 0) {
+        if (histo[i] == 0 || i == end) {
+            int w2 = i;
+            while (histo[i] == 0 || i == end) {
                 sp++;
                 i++;
             }
-            if (sp > av)
-                CutInBlockW(matrix, h, w, w1, w2);
-            w1 = i;
+            if (sp > av || (i == end)) {
+                CutInBlockW(matrix, rlsa, h, w, w1, w2);
+                w1 = i;
+            }
+            sp = 0;
         }
         i++;
     }
+
+    free(histo);
 }
 
-void CutInBlockW(int** matrix, int h, int w, int w1, int w2) {
-    int *histo = MatrixW1Histogram(matrix, w1, w2, h);
+void CutInBlockW(int** matrix, int **rlsa, int h, int w, int w1, int w2) {
+    int *histo = MatrixHHistogram(rlsa, h, w1, w2);
     int begin = 0, end = h-1;
     int n = 0, sum = 0;
     int av = 0, sp = 0;
@@ -178,22 +185,31 @@ void CutInBlockW(int** matrix, int h, int w, int w1, int w2) {
         }
         i++;
     }
-    av = sum / n;
+
+    PrintArray(histo, h);
+
+    if (n > 0)
+        av = sum / n;
+
     i = begin;
     int h1 = begin;
-    while (i < end)
+    while (i <= end)
     {
-        if (histo[i] == 0) {
-            int h2 = i+1;
-            while (histo[i] == 0) {
+        if (histo[i] == 0 ||i == end) {
+            int h2 = i;
+            while (histo[i] == 0 || i == end) {
                 sp++;
                 i++;
             }
-            if (sp > av) {
+            if (sp > av || (i == end)) {
                 //DrawBlock(matrix, h, w, w1, w2, h1, h2);
-                CutInLine(CutMatrix(matrix, h, w, h1, h2, w1, w2), h, w);
+                int **m = CutMatrix(matrix, h1, h2, w1, w2);
+                int nh = h2-h1, nw = w2-w1;
+                CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
+                //FreeMatrix((void**)m, h2-h1);
+                h1 = i;
             }
-            h1 = i;
+            sp = 0;
         }
         i++;
     }
@@ -221,8 +237,6 @@ void CutInLine(int **matrix, int *histogram, int h, int w)
 
     data->data = eol;
 
-
-
     // Find average space between lines
     //average_sp = AverageSpace(histogram, h);
 
@@ -247,7 +261,6 @@ void CutInLine(int **matrix, int *histogram, int h, int w)
             }
 
             // Clears and creates histogram for each detected line
-            InitArray(histoW, w);
             histoW = MatrixWHistogram(matrix, x1, x2, w);
 
             // Cuts line in char

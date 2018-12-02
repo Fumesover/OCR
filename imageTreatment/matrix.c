@@ -87,13 +87,13 @@ void PrintArray(int *list, int h)
 /*** Histograms of black pixels ***/
 
 // Returns the histogram of all lines of the matrix
-int* MatrixHHistogram(int **matrix, int h, int w)
+int* MatrixHHistogram(int **matrix, int h, int w1, int w2)
 {
-    int *histo = malloc(sizeof(int) * h);
+    int *histo = calloc((size_t)(h), sizeof(int));
 
     for (int i = 0; i < h; i++)
     {
-        for (int j = 0; j < w; j++)
+        for (int j = w1; j < w2; j++)
         {
             if (matrix[i][j] == 1)
                 histo[i]++;
@@ -107,25 +107,10 @@ int* MatrixHHistogram(int **matrix, int h, int w)
 // in the line range [h1, h2]
 int* MatrixWHistogram(int **matrix, int h1, int h2, int w)
 {
-    int *histo = malloc(sizeof(int) * w);
+    int *histo = calloc((size_t)w, sizeof(int));
     for (int x = 0; x < w; x++)
     {
         for (int y = h1; y < h2; y++)
-        {
-            if (matrix[y][x] == 1)
-                histo[x]++;
-        }
-    }
-
-    return histo;
-}
-
-int* MatrixW1Histogram(int **matrix, int w1, int w2, int h)
-{
-    int *histo = malloc(sizeof(int) * (w2-w1));
-    for (int x = w1; x < w2; x++)
-    {
-        for (int y = 0; y < h; y++)
         {
             if (matrix[y][x] == 1)
                 histo[x]++;
@@ -145,30 +130,29 @@ void Copy(int **mat1, int**mat2, int h, int w)
     }
 }
 
-int** CutMatrix(int **matrix, int h, int w, int h1, int h2, int w1, int w2)
+int** CutMatrix(int **matrix, int h1, int h2, int w1, int w2)
 {
-    int **cut = InitIntMatrix(h2-h1, w2-w1);
-    for (int i = h1; i < h2; i++) {
-        for (int j = w1; j < w2; j++) {
-
+    int h = h2-h1, w = w2-w1;
+    int **cut = InitIntMatrix(h, w);
+    for (int i = 0; i < h; i++) {
+        for (int j = 0; j < w; j++) {
+            cut[i][j] = matrix[i + h1][j + w1];
         }
     }
+    return cut;
 }
 
 // Remove the white borders on the side of the matrix
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
     /*** INIT ***/
-    int* histoH = malloc(sizeof(int) * *h);
-    int* histoW = malloc(sizeof(int) * *w);
+    int* histoH = MatrixHHistogram(matrix, *h, 0, *w);
+    int* histoW = MatrixWHistogram(matrix, 0, *h, *w);
     int** res;
     int y = 0, x = 0, rx = *w - 1, ry = *h - 1;
 
     InitArray(histoH, *h);
     InitArray(histoW, *w);
-
-    MatrixHHistogram(matrix, histoH, *h, *w);
-    MatrixWHistogram(matrix, histoW, 0, *h, *w);
 
     // Find boundaries of matrixes
     while (x < *w && histoW[x] == 0)
