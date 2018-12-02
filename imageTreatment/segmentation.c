@@ -10,6 +10,7 @@
 #define HOR_THRESH 2000
 #define VER_THRESH 2000
 
+#define BLOCS 1.5
 #define SIZE 20
 
 Queue *queue;
@@ -33,8 +34,9 @@ Queue *Segmentation(int **matrix, int h, int w)
 
     /*** RLSA ***/
     RLSA(matrix, h, w);
+    ShowSegmentation();
+    /*** LINE SEGMENTATION ***
 
-    /*** LINE SEGMENTATION ***/
     //CutInLine(matrix, histo, queue, h,  w);
 
     /*** FREE ALLOCATED MEMORY ***/
@@ -151,7 +153,7 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
                 sp++;
                 i++;
             }
-            if (sp > av || (i == end)) {
+            if (sp > av*BLOCS || (i == end)) {
                 CutInBlockW(matrix, rlsa, h, w1, w2);
                 w1 = i;
             }
@@ -168,6 +170,17 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
     int begin = 0, end = h-1;
     int n = 0, sum = 0;
     int av = 0, sp = 0;
+
+    Tuple *data = NewTuple();
+    data->height = 1;
+    data->width = 1;
+
+    int **eol = NULL;
+    eol = malloc(sizeof(int*) * 1);
+    eol[0] = malloc(sizeof(int) * 1);
+    eol[0][0] = 38;
+
+    data->data = eol;
 
     while (begin < h && histo[begin] == 0) begin++;
     while (end > 0 && histo[end] == 0) end--;
@@ -197,10 +210,11 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
                 sp++;
                 i++;
             }
-            if (sp > av || (i == end)) {
+            if (sp > av*BLOCS || (i == end)) {
                 int **m = CutMatrix(matrix, h1, h2, w1, w2);
                 int nh = h2-h1, nw = w2-w1;
                 CutInLine(m, MatrixHHistogram(m, nh, 0, nw), nh, nw);
+                Enqueue(queue, data);
                 h1 = i;
             }
             sp = 0;

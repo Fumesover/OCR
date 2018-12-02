@@ -253,10 +253,10 @@ SDL_Surface *ResizeSurface(SDL_Surface *Surface, size_t s)
 
     for(int y = 0; y < h; y++)
         for(int x = 0; x < w; x++)
-            for(Sint32 o_y = 0; o_y < resizeY; ++o_y)
-                for(Sint32 o_x = 0; o_x < resizeX; ++o_x)
-                    PutPixel(res, (Sint32)(resizeX * x) + o_x,
-                              (Sint32)(resizeY * y) + o_y, GetPixel(Surface, x, y));
+            for(int i = 0; i < resizeY; i++)
+                for(int j = 0; j < resizeX; j++)
+                    PutPixel(res, (int)(resizeX * x) + j,
+                             (int)(resizeY * y) + i, GetPixel(Surface, x, y));
 
     return res;
 }
