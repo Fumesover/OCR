@@ -125,6 +125,7 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
     while (begin < w && histo[begin] == 0) begin++;
     while (end > 0 && histo[end] == 0) end--;
 
+    // Finds average space between blocs
     int i = begin;
     while (i < end){
         if (histo[i] == 0){
@@ -139,11 +140,14 @@ void CutInBlockH(int** matrix, int **rlsa, int h, int w) {
     if (n > 0)
         av = sum / n;
 
+    // Finds blocs
     i = begin;
+    // First boundary
     int w1 = begin;
     while (i <= end)
     {
         if (histo[i] == 0 || i == end) {
+            // Second boundary
             int w2 = i;
             while (histo[i] == 0 || i == end) {
                 sp++;
@@ -187,9 +191,6 @@ void CutInBlockW(int** matrix, int **rlsa, int h, int w1, int w2) {
     }
 }
 
-
-// Cuts matrix in lines of characters and sends them
-// to CutInChar with the corresponding histogram
 void CutInLine(int **matrix, int *histogram, int h, int w)
 {
     /*** INIT ***/
@@ -252,9 +253,6 @@ void CutInLine(int **matrix, int *histogram, int h, int w)
     free(histoW);
 }
 
-
-// Cutes line from h1 to h2 in "matrix" in characters
-// and puts them in the queue
 void CutInChar(int **matrix, int *histo, int h1, int h2, int w)
 {
     /*** INIT ***/
@@ -311,7 +309,6 @@ void CutInChar(int **matrix, int *histo, int h1, int h2, int w)
     }
 }
 
-// Returns the average white spaces in the histogram
 float AverageSpace(int* histogram, int t)
 {
     int pos = 0, last_pos = t - 1;
@@ -364,9 +361,6 @@ void EnqueueMatrix(int **matrix, int h1, int h2, int w1, int w2)
     Enqueue(queue, data);
 }
 
-// TEST FUNCTION
-// Shows result of segmentation
-// Returns elements of the queue in a char array 
 char* ShowSegmentation()
 {
     printf("y\n");

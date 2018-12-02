@@ -36,10 +36,8 @@ void Display(gchar *path)
 
 void Load(GtkWidget *file_chooser)
 {
-
-    // Queue for segmentation
+    // Get path and displays image
     gchar *path = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(file_chooser));
-
     printf("path: %s\n", path);
     Display(path);
 
@@ -52,10 +50,9 @@ void Load(GtkWidget *file_chooser)
     matrix = InitIntMatrix(h, w);
     pixels = InitPixelMatrix(h, w);
 
-    // Fill the martix
+    // Fill the matrix
     SurfaceToMatrix(pixels, image, h, w);
 
-    /*** BINARIZATION ***/
     //Greyscale
     GreyScale(pixels, h, w);
 }
@@ -127,6 +124,7 @@ int main(int argc, char *argv[])
     window = GTK_WIDGET(gtk_builder_get_object(builder, "main"));
     gtk_builder_connect_signals(builder, NULL);
 
+    /*** INIT WIDGETS ***/
     imageIni    = GTK_IMAGE(gtk_builder_get_object(builder, "Ini"));
     loadButton  = GTK_WIDGET(gtk_builder_get_object(builder, "Load"));
     binButton   = GTK_WIDGET(gtk_builder_get_object(builder, "Binarize"));
