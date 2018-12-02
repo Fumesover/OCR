@@ -8,7 +8,6 @@
 
 /*** Matrixes ***/
 
-// Prints the values of the matrix into the terminal
 void PrintMatrix(int **matrix, int h, int w)
 {
     for (int i = 0; i < h; i++)
@@ -23,7 +22,6 @@ void PrintMatrix(int **matrix, int h, int w)
     printf("===============================================================\n");
 }
 
-// Initializes the matrix
 int** InitIntMatrix(int h, int w)
 {
     int **matrix = NULL;
@@ -64,16 +62,14 @@ Pixel** InitPixelMatrix(int h, int w)
     return matrix;
 }
 
-/*** Lists ***/
+/***** Lists ****/
 
-// Initializes all values of the list to 0
 void InitArray(int *array, int h)
 {
     for (int i = 0; i < h; i++)
         array[i] = 0;
 }
 
-// Prints the list of the matrix into the terminal
 void PrintArray(int *list, int h)
 {
     for (int i = 0; i < h; i++)
@@ -84,9 +80,6 @@ void PrintArray(int *list, int h)
     printf("\n");
 }
 
-/*** Histograms of black pixels ***/
-
-// Returns the histogram of all lines of the matrix
 int* MatrixHHistogram(int **matrix, int h, int w1, int w2)
 {
     int *histo = calloc((size_t)(h), sizeof(int));
@@ -103,8 +96,6 @@ int* MatrixHHistogram(int **matrix, int h, int w1, int w2)
     return histo;
 }
 
-// Returns the histogram of all columns of the matrix
-// in the line range [h1, h2]
 int* MatrixWHistogram(int **matrix, int h1, int h2, int w)
 {
     int *histo = calloc((size_t)w, sizeof(int));
@@ -120,7 +111,6 @@ int* MatrixWHistogram(int **matrix, int h1, int h2, int w)
     return histo;
 }
 
-// Copy content of mat1 into mat2
 void Copy(int **mat1, int**mat2, int h, int w)
 {
     for (int i = 0; i < h; i++)
@@ -142,7 +132,6 @@ int** CutMatrix(int **matrix, int h1, int h2, int w1, int w2)
     return cut;
 }
 
-// Remove the white borders on the side of the matrix
 int **RemoveWhite(int **matrix, int *h, int *w)
 {
     /*** INIT ***/
@@ -175,9 +164,6 @@ int **RemoveWhite(int **matrix, int *h, int *w)
     return res;
 }
 
-
-// Returns a squared matrix equivalent to the original
-// By adding white space on the thinner sides
 int **SquareMatrix(int **matrix, int h, int w)
 {
     /*** INIT ***/
@@ -203,7 +189,6 @@ int **SquareMatrix(int **matrix, int h, int w)
     return res;
 }
 
-// Returns the matrix to the adequate format and size
 int **Resize(int **matrix, int h, int w, int newsize)
 {
     // Remove white borders of the matrix
@@ -211,20 +196,22 @@ int **Resize(int **matrix, int h, int w, int newsize)
     // Squares matrix
     int** square = SquareMatrix(cut, h, w);
 
+    // Get size
     int size = h > w ? h : w;
 
     Pixel** pix1 = InitPixelMatrix(size, size);
     Pixel** pix2 = InitPixelMatrix(newsize, newsize);
+    int **final = InitIntMatrix(newsize, newsize);
 
     // Conversions and resize
     BinToPixels(square, pix1, size, size);
     SDL_Surface *n = MatrixToSurface(pix1, size, size);
     SDL_Surface *res = ResizeSurface(n, (Uint16)newsize);
 
-    int **final = InitIntMatrix(newsize, newsize);
-
     SurfaceToMatrix(pix2, res, newsize, newsize);
     BinarizeMatrix(pix2, final, newsize, newsize);
+
+    // Free allocated memory
 
     FreeMatrix((void**)pix1, size);
     FreeMatrix((void**)cut, h);
@@ -237,20 +224,26 @@ int **Resize(int **matrix, int h, int w, int newsize)
     return final;
 }
 
-// Resize the matrix
 SDL_Surface *ResizeSurface(SDL_Surface *Surface, int s)
 {
-    SDL_Surface *res = SDL_CreateRGBSurface(Surface->flags, (Uint16)s, (Uint16)s,
+    // New surface of size s*s
+    SDL_Surface *res = SDL_CreateRGBSurface(Surface->flags,
+                                            (Uint16)s,
+                                            (Uint16)s,
                                             Surface->format->BitsPerPixel,
-                                            Surface->format->Rmask, Surface->format->Gmask,
-                                            Surface->format->Bmask, Surface->format->Amask);
+                                            Surface->format->Rmask,
+                                            Surface->format->Gmask,
+                                            Surface->format->Bmask,
+                                            Surface->format->Amask);
 
+    // Get variables
     int h = Surface->h;
     int w = Surface->w;
 
     double resizeX = ((double)(s)  / (double)(w));
     double resizeY = ((double)(s) / (double)(h));
 
+    // Resize
     for(int y = 0; y < h; y++)
         for(int x = 0; x < w; x++)
             for(int i = 0; i < resizeY; i++)

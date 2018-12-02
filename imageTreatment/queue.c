@@ -14,7 +14,6 @@ Elt *NewElt()
     return new;
 }
 
-// Returns a new empty Tuple
 Tuple *NewTuple()
 {
     Tuple *new = malloc(sizeof(*new));
@@ -25,8 +24,6 @@ Tuple *NewTuple()
     return new;
 }
 
-// Enqueue an Element containing the tuple "data"
-// in the Queue "queue"
 void Enqueue(Queue *queue, Tuple *data)
 {
     // New element

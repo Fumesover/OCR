@@ -7,6 +7,8 @@ void DisplayResult(gchar *path);
 void PrintText();
 void Quit();
 void Seg();
+void Noise();
 void Bin();
+void About();
 
 #endif

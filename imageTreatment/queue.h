@@ -1,6 +1,11 @@
 #ifndef QUEUE_H
 #define QUEUE_H
 
+
+/*****************************************************/
+/*                   STRUCTURES                      */
+/*****************************************************/
+
 // The data of the elements of the queue are Tuple
 // containing the character matrix, its height and width
 typedef struct Tuple Tuple;
@@ -24,8 +29,19 @@ struct Queue {
 };
 
 
-void Enqueue(Queue *queue, Tuple *data);
+/*****************************************************/
+/*                   INITS                           */
+/*****************************************************/
+
+// Returns a new empty Elt
 Elt *NewElt();
+
+// Returns a new empty Tuple
 Tuple *NewTuple();
+
+// Enqueue an Element containing the tuple "data"
+// in the Queue "queue"
+void Enqueue(Queue *queue, Tuple *data);
+
 
 #endif
